@@ -18,6 +18,8 @@ class BoardItem < Qt::Widget
 	attr_accessor :color_square, :color_circle
 	attr_writer :in_use
 
+	signals :sizeChanged
+
 	def initialize(parent, color_square = Qt::green, color_circle = Qt::transparent)
 		super(parent)
 
@@ -26,26 +28,35 @@ class BoardItem < Qt::Widget
 		@in_use = false
 	end
 
+	def resizeEvent(event)
+		# puts "#{self.x} #{self.y} #{self.width} #{self.height}"
+		self.sizeChanged
+	end
+
 	def in_use?()
 		return @in_use
 	end
 
 	def paintEvent(event)
+		offset = 10
+		circle_boundary = Qt::RectF.new(offset, offset, self.width - 2 * offset, self.height - 2 * offset)
+
+		path = Qt::PainterPath.new
+		path.addRect(0, 0, self.width, self.height)
+		path.addEllipse(circle_boundary)
+
+		brush_square = Qt::Brush.new(@color_square)
+		brush_circle = Qt::Brush.new(@color_circle)
+
 		painter = Qt::Painter.new(self)
-
-		brush_circle = Qt::Brush.new(color_circle)
-		brush_square = Qt::Brush.new(color_square)
-
 		painter.setPen Qt::NoPen
-
+		
 		painter.setBrush brush_square
-		painter.drawRect(0, 0, self.width, self.height)
+		painter.drawPath(path)
 
-		center = Qt::Point.new(self.width/2, self.height/2)
-		radius = self.width/2 - 15
 		painter.setBrush brush_circle
-		painter.drawEllipse(center, radius, radius)
-
+		painter.drawEllipse(circle_boundary)
+		
 		painter.end
 	end
 
@@ -63,9 +74,9 @@ class BoardMatrix
 
 	def initialize_matrix(parent)
 		@matrix = [] # array of array
-		for i in 0..@rows-1
+		for i in 0..@rows - 1
 			row = []
-			for j in 0..@columns-1
+			for j in 0..@columns - 1
 				row << BoardItem.new(parent)
 			end
 			@matrix << row
@@ -73,31 +84,38 @@ class BoardMatrix
 	end
 
 	def each()
-		for i in 0..@rows-1
-			for j in 0..@columns-1
+		for i in 0..@rows - 1
+			for j in 0..@columns - 1
 				yield self[i, j]
 			end
 		end
 	end
 
 	def each_with_index()
-		for i in 0..@rows-1
-			for j in 0..@columns-1
+		for i in 0..@rows - 1
+			for j in 0..@columns - 1
 				yield self[i, j], i, j
 			end
 		end
 	end
 
 	def each_in_row(i)
-		for j in 0..@columns-1
+		for j in 0..@columns - 1
 			yield self[i, j]
 		end
 	end
 
 	def each_in_column(j)
-		for i in 0..@rows-1
+		for i in 0..@rows - 1
 			yield self[i, j]
 		end
+	end
+
+	def tail(j)
+		for i in ((@rows - 1) ..0)
+			return self[i, j] if not self[i, j].in_use?
+		end
+		return self[6, 0]
 	end
 
 	def [](i, j)
@@ -111,6 +129,7 @@ class Board < Qt::Widget
 	def initialize(rows, columns, width = 800, height = 600)
 		super()
 
+		@head = BoardMatrix.new(self, 1, columns)
 		@matrix = BoardMatrix.new(self, rows, columns)
 
 		setWindowTitle "Ruby-Board-Games"
@@ -126,17 +145,45 @@ class Board < Qt::Widget
 		@layout = Qt::GridLayout.new(self)
 		@layout.setSpacing(0)
 
-		@matrix.each_with_index do |item, row, column|
-			@layout.addWidget(item, row, column)			
-		end
+		@head.each_with_index { |item, row, column|
+			@layout.addWidget(item, row, column)
+			item.color_square = Qt::transparent
+		}
 
-		test_painter()
+		@matrix.each_with_index { |item, row, column|
+			@layout.addWidget(item, row + 1, column)
+		}
+
+		# test_painter()
+		test_drop
 
 		setLayout @layout
 	end
 
-	def drop(column)
+	slots :drop
 
+	def test_drop
+		head = @head[0, 0]
+		connect(head, SIGNAL(:sizeChanged), self, SLOT(:drop))
+	end
+
+	def drop()
+		column = 0
+		@item = BoardItem.new(self, Qt::transparent, Qt::red)
+		head = @head[0, column]
+		tail = @matrix.tail(column)
+		@item.lower
+		@item.show
+		# @item.setGeometry head.geometry
+		puts "#{@item.x} #{@item.y} #{@item.width} #{@item.height}"
+
+		@animation = Qt::PropertyAnimation.new
+		@animation.targetObject = @item
+		@animation.propertyName = "geometry"
+		@animation.duration = 2000
+		@animation.startValue = head.geometry
+		@animation.endValue = tail.geometry
+		@animation.start
 	end
 
 	def test_painter()
