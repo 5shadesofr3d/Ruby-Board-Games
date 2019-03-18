@@ -1,10 +1,10 @@
 require "test/unit"
 require 'state_pattern'
+require_relative 'qt_application'
 
 # TODO:
 # The state_pattern already defines an abstract state that we inherit
-# from, do we need contracts for it>
-
+# from, do we need contracts for it?
 
 # Base application state, defines and creates the window here.
 class ApplicationState
@@ -13,25 +13,39 @@ class ApplicationState
   set_initial_state(TitleScreenState)
 
   def is_valid?
-    # assert Window.Size > 0
-    # assert Window.Displayed = true
-    # assert application.is_a? QTWindow
+    assert @window.height > 0
+    assert @window.width > 0
+    assert @window.visible
+    assert @window.is_a? QTApplication
   end
 
   # Create GUI here.
   def initialize
     # Use a singleton to create the QT GUI.
-    # @window = ...
+    @window = QTApplication.instance
+
+    # Display the window
+
+    is_valid?
+  end
+
+  # Do we need a callback to handle user interaction?
+  def call_back
+
   end
 
   # Main application loop.
   def main
 
+    # On launch.
     # Display title screen.
-    # If settings button clicked.
+    # If settings button clicked from title screen.
     # Open settings screen.
-    # If game button clicked.
+    # If game button clicked from title screen.
     # Open game screen.
+    # When game ends.
+    # Open title screen.
+
   end
 
 end
@@ -67,7 +81,7 @@ end
 class GameScreenState < StatePattern::State
 
   def enter
-    # assert class invariants?
+    # Add the assertions from the game as before.
   end
 
   def open_title_screen
