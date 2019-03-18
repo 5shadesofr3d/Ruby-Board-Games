@@ -9,7 +9,7 @@ class LocalPlayer < Player
 		# Position is in terms of the column position on the board
 		
 		#pre
-		assert current_position.is_a? Numeric and current_position > 0
+		assert current_position.is_a? Numeric and current_position >= 0
 		assert event.is_a? Qt::QKeyEvent or event.is_a? Qt::QMouseEvent
 
 		new_position = current_position
@@ -20,11 +20,10 @@ class LocalPlayer < Player
 		elsif event.type == Qt::QMouseEvent
 			new_position = self.get_mouse_click(current_position, event)
 
+		#post
 		assert new_position.is_a? Numeric
+
 		return new_position
-			
-
-
 	end
 
 	def get_keyboard_press(current_position, key_event)
@@ -37,7 +36,7 @@ class LocalPlayer < Player
 		# Qt::Key_Space
 
 		#pre
-		assert current_position.is_a? Numeric and current_position > 0
+		assert current_position.is_a? Numeric and current_position >= 0
 		assert event.is_a? Qt::QKeyPress
 
 		new_position
@@ -52,15 +51,15 @@ class LocalPlayer < Player
 		assert new_position.is_a? Numeric
 
 		return new_position
-
 	end
 
 	def get_mouse_click(current_position, event)
 		# this will change the position of the cursor based on wherever the mouse clicked
 
 		#pre
-		assert current_position.is_a? Numeric and current_position > 0
+		assert current_position.is_a? Numeric and current_position >= 0
 		assert event.is_a? Qt::QMouseEvent
+		# assert Game.Settings.Window exists and are valid numbers
 
 		# handle the mouse event. Will return a new position
 		new_position = 1 # will add rest of functionality later
@@ -69,5 +68,5 @@ class LocalPlayer < Player
 		assert new_position.is_a? Numeric
 		return new_position
 	end
-	
+
 end
