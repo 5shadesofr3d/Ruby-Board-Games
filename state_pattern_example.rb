@@ -33,6 +33,14 @@ class BaseState < StatePattern::State
 end
 
 class BaseStateMachine
+  include StatePattern
+  set_initial_state BaseState
+  attr_accessor :state_machine_variable
+
+  # You can define state machine global variables here.
+  def initialize
+    @state_machine_variable = null
+  end
 
 end
 
