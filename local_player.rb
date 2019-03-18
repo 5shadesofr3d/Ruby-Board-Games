@@ -1,0 +1,1 @@
+# This is the local player object. It is inherited from the player abstract class
