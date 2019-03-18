@@ -25,6 +25,7 @@ class Player
 
 	def get_name
 		return @name
+	end
 
 	def set_name(new_name)
 		#pre
