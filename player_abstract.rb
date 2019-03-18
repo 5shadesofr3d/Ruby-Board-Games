@@ -8,18 +8,32 @@ class Player
 	public
 	def initialize(player_name)
 		# Set the name of the player and make the score 0
+		#pre
 		assert player_name.is_a? String
 		@name = player_name
+
 		@score = 0
 
+		#post
 		assert valid?
+	end
+
+	def valid?
+		assert @score.is_a? Numeric
+		assert @name.is_a? String
 	end
 
 	def get_name
 		return @name
 
 	def set_name(new_name)
+		#pre
+		assert new_name.is_a? String
+
 		@name = new_name
+
+		#post
+		assert valid?
 	end
 
 	def get_score
@@ -29,6 +43,9 @@ class Player
 	def scored
 		# The player has won a game
 		@score = @score + 1
+
+		#post
+		assert valid?
 	end
 
 	def get_move

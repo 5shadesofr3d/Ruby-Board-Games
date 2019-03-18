@@ -1,5 +1,6 @@
 require "test/unit"
 require 'state_pattern'
+require 'player_abstract'
 require_relative 'application_states.rb'
 
 class GameState < StatePattern::State
