@@ -17,15 +17,15 @@ class Connect4 < Game
   end
 
   def valid?
-    assert @windowWidth.is_a? Numeric
-    assert @windowWidth > 0 and @windowWidth <= 1080
+    @windowWidth.is_a? Numeric
+    @windowWidth > 0 and @windowWidth <= 1080
 
-    assert @windowHeight.is_a? Numeric
-    assert @windowHeight > 0 and @windowHeight <= 1080
+    @windowHeight.is_a? Numeric
+    @windowHeight > 0 and @windowHeight <= 1080
 
-    assert @gameMode == "Connect4"
+    @gameMode == "Connect4"
 
-    assert @gameType == "Single" or @gameType == "Multi"
+    @gameType == "Single" or @gameType == "Multi"
 
   end
 end
@@ -49,14 +49,14 @@ class OTTO < Game
   end
 
   def valid?
-    assert @windowWidth.is_a? Numeric
-    assert @windowWidth > 0 and @windowWidth <= 1080
+    @windowWidth.is_a? Numeric
+    @windowWidth > 0 and @windowWidth <= 1080
 
-    assert @windowHeight.is_a? Numeric
-    assert @windowHeight > 0 and @windowHeight <= 1080
+    @windowHeight.is_a? Numeric
+    @windowHeight > 0 and @windowHeight <= 1080
 
-    assert @gameMode == "Connect4"
+    @gameMode == "Connect4"
 
-    assert @gameType == "Single" or @gameType == "Multi"
+    @gameType == "Single" or @gameType == "Multi"
   end
 end
