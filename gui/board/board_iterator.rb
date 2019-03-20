@@ -1,4 +1,13 @@
 module BoardIterator
+
+	def rows
+		return (0..@rows-1)
+	end
+
+	def columns
+		return (0..@cols-1)
+	end
+
 	def each()
 		assert valid?
 
@@ -12,8 +21,8 @@ module BoardIterator
 	def each_with_index()
 		assert valid?
 
-		(0..@rows).each do |row|
-			(0..@cols).each do |col|
+		rows.each do |row|
+			columns.each do |col|
 				yield self[row, col], row, col
 			end
 		end
@@ -24,7 +33,7 @@ module BoardIterator
 	def each_in_row(row)
 		assert valid?
 
-		(0..@cols).each do |col|
+		columns.each do |col|
 			yield self[row, col]
 		end
 
@@ -34,7 +43,7 @@ module BoardIterator
 	def each_in_column(col)
 		assert valid?
 
-		(0..@rows).each do |row|
+		rows.each do |row|
 			yield self[row, col]
 		end
 

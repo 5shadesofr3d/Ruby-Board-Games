@@ -1,27 +1,27 @@
+require 'Qt'
 require 'test/unit'
+require_relative 'board_iterator'
+require_relative 'board_item'
 
 class Board < Qt::Widget
 	include Test::Unit::Assertions
+	include BoardIterator
 
 	def initialize(rows, cols, width = 800, height = 600, parent = nil)
-		if parent != nil
-			super(parent)
-		else
-			super()
-		end
+		parent != nil ? super(parent) : super()
 
 		@tile = []
 
 		@layout = Qt::GridLayout.new(self)
 		@layout.setSpacing(0)
-		self.setLayout(@layout)
+		setLayout(@layout)
 
-		self.setWindowSize(width, height)
-		self.setBoardSize(rows, cols)
-		self.setWindowTitle("Ruby-Board-Games")
-		self.move(100, 100)0
+		setWindowSize(width, height)
+		setBoardSize(rows, cols)
+		setWindowTitle("Ruby-Board-Games")
+		move(100, 100)
 
-		assert self.valid?
+		assert valid?
 	end
 
 	def valid?
@@ -37,60 +37,63 @@ class Board < Qt::Widget
 		assert width.is_a?(Integer) and width.between?(100, 1920)
 		assert height.is_a?(Integer) and height.between?(100, 1080)
 
-		self.resize(width, height)
+		resize(width, height)
 
-		assert self.width == width
-		assert self.height == height
+		assert width() == width
+		assert height() == height
 	end
 
 	def setBoardSize(rows, cols)
 		assert rows.is_a?(Integer) and rows.between?(1, 100)
 		assert cols.is_a?(Integer) and cols.between?(1, 100)
 
-		@rows = rows
+		@rows = rows 
 		@cols = cols
 
-		self.generateHead()
-		self.generateTiles()
+		generateHead()
+		generateTiles()
 
-		assert self.valid?
+		assert valid?
+	end
+
+	def boardSize()
+		return @rows * @cols
 	end
 
 private
 	def generateTiles()
-		assert self.valid?
 		assert @layout.count == @head.size
 
+		puts "#{@layout.count}, #{@head.size + boardSize()}"
+
 		@tile = []
-		(0..@rows).each do |r|
+		 rows.each do |r|
 			row = []
-			(0..@cols).each do |c|
-				item = BoardTile.new(parent: self)
+			columns.each do |c|
+				item = BoardTile.new(parent = self)
 				row << item
 				@layout.addWidget(item, r + 1, c)
 			end
 			@tile << row
 		end
 
-		assert @layout.count == @head.size + @rows * @cols
+		puts "#{@layout.count}, #{@head.size + boardSize()}"
+		assert @layout.count == @head.size + boardSize()
 		assert @tile.size == @rows
 		assert @tile.first.size == @cols
-		assert self.valid?
 	end
 
 	def generateHead()
-		assert self.valid?
 		assert @layout.isEmpty
 
 		@head = []
-		(0..@cols).each do |col|
-			item = BoardHead.new(parent: self)
+		columns.each do |col|
+			item = BoardHead.new(parent = self)
 			@head << item
 			@layout.addWidget(item, 0, col)
 		end
 
 		assert @layout.count == @head.size and @head.size == @cols
-		assert self.valid?
 	end
 
 end

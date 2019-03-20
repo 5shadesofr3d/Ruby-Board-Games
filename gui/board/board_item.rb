@@ -1,3 +1,4 @@
+require 'Qt'
 require 'test/unit'
 
 class BoardItem < Qt::Widget
@@ -6,11 +7,7 @@ class BoardItem < Qt::Widget
 	attr_accessor :primary, :secondary # colors
 
 	def initialize(primary = Qt::transparent, secondary = Qt::transparent, parent = nil)
-		if parent != nil
-			super(parent)
-		else
-			super()
-		end
+		parent != nil ? super(parent) : super()
 
 		@primary = primary
 		@secondary = secondary
