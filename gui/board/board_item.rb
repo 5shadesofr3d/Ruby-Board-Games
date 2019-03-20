@@ -1,3 +1,4 @@
+require 'Qt'
 require 'test/unit'
 
 class BoardItem < Qt::Widget
@@ -5,12 +6,8 @@ class BoardItem < Qt::Widget
 
 	attr_accessor :primary, :secondary # colors
 
-	def initialize(primary = Qt::transparent, secondary = Qt::transparent, parent = nil)
-		if parent != nil
-			super(parent)
-		else
-			super()
-		end
+	def initialize(primary: Qt::transparent, secondary: Qt::transparent, parent: nil)
+		parent != nil ? super(parent) : super()
 
 		@primary = primary
 		@secondary = secondary
@@ -30,7 +27,7 @@ class BoardItem < Qt::Widget
 	def paintEvent(event)
 		assert valid?
 
-		offset = 10
+		offset = 15
 		circle_boundary = Qt::RectF.new(offset, offset, self.width - 2 * offset, self.height - 2 * offset)
 
 		path = Qt::PainterPath.new
@@ -41,11 +38,10 @@ class BoardItem < Qt::Widget
 		brush_circle = Qt::Brush.new(@secondary)
 
 		painter = Qt::Painter.new(self)
-		painter.setPen Qt::NoPen
-		
-		painter.setBrush brush_square
-		painter.drawPath(path)
 
+		painter.setPen(Qt::NoPen)
+		painter.setBrush(brush_square)
+		painter.drawPath(path)
 		painter.setBrush brush_circle
 		painter.drawEllipse(circle_boundary)
 		
@@ -56,8 +52,8 @@ class BoardItem < Qt::Widget
 end
 
 class BoardTile < BoardItem
-	def initialize(color = Qt::blue, parent = nil)
-		super(color, Qt::transparent, parent)
+	def initialize(color: Qt::blue, parent: nil)
+		super(primary: color, secondary: Qt::transparent, parent: parent)
 
 		assert @primary == color
 		assert valid?
@@ -73,8 +69,8 @@ class BoardTile < BoardItem
 end
 
 class BoardHead < BoardItem
-	def initialize(parent = nil)
-		super(Qt::transparent, Qt::transparent, parent)
+	def initialize(parent: nil)
+		super(primary: Qt::transparent, secondary: Qt::transparent, parent: parent)
 
 		assert valid?
 	end
@@ -89,8 +85,8 @@ class BoardHead < BoardItem
 end
 
 class BoardChip < BoardItem
-	def initialize(color = Qt::red, parent = nil)
-		super(Qt::transparent, color, parent)
+	def initialize(color: Qt::red, parent: nil)
+		super(primary: Qt::transparent, secondary: color, parent: parent)
 
 		assert @secondary == color
 		assert valid?
