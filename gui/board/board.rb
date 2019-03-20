@@ -59,8 +59,10 @@ class Board < Qt::Widget
 
 	def translate(item: nil, from: nil, to: nil, time: 0)
 		assert from.is_a?(BoardItem)
-		assert to.is_a?(BoardItem)
+		assert to.is_a?(BoardTile)
 		assert time.is_a?(Integer) and time >= 0
+
+		to.attach(item)
 
 		return if from == to
 

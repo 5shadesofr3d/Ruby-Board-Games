@@ -55,6 +55,8 @@ end
 
 class BoardTile < BoardItem
 	def initialize(color: Qt::blue, parent: nil)
+		@attached = []
+
 		super(primary: color, secondary: Qt::transparent, parent: parent)
 
 		assert @primary == color
@@ -65,9 +67,22 @@ class BoardTile < BoardItem
 		return false unless super
 		return false unless @primary != Qt::transparent
 		return false unless @secondary == Qt::transparent
+		return false unless @attached.is_a?(Array)
 
 		return true
 	end
+
+	def resizeEvent(event)
+		@attached.each { |item| item.geometry = geometry() }
+	end
+
+	def attach(item)
+		# attaching an item ensures that when the tile is resized, so is the attached item.
+		assert item.is_a?(BoardItem)
+		item.size = size()
+		@attached << item
+	end
+
 end
 
 class BoardHead < BoardItem
@@ -84,6 +99,7 @@ class BoardHead < BoardItem
 
 		return true
 	end
+
 end
 
 class BoardChip < BoardItem
