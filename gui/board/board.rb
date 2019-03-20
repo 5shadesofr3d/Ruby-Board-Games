@@ -20,6 +20,7 @@ class Board < Qt::Widget
 		setBoardSize(rows, cols)
 		setWindowTitle("Ruby-Board-Games")
 		move(100, 100)
+		show()
 
 		assert valid?
 	end
@@ -56,6 +57,36 @@ class Board < Qt::Widget
 		assert valid?
 	end
 
+	def translate(item: nil, from: nil, to: nil, time: 0)
+		assert from.is_a?(BoardItem)
+		assert to.is_a?(BoardItem)
+		assert time.is_a?(Integer) and time >= 0
+
+		return if from == to
+
+		animation = Qt::PropertyAnimation.new(self)
+		animation.targetObject = item
+		animation.propertyName = "geometry"
+		animation.duration = time
+		animation.startValue = from.geometry
+		animation.endValue = to.geometry
+		animation.start
+	end
+
+	def head(col)
+		assert col.is_a?(Integer) and col.between?(columns)
+		assert valid?
+
+		return @head[col]
+	end
+
+	def tile(row, col)
+		assert row.is_a?(Integer) and row.between?(rows)
+		assert col.is_a?(Integer) and col.between?(columns)
+
+		return @tile[row][col]
+	end
+
 	def background=(c)
 		palette = Qt::Palette.new(c)
 		setAutoFillBackground(true)
@@ -73,8 +104,6 @@ class Board < Qt::Widget
 private
 	def generateTiles()
 		assert @layout.count == @head.size
-
-		puts "#{@layout.count}, #{@head.size + boardSize()}"
 
 		@tile = []
 		 rows.each do |r|

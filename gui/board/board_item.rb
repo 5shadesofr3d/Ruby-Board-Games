@@ -12,6 +12,8 @@ class BoardItem < Qt::Widget
 		@primary = primary
 		@secondary = secondary
 
+		show()
+
 		assert valid?
 	end
 

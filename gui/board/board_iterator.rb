@@ -52,10 +52,8 @@ module BoardIterator
 
 	def [](row, col)
 		assert valid?
-		assert row.is_a?(Integer) and row.between?(0, @rows)
-		assert col.is_a?(Integer) and col.between?(0, @cols)
 
-		return @tile[row][col]
+		return tile(row, col)
 	end
 
 end
