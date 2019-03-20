@@ -56,6 +56,16 @@ class Board < Qt::Widget
 		assert valid?
 	end
 
+	def background=(c)
+		palette = Qt::Palette.new(c)
+		setAutoFillBackground(true)
+		setPalette(palette)
+	end
+
+	def color=(c)
+		each { |tile| tile.primary = c }
+	end
+
 	def boardSize()
 		return @rows * @cols
 	end
@@ -70,14 +80,13 @@ private
 		 rows.each do |r|
 			row = []
 			columns.each do |c|
-				item = BoardTile.new(parent = self)
+				item = BoardTile.new(parent: self)
 				row << item
 				@layout.addWidget(item, r + 1, c)
 			end
 			@tile << row
 		end
 
-		puts "#{@layout.count}, #{@head.size + boardSize()}"
 		assert @layout.count == @head.size + boardSize()
 		assert @tile.size == @rows
 		assert @tile.first.size == @cols
@@ -88,7 +97,7 @@ private
 
 		@head = []
 		columns.each do |col|
-			item = BoardHead.new(parent = self)
+			item = BoardHead.new(parent: self)
 			@head << item
 			@layout.addWidget(item, 0, col)
 		end
