@@ -50,13 +50,13 @@ class BoardItem < Qt::Widget
 
 		painter = Qt::Painter.new(self)
 		painter.setPen Qt::NoPen
-		
+
 		painter.setBrush brush_square
 		painter.drawPath(path)
 
 		painter.setBrush brush_circle
 		painter.drawEllipse(circle_boundary)
-		
+
 		painter.end
 	end
 

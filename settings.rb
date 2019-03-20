@@ -1,4 +1,4 @@
-class settings
+class Settings
 
   def initialize(gameType, gameMode, color, width, height)
     include Test::Unit::Assertions
