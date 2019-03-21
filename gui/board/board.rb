@@ -7,6 +7,8 @@ class Board < Qt::Widget
 	include Test::Unit::Assertions
 	include BoardIterator
 
+	slots "insert(BoardItem, int, int)"
+
 	def initialize(rows, cols, width = 800, height = 600, parent = nil)
 		parent != nil ? super(parent) : super()
 
@@ -105,6 +107,10 @@ class Board < Qt::Widget
 
 	def boardSize()
 		return @rows * @cols
+	end
+
+	def insert(chip, col, time: 1000)
+		translate(item: chip, from: head(col), to: next_empty(col), time: time)
 	end
 
 private

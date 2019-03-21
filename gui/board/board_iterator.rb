@@ -31,7 +31,7 @@ module BoardIterator
 	end
 
 	def valid_type?(type)
-		return type.is_a?(Symbol) and (type == :tile or type == :chip)
+		return (type.is_a?(Symbol) and (type == :tile or type == :chip))
 	end
 
 	def each_with_index(type)
@@ -89,10 +89,13 @@ module BoardIterator
 		# iterates from bottom to top and returns the tile if its empty
 		# returns nil if the selected col is full
 
-		e = self.to_enum(:each_in_column, :title, col)
-		e.reverse.each { |tile| return tile if tile.empty? }
+		e = self.to_enum(:each_in_column, :tile, col)
+		e.reverse_each { |tile| return tile if tile.empty? }
 
-		return nil
+		raise ColumnFullError
+	end
+
+	class ColumnFullError < StandardError
 	end
 
 end
