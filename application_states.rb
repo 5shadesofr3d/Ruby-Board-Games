@@ -61,71 +61,17 @@ class GameScreenState < StatePattern::State
 
 end
 
-class SettingsScreenState < StatePattern::State
-  include Test::Unit::Assertions
+class SettingsController < Qt::Widget
+  slots 'apply_settings()'
 
-  def is_valid?
-    # assert @window.height > 0
-    # assert @window.width > 0
-    # assert @window.visible
-    assert @window.is_a? QTApplication
-  end
+  def initialize(gui)
+    super()
 
-  def enter
-    is_valid?
-
-
-    is_valid?
-  end
-
-  def open_title_screen
-    transition_to(TitleScreenState)
-  end
-
-end
-
-# Base application state, defines and creates the window here.
-class ApplicationStateMachine < Qt::Widget
-  include StatePattern
-  include Test::Unit::Assertions
-  attr_accessor :window
-  set_initial_state(SettingsScreenState)
-  slots 'go_to_titlescreen()', 'apply_settings()'
-
-  def is_valid?
-    # assert @window.height > 0
-    # assert @window.width > 0
-    # assert @window.visible
-    # assert @window.is_a? QTApplication
-  end
-
-  # Create GUI here.
-  def initialize
-    super
-    # Use a singleton to create the QT GUI.
-    @window = QTApplication.instance
+    @gui = gui
     @settings = Settings.instance
-    @gui = SettingsGUI.new
 
-    window = Qt::MainWindow.new
-    @gui.setup_ui(window)
-
-    # Setup callbacks.
-    connect(@gui.cancelButton, SIGNAL('clicked()'), self, SLOT('go_to_titlescreen()'))
     connect(@gui.applyButton,  SIGNAL('clicked()'), self, SLOT('apply_settings()'))
 
-    window.show
-
-    is_valid?
-  end
-
-  # Callback:
-  # This is the function that should read the attributes from
-  # the view and changes the model. In this case, it acts like
-  # the controller.
-  def go_to_titlescreen
-    # transition_to(TitleScreenState)
-    exit # TODO: Integrate title screen.
   end
 
   def apply_settings
@@ -153,6 +99,67 @@ class ApplicationStateMachine < Qt::Widget
     puts @settings.to_s
 
     @settings.is_valid?
+  end
+
+end
+
+class SettingsScreenState < StatePattern::State
+  include Test::Unit::Assertions
+
+  def is_valid?
+    # assert @window.height > 0
+    # assert @window.width > 0
+    # assert @window.visible
+    # assert @window.is_a? QTApplication
+  end
+
+  def enter
+    is_valid?
+    puts "test2"
+    @controller = SettingsController.new(stateful.settings_gui)
+    is_valid?
+  end
+
+end
+
+class ApplicationStateMachine < Qt::Widget
+  include StatePattern
+  include Test::Unit::Assertions
+  attr_accessor :window, :settings_gui
+  set_initial_state(SettingsScreenState)
+  slots 'open_title_screen()'
+
+  def is_valid?
+    # assert @window.height > 0
+    # assert @window.width > 0
+    # assert @window.visible
+    # assert @window.is_a? QTApplication
+  end
+
+  # Create GUI here.
+  def initialize
+    super
+
+    @window = QTApplication.instance
+    @settings_gui = SettingsGUI.new
+    @main_window = Qt::MainWindow.new
+
+    @settings_gui.setup_ui(@main_window)
+
+    # Setup callbacks.
+    connect(@settings_gui.cancelButton, SIGNAL('clicked()'), self, SLOT('open_title_screen()'))
+
+    transition_to(SettingsScreenState)
+
+    @main_window.show
+
+    is_valid?
+  end
+
+  # Callback:
+  def open_title_screen
+    #transition_to(TitleScreenState)
+    exit # TODO: Integrate title screen
   end
 
 end
