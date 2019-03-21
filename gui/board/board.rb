@@ -10,7 +10,7 @@ class Board < Qt::Widget
 	slots "insert(BoardItem, int, int)"
 	signals :insertComplete
 
-	def initialize(rows, cols, width = 800, height = 600, parent = nil)
+	def initialize(rows, cols, width: 800, height: 600, parent: nil)
 		parent != nil ? super(parent) : super()
 
 		@tile = []
