@@ -7,6 +7,8 @@ class Board < Qt::Widget
 	include Test::Unit::Assertions
 	include BoardIterator
 
+	slots "insert(BoardItem, int, int)"
+
 	def initialize(rows, cols, width = 800, height = 600, parent = nil)
 		parent != nil ? super(parent) : super()
 
@@ -76,17 +78,21 @@ class Board < Qt::Widget
 	end
 
 	def head(col)
-		assert col.is_a?(Integer) and col.between?(columns)
+		assert col.is_a?(Integer) and columns.include?(col)
 		assert valid?
 
 		return @head[col]
 	end
 
 	def tile(row, col)
-		assert row.is_a?(Integer) and row.between?(rows)
-		assert col.is_a?(Integer) and col.between?(columns)
+		assert row.is_a?(Integer) and rows.include?(row)
+		assert col.is_a?(Integer) and columns.include?(col)
 
 		return @tile[row][col]
+	end
+
+	def chip(row, col)
+		return @tile[row][col].attached
 	end
 
 	def background=(c)
@@ -96,11 +102,15 @@ class Board < Qt::Widget
 	end
 
 	def color=(c)
-		each { |tile| tile.primary = c }
+		each(:tile) { |tile| tile.primary = c }
 	end
 
 	def boardSize()
 		return @rows * @cols
+	end
+
+	def insert(chip, col, time: 1000)
+		translate(item: chip, from: head(col), to: next_empty(col), time: time)
 	end
 
 private
