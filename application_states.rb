@@ -2,6 +2,7 @@ require "test/unit"
 require 'state_pattern'
 require 'Qt'
 require_relative 'qt_application'
+require_relative 'settings'
 require_relative 'gui/settings_gui'
 
 # TODO:
@@ -89,7 +90,7 @@ class ApplicationStateMachine < Qt::Widget
   include Test::Unit::Assertions
   attr_accessor :window
   set_initial_state(SettingsScreenState)
-  slots 'hello()'
+  slots 'go_to_titlescreen()', 'apply_settings()'
 
   def is_valid?
     # assert @window.height > 0
@@ -103,14 +104,15 @@ class ApplicationStateMachine < Qt::Widget
     super
     # Use a singleton to create the QT GUI.
     @window = QTApplication.instance
+    @settings = Settings.instance
+    @gui = SettingsGUI.new
 
-    gui = SettingsGUI.new
     window = Qt::MainWindow.new
-    gui.setup_ui(window)
+    @gui.setup_ui(window)
 
     # Setup callbacks.
-    connect(gui.cancelButton, SIGNAL('clicked()'), self, SLOT('go_to_titlescreen()'))
-    connect(gui.applyButton,  SIGNAL('clicked()'), self, SLOT('apply_settings()'))
+    connect(@gui.cancelButton, SIGNAL('clicked()'), self, SLOT('go_to_titlescreen()'))
+    connect(@gui.applyButton,  SIGNAL('clicked()'), self, SLOT('apply_settings()'))
 
     window.show
 
@@ -122,12 +124,19 @@ class ApplicationStateMachine < Qt::Widget
   # the view and changes the model. In this case, it acts like
   # the controller.
   def go_to_titlescreen
-    quit # TODO: Go back to titlescreen.
+    exit # TODO: Go back to titlescreen.
   end
 
   # TODO: Contracts for settings.
   def apply_settings
 
+    puts @gui.gameModeComboBox.currentText
+    puts @gui.numberPlayersComboBox.currentText
+    puts @gui.gameTypeComboBox.currentText
+    puts @gui.themeComboBox.currentText
+    puts @gui.resolutionComboBox.currentText
+
+    # @settings.is_valid?
   end
 
 end

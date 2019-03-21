@@ -14,6 +14,9 @@ class Settings
   # pass around a settings variable or initialize it with
   # default values. The last option reduces dependancy injection
   # potential.
+  #
+  # NOTE 2: We'll have to call Settings.is_valid? as contracts
+  # in other functions. Just not this one.
   def initialize
 
     @validGameType = ["Connect4", "TOOT"]
@@ -47,4 +50,8 @@ class Settings
 
 end
 
-test = Settings.instance
+# test = Settings.instance
+# puts test.gameType
+#
+# test.gameType = "Not valid"
+# puts test.gameType
