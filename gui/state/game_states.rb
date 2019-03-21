@@ -1,95 +1,129 @@
+require 'Qt'
 require "test/unit"
 require 'state_pattern'
 require 'player_abstract'
 require_relative 'application_states.rb'
 
-class GameState < StatePattern::State
-  include Test::Unit::Assertions
+class GameStateMachine < Qt::Object
+  include Test::Unit::Assertions  
+  include StatePattern
+  set_initial_state GameLobby
+  attr_reader :game
 
-  def initialize(playerCount,boardDim)
-    #pre
-    assert playerCount.is_a? Numeric
-    assert boardDim.is_a? Numeric
-    assert playerCount > 0
-    assert boardDim > 0
+  def initialize(game)
+    assert game.is_a?(Game)
 
-    @players = []
-    @board = new Board(boardDim) #TODO: Possible dependency injection here?
-    @game_type = Game(playerCount) #TODO: Make this Connect4/TOOT/OTTO
+    @game = game
 
-    #post
-    assert playerCount.is_a? Numeric
-    assert boardDim.is_a? Numeric
-    assert playerCount > 0
-    assert boardDim > 0
-  end
-
-  def valid?
-    #class invariant
-    @players.is_a? Array
-    @players.each {|a| a.is_a? Player}
-    @board.is_a? Board
-    @game_type.is_a? Game
-  end
-
-  def start_game
-    #pre
-    assert valid?
-    assert @board.is_a? Board
-
-    #setup board
-
-    #post
-    assert @board.is_a? Board
     assert valid?
   end
 
-  #Main game loop
-  def play_game
-    #pre
-    assert valid?
-    assert @players.is_a? Array
-    @players.each {|a| a.is_a? Player}
-    @board.is_a? Board
-
-    #loop player turns and perform actions on the board
-
-    #post
-    @board.is_a? Board
-    assert @players.is_a? Array
-    @players.each {|a| a.is_a? Player}
-    assert valid?
+  def valid?()
+    return false unless @game.is_a?(Game)
+    return true
   end
 
-  #do a players turn
-  def player_turn
-    #pre
-    assert valid?
-    assert @players.is_a? Array
-    @players.each {|a| a.is_a? Player}
+end
 
-    #perform a turn
+class GameLobby < StatePattern::State
+  def enter
 
-    #post
-    assert @players.is_a? Array
-    @players.each {|a| a.is_a? Player}
-    assert valid?
   end
 
-  def end_game
-    #pre
-    assert valid?
-    @board.is_a? Board
-    @game_type.is_a? Game
-
-    #cleanup and end the game, switch states.
-
-    #post
-    @game_type.is_a? Game
-    @board.is_a? Board
-    assert valid?
+  def change_state
+    transition_to(GamePlay)
   end
 
+  def execute
+    # add player screen
+    # option screen
+  end
+
+  def exit
+
+  end
+
+end
+
+class GamePlay < StatePattern::State
+  def enter
+
+  end
+
+  def change_state
+    transition_to(GamePlayerMove)
+  end
+
+  def execute
+    # setup game board
+    # game time
+    # game score
+  end
+
+  def exit
+
+  end
+end
+
+class GamePlayerMove < StatePattern::State
+  def enter
+
+  end
+
+  def change_state
+    transition_to(GameDetermineStatus)
+  end
+
+  def execute
+    # get next player
+    # connect signal for next player move
+  end
+
+  def exit
+    # disconnect signal for the player that just played his move
+  end
+end
+
+class GameDetermineStatus < StatePattern::State
+  def enter
+
+  end
+
+  def change_state
+    transition_to(GamePlayerMove)
+  end
+
+  def execute
+    # check for a winner
+
+    # if winner
+    transition_to(GameEnd)
+  end
+
+  def exit
+
+  end
+end
+
+class GameEnd < StatePattern::State
+  def enter
+
+  end
+
+  def change_state
+    # transition_to(GamePlay)
+  end
+
+  def execute
+    # display winner, clear game board, score
+  end
+
+  def exit
+
+  end
+end
+
+class GameClear < StatePattern::State
   def clear_board
     #pre
     assert valid?
