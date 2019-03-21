@@ -52,7 +52,7 @@ class SettingsGUI
     @font1.pointSize = 16
     # @numberOfPlayersText.font = @font1
 
-    @gameGridLayout.addWidget(@numberOfPlayersText, 3, 0, 1, 1)
+    # @gameGridLayout.addWidget(@numberOfPlayersText, 3, 0, 1, 1)
 
     @gameModeComboBox = Qt::ComboBox.new(@verticalLayoutWidget)
     @gameModeComboBox.objectName = "gameModeComboBox"

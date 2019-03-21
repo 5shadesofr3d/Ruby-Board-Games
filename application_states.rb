@@ -76,7 +76,7 @@ class SettingsController < Qt::Widget
 
   def apply_settings
 
-    @settings.number_of_players = @gui.numberPlayersComboBox.currentText
+    # @settings.number_of_players = @gui.numberPlayersComboBox.currentText
     @settings.theme =  @gui.themeComboBox.currentText.to_sym
 
     if @gui.gameModeComboBox.currentText == "Connect 4"
@@ -115,7 +115,6 @@ class SettingsScreenState < StatePattern::State
 
   def enter
     is_valid?
-    puts "test2"
     @controller = SettingsController.new(stateful.settings_gui)
     is_valid?
   end
