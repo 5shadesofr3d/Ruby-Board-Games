@@ -1,6 +1,6 @@
 require 'Qt'
 require_relative 'board/board'
-require_relative 'state/game_state'
+require_relative 'state/game_states'
 
 class Game < Qt::Widget
   include Test::Unit::Assertions

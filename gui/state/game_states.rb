@@ -1,29 +1,7 @@
 require 'Qt'
 require "test/unit"
 require 'state_pattern'
-require 'player_abstract'
-require_relative 'application_states.rb'
-
-class GameStateMachine < Qt::Object
-  include Test::Unit::Assertions  
-  include StatePattern
-  set_initial_state GameLobby
-  attr_reader :game
-
-  def initialize(game)
-    assert game.is_a?(Game)
-
-    @game = game
-
-    assert valid?
-  end
-
-  def valid?()
-    return false unless @game.is_a?(Game)
-    return true
-  end
-
-end
+require_relative '../player/player'
 
 class GameLobby < StatePattern::State
   def enter
@@ -41,6 +19,28 @@ class GameLobby < StatePattern::State
 
   def exit
 
+  end
+
+end
+
+class GameStateMachine < Qt::Object
+  include Test::Unit::Assertions  
+  include StatePattern
+  set_initial_state GameLobby
+  attr_reader :game
+
+  def initialize(game)
+    assert game.is_a?(Game)
+
+    super(game)
+    @game = game
+
+    assert valid?
+  end
+
+  def valid?()
+    return false unless @game.is_a?(Game)
+    return true
   end
 
 end
