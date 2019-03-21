@@ -4,7 +4,7 @@ require_relative 'gui/board/board_item.rb'
 
 app = Qt::Application.new ARGV
 
-game = Game.new()
+game = Connect4.new()
 game.board.background = Qt::white
 game.board.color = Qt::Color.new("#48dbfb")
 

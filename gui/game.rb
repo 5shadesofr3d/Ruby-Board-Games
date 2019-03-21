@@ -1,5 +1,6 @@
 require 'Qt'
 require_relative 'board/board'
+require_relative 'state/game_state'
 
 class Game < Qt::Widget
   include Test::Unit::Assertions
@@ -20,6 +21,9 @@ class Game < Qt::Widget
     @layout.addWidget(@board)
     setLayout(@layout)
 
+    @players = []
+    @state = GameState.new()
+
     assert valid?
   end
 
@@ -28,7 +32,8 @@ class Game < Qt::Widget
   end
 
   def addPlayer(player)
-    # assert Player.is_a?(Player)
+    assert Player.is_a?(Player)
+    @players << player
   end
 
   def valid?()
@@ -41,9 +46,8 @@ class Game < Qt::Widget
 end
 
 class Connect4 < Game
-  def initialize()
-
-    assert valid?
+  def initialize(rows: 7, columns: 8, width: 800, height: 600, parent: nil)
+    super(rows: rows, columns: columns, width: width, height: height, parent: parent)
   end
 
   def consecutive4?(chips)

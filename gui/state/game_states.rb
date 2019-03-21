@@ -238,4 +238,5 @@ class GameCompleteState < StatePattern::State
     assert player.is_a? Player
     assert valid?
   end
+
 end
