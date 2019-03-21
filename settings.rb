@@ -26,16 +26,16 @@ class Settings
     @windowWidth = 12
     @windowHeight = 34
 
-    assert is_valid?
+    is_valid?
 
   end
 
   def is_valid?
     #class invariant
 
-    assert @gameType.in? @validGameType
-    assert @gameMode.in? @validGameMode
-    assert @color.in? @validColors
+    assert @validGameType.include? @gameType
+    assert @validGameMode.include? @gameMode
+    assert @validColors.include? @color
 
     assert @windowWidth.is_a? Numeric
     assert @windowWidth > 0 and @windowLength <= 1080
@@ -44,7 +44,7 @@ class Settings
     assert @windowHeight > 0 and @windowHeight <= 1080
 
   end
-  
+
 end
 
 test = Settings.instance
