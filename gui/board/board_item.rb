@@ -116,7 +116,7 @@ class BoardChip < BoardItem
 	def initialize(color: Qt::red, parent: nil)
 		super(primary: Qt::transparent, secondary: color, parent: parent)
 
-		lower()
+		lower() # place chip behind tiles
 
 		assert @secondary == color
 		assert valid?
