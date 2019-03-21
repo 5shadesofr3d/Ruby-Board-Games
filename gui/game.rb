@@ -5,7 +5,7 @@ require_relative 'state/game_state'
 class Game < Qt::Widget
   include Test::Unit::Assertions
 
-  attr_reader :board, :state, :players
+  attr_reader :board, :lobby, :state, :players
 
   def initialize(rows: 7, columns: 8, width: 800, height: 600, parent: nil)
     assert rows.is_a?(Integer) and rows > 0
