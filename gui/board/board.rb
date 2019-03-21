@@ -8,6 +8,7 @@ class Board < Qt::Widget
 	include BoardIterator
 
 	slots "insert(BoardItem, int, int)"
+	signals :insertComplete
 
 	def initialize(rows, cols, width = 800, height = 600, parent = nil)
 		parent != nil ? super(parent) : super()
@@ -74,6 +75,7 @@ class Board < Qt::Widget
 		animation.duration = time
 		animation.startValue = from.geometry
 		animation.endValue = to.geometry
+		connect(animation, SIGNAL("finished()"), self, SIGNAL(:insertComplete))
 		animation.start
 	end
 

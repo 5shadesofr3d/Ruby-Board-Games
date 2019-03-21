@@ -54,9 +54,9 @@ module BoardIterator
 
 		(0..diagonal).each do |i|
 			if direction == :up
-				yield self[type, i, diagonal - i]
+				yield self[type, i, diagonal - i] unless self[type, i, diagonal - i] == nil
 			elsif direction == :down
-				yield self[type, diagonal - i, i]
+				yield self[type, diagonal - i, i] unless self[type, diagonal - i, i] == nil
 			end
 		end
 
