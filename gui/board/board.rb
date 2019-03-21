@@ -100,7 +100,7 @@ class Board < Qt::Widget
 	end
 
 	def color=(c)
-		each { |tile| tile.primary = c }
+		each(:tile) { |tile| tile.primary = c }
 	end
 
 	def boardSize()

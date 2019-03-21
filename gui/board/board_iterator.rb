@@ -5,8 +5,10 @@ module BoardIterator
 		assert type.is_a?(Symbol) and (type == :tile or type == :chip)
 
 		case type
-		when :tile return tile(row, col)
-		when :chip return chip(row, col)
+		when :tile
+			return tile(row, col)
+		when :chip
+			return chip(row, col)
 		end
 	end
 
@@ -39,6 +41,12 @@ module BoardIterator
 		end
 
 		assert valid?
+	end
+
+	def each_along_diagonal_up(type, diagonal)
+		columns.each do |col|
+
+		end
 	end
 
 	def each_in_row(type, row)

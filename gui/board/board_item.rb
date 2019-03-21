@@ -75,7 +75,7 @@ class BoardTile < BoardItem
 	end
 
 	def empty?()
-		return @attached == nil
+		return @attached.is_a?(NilClass)
 	end
 
 	def resizeEvent(event)
@@ -115,6 +115,8 @@ end
 class BoardChip < BoardItem
 	def initialize(color: Qt::red, parent: nil)
 		super(primary: Qt::transparent, secondary: color, parent: parent)
+
+		lower()
 
 		assert @secondary == color
 		assert valid?

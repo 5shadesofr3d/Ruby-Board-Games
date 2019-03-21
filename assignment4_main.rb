@@ -11,6 +11,7 @@ board.color = Qt::Color.new("#48dbfb")
 
 chip_red = Connect4Chip.new(color: Qt::red, parent: board)
 chip_yellow = Connect4Chip.new(color: Qt::yellow, parent: board)
+
 chip_t = OTTOChip.new(:T, parent: board)
 chip_o = OTTOChip.new(:O, parent: board)
 
