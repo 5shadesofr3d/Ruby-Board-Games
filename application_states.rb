@@ -128,18 +128,21 @@ class ApplicationStateMachine < Qt::Widget
     exit # TODO: Integrate title screen.
   end
 
-  # TODO: Use tags?
   def apply_settings
 
-    @settings.game_mode = @gui.gameModeComboBox.currentText
-    @settings.game_type = @gui.gameTypeComboBox.currentText
     @settings.number_of_players = @gui.numberPlayersComboBox.currentText
-    @settings.theme =  @gui.themeComboBox.currentText
+    @settings.theme =  @gui.themeComboBox.currentText.to_sym
 
-    if @settings.game_type == "Single Player"
-      @settings.game_type = "Single"
-    elsif @settings.game_type == "Multiplayer"
-      @settings.game_type = "Multi"
+    if @gui.gameModeComboBox.currentText == "Connect 4"
+      @settings.game_mode = :Connect4
+    elsif @gui.gameModeComboBox.currentText == "OTTO/TOOT"
+      @settings.game_mode = :TOOT
+    end
+
+    if @gui.gameTypeComboBox.currentText == "Single Player"
+      @settings.game_type = :Single
+    elsif @gui.gameTypeComboBox.currentText == "Multiplayer"
+      @settings.game_type = :Multi
     end
 
     if @gui.resolutionComboBox.currentText == "400x600"
