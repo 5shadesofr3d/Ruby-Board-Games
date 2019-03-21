@@ -1,16 +1,16 @@
 require "test/unit"
 require 'state_pattern'
+require 'Qt'
 require_relative 'qt_application'
+require_relative 'settings'
+require_relative 'gui/settings_gui'
 
 # TODO:
 # The state_pattern already defines an abstract state that we inherit
 # from, do we need contracts for it?
 
-# Base application state, defines and creates the window here.
-class ApplicationStateMachine
-  include StatePattern
-  attr_accessor :window
-  set_initial_state(TitleScreenState)
+class TitleScreenState < StatePattern::State
+  include Test::Unit::Assertions
 
   def is_valid?
     assert @window.height > 0
@@ -19,23 +19,160 @@ class ApplicationStateMachine
     assert @window.is_a? QTApplication
   end
 
-  # Create GUI here.
-  def initialize
-    # Use a singleton to create the QT GUI.
-    @window = QTApplication.instance
+  def enter
+    is_valid?
+
+    puts 'Hello, world.'
+    # launch the QT applications.
+
 
     is_valid?
   end
 
+  def open_settings
+    transition_to(SettingsScreenState)
+  end
+
+  def open_game
+    transition_to(GameScreenState)
+  end
 
 end
 
-class GameApplication
+class GameScreenState < StatePattern::State
+  include Test::Unit::Assertions
 
   def is_valid?
     assert @window.height > 0
     assert @window.width > 0
     assert @window.visible
+    assert @window.is_a? QTApplication
+  end
+
+  def enter
+    is_valid?
+    # Add the assertions from the game as before.
+    is_valid?
+  end
+
+  def open_title_screen
+    transition_to(TitleScreenState)
+  end
+
+end
+
+class SettingsController < Qt::Widget
+  slots 'apply_settings()'
+
+  def initialize(gui)
+    super()
+
+    @gui = gui
+    @settings = Settings.instance
+
+    connect(@gui.applyButton,  SIGNAL('clicked()'), self, SLOT('apply_settings()'))
+
+  end
+
+  def apply_settings
+
+    # @settings.number_of_players = @gui.numberPlayersComboBox.currentText
+    @settings.theme =  @gui.themeComboBox.currentText.to_sym
+
+    if @gui.gameModeComboBox.currentText == "Connect 4"
+      @settings.game_mode = :Connect4
+    elsif @gui.gameModeComboBox.currentText == "OTTO/TOOT"
+      @settings.game_mode = :TOOT
+    end
+
+    if @gui.gameTypeComboBox.currentText == "Single Player"
+      @settings.game_type = :Single
+    elsif @gui.gameTypeComboBox.currentText == "Multiplayer"
+      @settings.game_type = :Multi
+    end
+
+    if @gui.resolutionComboBox.currentText == "400x600"
+      @settings.window_height = 400
+      @settings.window_width = 600
+    end
+
+    puts @settings.to_s
+
+    @settings.is_valid?
+  end
+
+end
+
+class SettingsScreenState < StatePattern::State
+  include Test::Unit::Assertions
+
+  def is_valid?
+    # assert @window.height > 0
+    # assert @window.width > 0
+    # assert @window.visible
+    # assert @window.is_a? QTApplication
+  end
+
+  def enter
+    is_valid?
+    @controller = SettingsController.new(stateful.settings_gui)
+    is_valid?
+  end
+
+end
+
+class ApplicationStateMachine < Qt::Widget
+  include StatePattern
+  include Test::Unit::Assertions
+  attr_accessor :window, :settings_gui
+  set_initial_state(SettingsScreenState)
+  slots 'open_title_screen()'
+
+  def is_valid?
+    # assert @window.height > 0
+    # assert @window.width > 0
+    # assert @window.visible
+    # assert @window.is_a? QTApplication
+  end
+
+  # Create GUI here.
+  def initialize
+    super
+
+    @window = QTApplication.instance
+    @settings_gui = SettingsGUI.new
+    # @title_screen_gui = TitleScreenGUI.new
+    @main_window = Qt::MainWindow.new
+
+    @settings_gui.setup_ui(@main_window)
+
+    # Setup callbacks.
+    connect(@settings_gui.cancelButton, SIGNAL('clicked()'), self, SLOT('open_title_screen()'))
+
+    # TODO: Remove later.
+    transition_to(SettingsScreenState)
+
+    @main_window.show
+
+    is_valid?
+  end
+
+  # Callback:
+  def open_title_screen # TODO...
+    #@title_screen_gui.setup_ui(@main_window)
+    #transition_to(TitleScreenState)
+    exit
+  end
+
+end
+
+class GameApplication
+  include Test::Unit::Assertions
+
+  def is_valid?
+    # assert @window.height > 0
+    # assert @window.width > 0
+    # assert @window.visible
     assert @window.is_a? QTApplication
     assert @state_machine.is_a? ApplicationStateMachine
   end
@@ -44,11 +181,15 @@ class GameApplication
   def initialize
     # Use a singleton to create the QT GUI.
     @window = QTApplication.instance
+    @settings = Settings.instance
     @state_machine = ApplicationStateMachine.new
 
     # Setup "connections" for QT to capture mouse clicks.
 
     # Display the window
+    # NOTE: While window is displayed, we're stuck here.
+    @window.app.exec
+    # When window is closed, we execute the rest of the code.
 
     is_valid?
   end
@@ -74,69 +215,10 @@ class GameApplication
 
 end
 
-class TitleScreenState < StatePattern::State
+sup = GameApplication.new
 
-  def is_valid?
-    assert @window.height > 0
-    assert @window.width > 0
-    assert @window.visible
-    assert @window.is_a? QTApplication
-  end
-
-  def enter
-    is_valid?
-    # assert class invariants?
-    is_valid?
-  end
-
-  def open_settings
-    transition_to(SettingsScreenState)
-  end
-
-  def open_game
-    transition_to(GameScreenState)
-  end
-
-end
-
-class SettingsScreenState < StatePattern::State
-
-  def is_valid?
-    assert @window.height > 0
-    assert @window.width > 0
-    assert @window.visible
-    assert @window.is_a? QTApplication
-  end
-
-  def enter
-    is_valid?
-    # assert class invariants?
-    is_valid?
-  end
-
-  def open_title_screen
-    transition_to(TitleScreenState)
-  end
-
-end
-
-class GameScreenState < StatePattern::State
-
-  def is_valid?
-    assert @window.height > 0
-    assert @window.width > 0
-    assert @window.visible
-    assert @window.is_a? QTApplication
-  end
-
-  def enter
-    is_valid?
-    # Add the assertions from the game as before.
-    is_valid?
-  end
-
-  def open_title_screen
-    transition_to(TitleScreenState)
-  end
-
-end
+# a = QTApplication.instance
+# hello = Qt::PushButton.new('Hello World!', nil)
+# hello.resize(100, 30)
+# hello.show()
+# a.app.exec()
