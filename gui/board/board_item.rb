@@ -54,8 +54,10 @@ class BoardItem < Qt::Widget
 end
 
 class BoardTile < BoardItem
+	attr_reader :attached
+
 	def initialize(color: Qt::blue, parent: nil)
-		@attached = []
+		@attached = nil
 
 		super(primary: color, secondary: Qt::transparent, parent: parent)
 
@@ -67,20 +69,28 @@ class BoardTile < BoardItem
 		return false unless super
 		return false unless @primary != Qt::transparent
 		return false unless @secondary == Qt::transparent
-		return false unless @attached.is_a?(Array)
+		return false unless empty? or @attached.is_a?(BoardItem)
 
 		return true
 	end
 
+	def empty?()
+		return @attached == nil
+	end
+
 	def resizeEvent(event)
-		@attached.each { |item| item.geometry = geometry() }
+		@attached.geometry = geometry() if not empty?
 	end
 
 	def attach(item)
 		# attaching an item ensures that when the tile is resized, so is the attached item.
+		# NOTE: attached items are treated like chips
 		assert item.is_a?(BoardItem)
+
 		item.size = size()
-		@attached << item
+		@attached = item
+
+		assert valid?
 	end
 
 end

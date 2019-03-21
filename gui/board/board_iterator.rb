@@ -1,5 +1,15 @@
 module BoardIterator
 
+	def [](type, row, col)
+		assert valid?
+		assert type.is_a?(Symbol) and (type == :tile or type == :chip)
+
+		case type
+		when :tile return tile(row, col)
+		when :chip return chip(row, col)
+		end
+	end
+
 	def rows
 		return (0..@rows-1)
 	end
@@ -8,43 +18,44 @@ module BoardIterator
 		return (0..@cols-1)
 	end
 
-	def each()
+	def each(type)
 		assert valid?
 
-		self.each_with_index() do |val, row, col|
+		self.each_with_index(type) do |val, row, col|
 			yield val
 		end
 
 		assert valid?
 	end
 
-	def each_with_index()
+	def each_with_index(type)
 		assert valid?
+		assert type.is_a?(Symbol) and (type == :tile or type == :chip)
 
 		rows.each do |row|
 			columns.each do |col|
-				yield self[row, col], row, col
+				yield self[type, row, col], row, col
 			end
 		end
 
 		assert valid?
 	end
 
-	def each_in_row(row)
+	def each_in_row(type, row)
 		assert valid?
 
 		columns.each do |col|
-			yield self[row, col]
+			yield self[type, row, col]
 		end
 
 		assert valid?
 	end
 
-	def each_in_column(col)
+	def each_in_column(type, col)
 		assert valid?
 
 		rows.each do |row|
-			yield self[row, col]
+			yield self[type, row, col]
 		end
 
 		assert valid?
