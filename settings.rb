@@ -22,14 +22,14 @@ class Settings
     @valid_game_type = [:Single, :Multi]
     @valid_game_mode = [:Connect4, :TOOT]
     @valid_themes = [:Default]
-    @valid_number_of_players = [1, 2]
+    # @valid_number_of_players = [1, 2]
 
     @game_type = :Single
     @game_mode = :Connect4
     @theme = :Default
     @window_width = 12
     @window_height = 34
-    @number_of_players = 1
+    # @number_of_players = 1
 
     is_valid?
 
@@ -54,7 +54,7 @@ class Settings
     "Game Type: " + @game_type.to_s + "\n" +
     "Game Mode: " + @game_mode.to_s + "\n" +
     "Theme: " + @theme.to_s + "\n" +
-    "Number of players: " + @number_of_players.to_s + "\n" +
+    # "Number of players: " + @number_of_players.to_s + "\n" +
     "Resolution: " + @window_width.to_s + "x" + @window_height.to_s
   end
 

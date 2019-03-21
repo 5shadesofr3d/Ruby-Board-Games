@@ -2,7 +2,7 @@ require 'Qt4'
 
 class SettingsGUI
   attr_reader :gameModeComboBox
-  attr_reader :numberPlayersComboBox
+  # attr_reader :numberPlayersComboBox
   attr_reader :gameTypeComboBox
   attr_reader :themeComboBox
   attr_reader :resolutionComboBox
@@ -44,13 +44,13 @@ class SettingsGUI
     @gameGridLayout = Qt::GridLayout.new()
     @gameGridLayout.spacing = 6
     @gameGridLayout.objectName = "gameGridLayout"
-    @numberOfPlayersText = Qt::Label.new(@verticalLayoutWidget)
-    @numberOfPlayersText.objectName = "numberOfPlayersText"
-    @numberOfPlayersText.maximumSize = Qt::Size.new(16777215, 35)
+    # @numberOfPlayersText = Qt::Label.new(@verticalLayoutWidget)
+    # @numberOfPlayersText.objectName = "numberOfPlayersText"
+    # @numberOfPlayersText.maximumSize = Qt::Size.new(16777215, 35)
     @font1 = Qt::Font.new
     @font1.family = "Sans Serif"
     @font1.pointSize = 16
-    @numberOfPlayersText.font = @font1
+    # @numberOfPlayersText.font = @font1
 
     @gameGridLayout.addWidget(@numberOfPlayersText, 3, 0, 1, 1)
 
@@ -68,11 +68,11 @@ class SettingsGUI
 
     @gameGridLayout.addWidget(@gameModeText, 1, 0, 1, 1)
 
-    @numberPlayersComboBox = Qt::ComboBox.new(@verticalLayoutWidget)
-    @numberPlayersComboBox.objectName = "numberPlayersComboBox"
-    @numberPlayersComboBox.font = @font1
-
-    @gameGridLayout.addWidget(@numberPlayersComboBox, 3, 1, 1, 1)
+    # @numberPlayersComboBox = Qt::ComboBox.new(@verticalLayoutWidget)
+    # @numberPlayersComboBox.objectName = "numberPlayersComboBox"
+    # @numberPlayersComboBox.font = @font1
+    #
+    # @gameGridLayout.addWidget(@numberPlayersComboBox, 3, 1, 1, 1)
 
     @gameTypeText = Qt::Label.new(@verticalLayoutWidget)
     @gameTypeText.objectName = "gameTypeText"
@@ -181,11 +181,11 @@ class SettingsGUI
   def retranslateUi(settingsWindow)
     settingsWindow.windowTitle = Qt::Application.translate("SettingsWindow", "Settings", nil, Qt::Application::UnicodeUTF8)
     @gameSettingsText.text = Qt::Application.translate("SettingsWindow", "Game Settings", nil, Qt::Application::UnicodeUTF8)
-    @numberOfPlayersText.text = Qt::Application.translate("SettingsWindow", "Number of players:", nil, Qt::Application::UnicodeUTF8)
+    # @numberOfPlayersText.text = Qt::Application.translate("SettingsWindow", "Number of players:", nil, Qt::Application::UnicodeUTF8)
     @gameModeComboBox.insertItems(0, [Qt::Application.translate("SettingsWindow", "Connect 4", nil, Qt::Application::UnicodeUTF8),
                                       Qt::Application.translate("SettingsWindow", "OTTO/TOOT", nil, Qt::Application::UnicodeUTF8)])
     @gameModeText.text = Qt::Application.translate("SettingsWindow", "Game Mode:", nil, Qt::Application::UnicodeUTF8)
-    @numberPlayersComboBox.insertItems(0, [Qt::Application.translate("SettingsWindow", "2", nil, Qt::Application::UnicodeUTF8)])
+    # @numberPlayersComboBox.insertItems(0, [Qt::Application.translate("SettingsWindow", "2", nil, Qt::Application::UnicodeUTF8)])
     @gameTypeText.text = Qt::Application.translate("SettingsWindow", "Game Type:", nil, Qt::Application::UnicodeUTF8)
     @gameTypeComboBox.insertItems(0, [Qt::Application.translate("SettingsWindow", "Single Player", nil, Qt::Application::UnicodeUTF8),
                                       Qt::Application.translate("SettingsWindow", "Multiplayer", nil, Qt::Application::UnicodeUTF8)])

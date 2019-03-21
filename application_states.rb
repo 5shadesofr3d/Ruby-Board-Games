@@ -92,8 +92,8 @@ class SettingsController < Qt::Widget
     end
 
     if @gui.resolutionComboBox.currentText == "400x600"
-      @settings.window_height = 700
-      @settings.window_width = 700
+      @settings.window_height = 400
+      @settings.window_width = 600
     end
 
     puts @settings.to_s
@@ -142,6 +142,7 @@ class ApplicationStateMachine < Qt::Widget
 
     @window = QTApplication.instance
     @settings_gui = SettingsGUI.new
+    # @title_screen_gui = TitleScreenGUI.new
     @main_window = Qt::MainWindow.new
 
     @settings_gui.setup_ui(@main_window)
@@ -149,6 +150,7 @@ class ApplicationStateMachine < Qt::Widget
     # Setup callbacks.
     connect(@settings_gui.cancelButton, SIGNAL('clicked()'), self, SLOT('open_title_screen()'))
 
+    # TODO: Remove later.
     transition_to(SettingsScreenState)
 
     @main_window.show
@@ -157,9 +159,10 @@ class ApplicationStateMachine < Qt::Widget
   end
 
   # Callback:
-  def open_title_screen
+  def open_title_screen # TODO...
+    #@title_screen_gui.setup_ui(@main_window)
     #transition_to(TitleScreenState)
-    exit # TODO: Integrate title screen
+    exit
   end
 
 end
