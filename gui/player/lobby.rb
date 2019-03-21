@@ -1,6 +1,10 @@
 require 'Qt'
 require 'test/unit'
 
+require_relative 'player'
+require_relative 'local_player'
+require_relative 'ai_player'
+
 module LobbyColor
   GREY = "#D8DAE7"
   BLACK = "#050D10"
@@ -95,7 +99,10 @@ class PlayerInfoTypeBox < Qt::ComboBox
 end
 
 class PlayerInfoColorBox < Qt::Widget
+  attr_reader :color
+
   @@colors = ["red", "green", LobbyColor::LIGHT_BLUE, "yellow", "pink", "magenta"]
+
   def initialize(parent)
     super(parent)
     setMaximumSize(75, 30)
@@ -104,7 +111,8 @@ class PlayerInfoColorBox < Qt::Widget
   end
 
   def setColor
-    setStyleSheet("background-color:#{@@colors.first};")
+    @color = @@colors.first
+    setStyleSheet("background-color:#{@color};")
     @@colors.rotate!
   end
 
@@ -206,24 +214,45 @@ class PlayerInfo < Qt::Widget
     return @name.text
   end
 
+  def color
+    return @color.color
+  end
+
   def type
     return @type.text
   end
 
   def wins
-
+    return @wins.text.to_i
   end
 
   def losses
-
+    return @wins.text.to_i
   end
 
   def ties
-
+    return @wins.text.to_i
   end
 
-  def construct_player()
+  def construct_player(parent)
     # constructs and returns the player based off info
+
+    player = nil
+
+    case type
+    when "Local"
+      player = LocalPlayer.new(self.name, self.color, parent: parent)
+    when "Computer"
+      player = AIPlayer.new(self.name, self.color, parent: parent)
+    end
+
+    return if player == nil
+
+    player.wins = self.wins
+    player.losses = self.losses
+    player.ties = self.ties
+
+    return player
   end
 
   def valid?()

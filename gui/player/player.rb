@@ -1,26 +1,39 @@
 # This is the abstract player class. This will contain most of the basic rules that
 # are present for a player within the "Connect4" game
+require 'Qt'
 require 'test/unit'
 
-class Player
+class Player < Qt::Object
 	include Test::Unit::Assertions
 
+	attr_reader :name, :color
+	attr_accessor :wins, :losses, :ties
+
 	public
-	def initialize(player_name)
+	def initialize(player_name, player_color, parent: nil)
+		parent != nil ? super(parent) : super()
 		# Set the name of the player and make the score 0
 		#pre
 		assert player_name.is_a? String
-		@name = player_name
 
-		@score = 0
+		@name = player_name
+		@wins = 0
+		@losses = 0
+		@ties = 0
+		@color = Qt::Color.new(player_color)
 
 		#post
 		assert valid?
 	end
 
 	def valid?
-		assert @score.is_a? Numeric
-		assert @name.is_a? String
+		return false unless @name.is_a?(String)
+		return false unless @wins.is_a?(Integer) and @wins >= 0
+		return false unless @losess.is_a?(Integer) and @losses >= 0
+		return false unless @ties.is_a?(Integer) and @ties >= 0
+		return false unless @color.is_a?(Qt::Color)
+
+		return true
 	end
 
 	def get_name
@@ -37,16 +50,8 @@ class Player
 		assert valid?
 	end
 
-	def get_score
-		return @score
-	end
-
-	def scored
-		# The player has won a game
-		@score = @score + 1
-
-		#post
-		assert valid?
+	def total_score
+		return wins - losses
 	end
 
 	def get_move
