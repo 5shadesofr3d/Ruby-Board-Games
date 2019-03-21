@@ -124,19 +124,32 @@ class ApplicationStateMachine < Qt::Widget
   # the view and changes the model. In this case, it acts like
   # the controller.
   def go_to_titlescreen
-    exit # TODO: Go back to titlescreen.
+    # transition_to(TitleScreenState)
+    exit # TODO: Integrate title screen.
   end
 
-  # TODO: Contracts for settings.
+  # TODO: Use tags?
   def apply_settings
 
-    puts @gui.gameModeComboBox.currentText
-    puts @gui.numberPlayersComboBox.currentText
-    puts @gui.gameTypeComboBox.currentText
-    puts @gui.themeComboBox.currentText
-    puts @gui.resolutionComboBox.currentText
+    @settings.game_mode = @gui.gameModeComboBox.currentText
+    @settings.game_type = @gui.gameTypeComboBox.currentText
+    @settings.number_of_players = @gui.numberPlayersComboBox.currentText
+    @settings.theme =  @gui.themeComboBox.currentText
 
-    # @settings.is_valid?
+    if @settings.game_type == "Single Player"
+      @settings.game_type = "Single"
+    elsif @settings.game_type == "Multiplayer"
+      @settings.game_type = "Multi"
+    end
+
+    if @gui.resolutionComboBox.currentText == "400x600"
+      @settings.window_height = 700
+      @settings.window_width = 700
+    end
+
+    puts @settings.to_s
+
+    @settings.is_valid?
   end
 
 end
