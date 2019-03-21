@@ -1,23 +1,36 @@
-class Settings
+require 'singleton'
+require "test/unit"
 
-  def initialize(gameType, gameMode, color, width, height)
-    include Test::Unit::Assertions
+class Settings
+  include Test::Unit::Assertions
+  include Singleton
+
+  attr_accessor :gameType, :gameMode
+  attr_accessor :color
+  attr_accessor :windowHeight, :windowWidth, :windowLength
+
+  # NOTE: Singleton gem does not allow us to initialize
+  # our objects. We can either create our own singleton class,
+  # pass around a settings variable or initialize it with
+  # default values. The last option reduces dependancy injection
+  # potential.
+  def initialize
 
     @validGameType = ["Connect4", "TOOT"]
     @validGameMode = ["Single", "Multi"]
     @validColors = ["Red", "Orange", "Yellow", "Green", "Blue", "Purple", "Black"]
 
-    @gameType = gameType
-    @gameMode = gameMode
-    @color = color
-    @windowWidth = width
-    @windowHeight = height
+    @gameType = "Connect4"
+    @gameMode = "Single"
+    @color = "Red"
+    @windowWidth = 12
+    @windowHeight = 34
 
-    assert valid?
+    assert is_valid?
 
   end
 
-  def valid?
+  def is_valid?
     #class invariant
 
     assert @gameType.in? @validGameType
@@ -33,7 +46,7 @@ class Settings
   end
 
   def getGameType()
-    assert valid?
+    assert is_valid?
     return @gameType
   end
 
@@ -99,3 +112,5 @@ class Settings
     assert valid?
   end
 end
+
+test = Settings.instance

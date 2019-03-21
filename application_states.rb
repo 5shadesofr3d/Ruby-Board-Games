@@ -2,6 +2,7 @@ require "test/unit"
 require 'state_pattern'
 require 'Qt'
 require_relative 'qt_application'
+require_relative 'gui/settings_gui'
 
 # TODO:
 # The state_pattern already defines an abstract state that we inherit
@@ -83,11 +84,12 @@ class SettingsScreenState < StatePattern::State
 end
 
 # Base application state, defines and creates the window here.
-class ApplicationStateMachine
+class ApplicationStateMachine < Qt::Widget
   include StatePattern
   include Test::Unit::Assertions
   attr_accessor :window
   set_initial_state(SettingsScreenState)
+  slots 'hello()'
 
   def is_valid?
     # assert @window.height > 0
@@ -98,17 +100,35 @@ class ApplicationStateMachine
 
   # Create GUI here.
   def initialize
+    super
     # Use a singleton to create the QT GUI.
     @window = QTApplication.instance
 
-    puts "test"
-    hello = Qt::PushButton.new('Hello World!', nil)
-    hello.resize(100, 30)
-    hello.show()
+    gui = SettingsGUI.new
+    window = Qt::MainWindow.new
+    gui.setup_ui(window)
+
+    # Setup callbacks.
+    connect(gui.cancelButton, SIGNAL('clicked()'), self, SLOT('go_to_titlescreen()'))
+    connect(gui.applyButton,  SIGNAL('clicked()'), self, SLOT('apply_settings()'))
+
+    window.show
 
     is_valid?
   end
 
+  # Callback:
+  # This is the function that should read the attributes from
+  # the view and changes the model. In this case, it acts like
+  # the controller.
+  def go_to_titlescreen
+    quit # TODO: Go back to titlescreen.
+  end
+
+  # TODO: Contracts for settings.
+  def apply_settings
+
+  end
 
 end
 
@@ -127,12 +147,15 @@ class GameApplication
   def initialize
     # Use a singleton to create the QT GUI.
     @window = QTApplication.instance
+    @settings = Settings.instance
     @state_machine = ApplicationStateMachine.new
 
     # Setup "connections" for QT to capture mouse clicks.
 
     # Display the window
+    # NOTE: While window is displayed, we're stuck here.
     @window.app.exec
+    # When window is closed, we execute the rest of the code.
 
     is_valid?
   end
