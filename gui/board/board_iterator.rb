@@ -50,10 +50,4 @@ module BoardIterator
 		assert valid?
 	end
 
-	def [](row, col)
-		assert valid?
-
-		return tile(row, col)
-	end
-
 end

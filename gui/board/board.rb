@@ -75,6 +75,12 @@ class Board < Qt::Widget
 		animation.start
 	end
 
+	def [](row, col)
+		assert valid?
+
+		return tile(row, col)
+	end
+
 	def head(col)
 		assert col.is_a?(Integer) and col.between?(columns)
 		assert valid?
