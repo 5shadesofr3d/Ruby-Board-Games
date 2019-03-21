@@ -1,52 +1,101 @@
 module BoardIterator
-	def each()
-		assert valid?
 
-		self.each_with_index() do |val, row, col|
-			yield val
+	def [](type, row, col)
+		assert valid?
+		assert type.is_a?(Symbol) and (type == :tile or type == :chip)
+
+		case type
+		when :tile
+			return tile(row, col)
+		when :chip
+			return chip(row, col)
 		end
-
-		assert valid?
 	end
 
-	def each_with_index()
-		assert valid?
+	def rows
+		return (0..@rows-1)
+	end
 
-		(0..@rows).each do |row|
-			(0..@cols).each do |col|
-				yield self[row, col], row, col
+	def columns
+		return (0..@cols-1)
+	end
+
+	def diagonals
+		return (0..[@rows, @cols].max - 1)
+	end
+
+	def each(type)
+		self.each_with_index(type) do |val, row, col|
+			yield val
+		end
+	end
+
+	def valid_type?(type)
+		return (type.is_a?(Symbol) and (type == :tile or type == :chip))
+	end
+
+	def each_with_index(type)
+		assert valid?
+		assert valid_type?(type)
+
+		rows.each do |row|
+			columns.each do |col|
+				yield self[type, row, col], row, col
 			end
 		end
 
 		assert valid?
 	end
 
-	def each_in_row(row)
-		assert valid?
+	def each_in_diagonal(type, diagonal, direction)
+		assert diagonal.between?(0, [@rows, @cols].min - 1)
+		assert direction.is_a?(Symbol) and (direction == :up or direction == :down)
+		assert valid_type?(type)
 
-		(0..@cols).each do |col|
-			yield self[row, col]
+		(0..diagonal).each do |i|
+			if direction == :up
+				yield self[type, i, diagonal - i]
+			elsif direction == :down
+				yield self[type, diagonal - i, i]
+			end
 		end
 
 		assert valid?
 	end
 
-	def each_in_column(col)
+	def each_in_row(type, row)
 		assert valid?
+		assert valid_type?(type)
 
-		(0..@rows).each do |row|
-			yield self[row, col]
+		columns.each do |col|
+			yield self[type, row, col]
 		end
 
 		assert valid?
 	end
 
-	def [](row, col)
+	def each_in_column(type, col)
 		assert valid?
-		assert row.is_a?(Integer) and row.between?(0, @rows)
-		assert col.is_a?(Integer) and col.between?(0, @cols)
+		assert valid_type?(type)
 
-		return @tile[row][col]
+		rows.each do |row|
+			yield self[type, row, col]
+		end
+
+		assert valid?
+	end
+
+	def next_empty(col)
+		# iterates from bottom to top and returns the tile if its empty
+		# returns nil if the selected col is full
+
+		e = self.to_enum(:each_in_column, :tile, col)
+		e.reverse_each { |tile| return tile if tile.empty? }
+
+		raise ColumnFullError
+	end
+
+	class ColumnFullError < StandardError
 	end
 
 end

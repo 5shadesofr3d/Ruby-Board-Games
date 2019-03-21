@@ -1,27 +1,30 @@
+require 'Qt'
 require 'test/unit'
+require_relative 'board_iterator'
+require_relative 'board_item'
 
 class Board < Qt::Widget
 	include Test::Unit::Assertions
+	include BoardIterator
+
+	slots "insert(BoardItem, int, int)"
 
 	def initialize(rows, cols, width = 800, height = 600, parent = nil)
-		if parent != nil
-			super(parent)
-		else
-			super()
-		end
+		parent != nil ? super(parent) : super()
 
 		@tile = []
 
 		@layout = Qt::GridLayout.new(self)
 		@layout.setSpacing(0)
-		self.setLayout(@layout)
+		setLayout(@layout)
 
-		self.setWindowSize(width, height)
-		self.setBoardSize(rows, cols)
-		self.setWindowTitle("Ruby-Board-Games")
-		self.move(100, 100)0
+		setWindowSize(width, height)
+		setBoardSize(rows, cols)
+		setWindowTitle("Ruby-Board-Games")
+		move(100, 100)
+		show()
 
-		assert self.valid?
+		assert valid?
 	end
 
 	def valid?
@@ -37,34 +40,87 @@ class Board < Qt::Widget
 		assert width.is_a?(Integer) and width.between?(100, 1920)
 		assert height.is_a?(Integer) and height.between?(100, 1080)
 
-		self.resize(width, height)
+		resize(width, height)
 
-		assert self.width == width
-		assert self.height == height
+		assert width() == width
+		assert height() == height
 	end
 
 	def setBoardSize(rows, cols)
 		assert rows.is_a?(Integer) and rows.between?(1, 100)
 		assert cols.is_a?(Integer) and cols.between?(1, 100)
 
-		@rows = rows
+		@rows = rows 
 		@cols = cols
 
-		self.generateHead()
-		self.generateTiles()
+		generateHead()
+		generateTiles()
 
-		assert self.valid?
+		assert valid?
+	end
+
+	def translate(item: nil, from: nil, to: nil, time: 0)
+		assert from.is_a?(BoardItem)
+		assert to.is_a?(BoardTile)
+		assert time.is_a?(Integer) and time >= 0
+
+		to.attach(item)
+
+		return if from == to
+
+		animation = Qt::PropertyAnimation.new(self)
+		animation.targetObject = item
+		animation.propertyName = "geometry"
+		animation.duration = time
+		animation.startValue = from.geometry
+		animation.endValue = to.geometry
+		animation.start
+	end
+
+	def head(col)
+		assert col.is_a?(Integer) and columns.include?(col)
+		assert valid?
+
+		return @head[col]
+	end
+
+	def tile(row, col)
+		assert row.is_a?(Integer) and rows.include?(row)
+		assert col.is_a?(Integer) and columns.include?(col)
+
+		return @tile[row][col]
+	end
+
+	def chip(row, col)
+		return @tile[row][col].attached
+	end
+
+	def background=(c)
+		palette = Qt::Palette.new(c)
+		setAutoFillBackground(true)
+		setPalette(palette)
+	end
+
+	def color=(c)
+		each(:tile) { |tile| tile.primary = c }
+	end
+
+	def boardSize()
+		return @rows * @cols
+	end
+
+	def insert(chip, col, time: 1000)
+		translate(item: chip, from: head(col), to: next_empty(col), time: time)
 	end
 
 private
 	def generateTiles()
-		assert self.valid?
 		assert @layout.count == @head.size
 
 		@tile = []
-		(0..@rows).each do |r|
+		 rows.each do |r|
 			row = []
-			(0..@cols).each do |c|
+			columns.each do |c|
 				item = BoardTile.new(parent: self)
 				row << item
 				@layout.addWidget(item, r + 1, c)
@@ -72,25 +128,22 @@ private
 			@tile << row
 		end
 
-		assert @layout.count == @head.size + @rows * @cols
+		assert @layout.count == @head.size + boardSize()
 		assert @tile.size == @rows
 		assert @tile.first.size == @cols
-		assert self.valid?
 	end
 
 	def generateHead()
-		assert self.valid?
 		assert @layout.isEmpty
 
 		@head = []
-		(0..@cols).each do |col|
+		columns.each do |col|
 			item = BoardHead.new(parent: self)
 			@head << item
 			@layout.addWidget(item, 0, col)
 		end
 
 		assert @layout.count == @head.size and @head.size == @cols
-		assert self.valid?
 	end
 
 end
