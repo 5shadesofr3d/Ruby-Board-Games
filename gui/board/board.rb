@@ -76,15 +76,15 @@ class Board < Qt::Widget
 	end
 
 	def head(col)
-		assert col.is_a?(Integer) and col.between?(columns)
+		assert col.is_a?(Integer) and columns.include?(col)
 		assert valid?
 
 		return @head[col]
 	end
 
 	def tile(row, col)
-		assert row.is_a?(Integer) and row.between?(rows)
-		assert col.is_a?(Integer) and col.between?(columns)
+		assert row.is_a?(Integer) and rows.include?(row)
+		assert col.is_a?(Integer) and columns.include?(col)
 
 		return @tile[row][col]
 	end
