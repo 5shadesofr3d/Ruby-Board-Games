@@ -26,7 +26,7 @@ class PlayerLobby < Qt::Frame
 
     setSizePolicy(Qt::SizePolicy::Preferred, Qt::SizePolicy::Minimum)
     setMaximumWidth(550)
-    # setMaximumHeight(300)
+    setMaximumHeight(300)
 
     layout = Qt::VBoxLayout.new(self)
     layout.addWidget(room)
