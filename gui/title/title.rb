@@ -11,12 +11,11 @@ class Title < Qt::Widget
     assert height > 0
     super()
 
-    @layout = Qt::GridLayout.new(self)
-		@layout.setSpacing(10)
+    @layout = Qt::VBoxLayout.new(self)
+		@layout.setSpacing(height/6) #This value seems to use the screen space well
     setLayout(@layout)
     setScreenSize(width,height)
     setWindowTitle("Ruby-Board-Games")
-    move(100, 100)
     setBackground(Qt::darkCyan)
     drawMenu()
     show()
@@ -43,13 +42,51 @@ class Title < Qt::Widget
   def drawMenu
     assert valid?
 
+    fontT = Qt::Font.new
+    fontT.family = "Sans Serif"
+    fontT.pointSize = 36
+    font = Qt::Font.new
+    font.family = "Sans Serif"
+    font.pointSize = 24
+
+
+    title = Qt::Label.new
+    title.maximumSize = Qt::Size.new(16777215, 46)
+    title.font = fontT
+    title.text = "Connect N"
+
+    b1 = Qt::PushButton.new("Play")
+    b1.font = font
+    b1.setAutoFillBackground(true)
+    b1.setStyleSheet("background-color: rgb(66, 134, 244); color: rgb(255, 255, 255)")
+    b1.maximumSize = Qt::Size.new(300, 50)
+    b2 = Qt::PushButton.new("Settings")
+    b2.font = font
+    b2.setAutoFillBackground(true)
+    b2.setStyleSheet("background-color: rgb(66, 134, 244); color: rgb(255, 255, 255)")
+    b2.maximumSize = Qt::Size.new(300, 50)
+    b3 = Qt::PushButton.new("Exit")
+    b3.font = font
+    b3.setAutoFillBackground(true)
+    b3.setStyleSheet("background-color: rgb(66, 134, 244); color: rgb(255, 255, 255)")
+    b3.maximumSize = Qt::Size.new(300, 50)
+
+
+    @layout.setAlignment(Qt::AlignTop | Qt::AlignHCenter)
+    
+    @layout.addWidget(title)
+    @layout.addWidget(b1)
+    @layout.addWidget(b2)
+    @layout.addWidget(b3)
+
+
     assert valid?
   end
 
   def valid?
     return false unless width().is_a?(Integer) and width().between?(100, 1920)
     return false unless height().is_a?(Integer) and height().between?(100, 1080)
-    return false unless @layout.is_a? Qt::GridLayout
+    return false unless @layout.is_a? Qt::VBoxLayout
     return true
   end
 
