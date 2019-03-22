@@ -1,5 +1,5 @@
 require 'Qt'
-require_relative 'board/board'
+require_relative 'board'
 require_relative 'state/game_states'
 require_relative 'debug'
 
@@ -26,7 +26,7 @@ class Game < Qt::Widget
 
   def setupUI()
     setupStack
-    setupLobby
+    # setupLobby
     setupBoard
   end
 
