@@ -18,15 +18,18 @@ class PlayerLobby < Qt::Frame
 
   slots :addPlayer
 
+  @@MAX_PLAYER_COUNT = 4
+
   def initialize(parent: nil)
     parent != nil ? super(parent) : super()
 
     @room = PlayerRoom.new(parent: self)
     @buttons = PlayerLobbyButtons.new(parent: self)
+    @player_count = 0
 
     setSizePolicy(Qt::SizePolicy::Preferred, Qt::SizePolicy::Minimum)
     setMaximumWidth(550)
-    setMaximumHeight(300)
+    setMaximumHeight(400)
 
     layout = Qt::VBoxLayout.new(self)
     layout.addWidget(room)
@@ -40,7 +43,8 @@ class PlayerLobby < Qt::Frame
   end
 
   def addPlayer()
-    @room.addPlayer()
+    @room.addPlayer() if @player_count < @@MAX_PLAYER_COUNT
+    @player_count += 1
   end
 
   def getPlayers()
