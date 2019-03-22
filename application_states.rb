@@ -11,27 +11,21 @@ require_relative 'gui/title/title'
 # from, do we need contracts for it?
 
 class TitleScreenState < StatePattern::State
+  include Test::Unit::Assertions
 
-  def initialize()
-    super()
-
-    @title = TitleController.new(self)
-
-    assert @title.is_a? TitleController
-  end
-
-
-  def is_valid?
-    assert @window.height > 0
-    assert @window.width > 0
-    assert @window.visible
-    assert @window.is_a? QTApplication
+  def valid?
+    return false unless @title.is_a? TitleController
+    return true
   end
 
   def enter
-    is_valid?
-    # assert class invariants?
-    is_valid?
+    #no preconditions as setup is performed here
+
+    @title = TitleController.new(self,stateful.main_window)
+
+    assert @title.is_a? TitleController
+
+    assert valid?
   end
 
   def open_settings
@@ -44,21 +38,24 @@ class TitleScreenState < StatePattern::State
 
   def quit_game
     puts "quit"
+    exit
   end
 
 end
 
 #TODO: Get rid of this
 class TitleController < Qt::Widget
+  include Test::Unit::Assertions
+
   slots 'play_game()','open_settings()','quit_game()'
 
-  def initialize(state)
+  def initialize(state,window)
     assert state.is_a? TitleScreenState
     super()
 
     @state = state
 
-    @title = Title.new
+    @title = Title.new(800,600,window)
 
     connect(@title.bPlay,  SIGNAL('clicked()'), self, SLOT('play_game()'))
     connect(@title.bSettings,  SIGNAL('clicked()'), self, SLOT('open_settings()'))
@@ -68,15 +65,18 @@ class TitleController < Qt::Widget
   end
 
   def open_settings
+    @title.close
     @state.open_settings
   end
 
   def open_game
+    @title.close
     @state.open_game
   end
 
   def quit_game
-    @state.quit_settings
+    @title.close
+    @state.quit_game
   end
 
 end
@@ -84,17 +84,15 @@ end
 class GameScreenState < StatePattern::State
   include Test::Unit::Assertions
 
-  def is_valid?
-    assert @window.height > 0
-    assert @window.width > 0
-    assert @window.visible
-    assert @window.is_a? QTApplication
+  def valid?
+    #assert @window.height > 0
+    #assert @window.width > 0
+    #assert @window.visible
+    #assert @window.is_a? QTApplication
   end
 
   def enter
-    is_valid?
     # Add the assertions from the game as before.
-    is_valid?
   end
 
   def open_title_screen
@@ -104,16 +102,16 @@ class GameScreenState < StatePattern::State
 end
 
 class SettingsController < Qt::Widget
-  slots 'apply_settings()'
+  slots 'apply_settings()','cancel()'
 
-  def initialize(gui)
+  def initialize(state,gui)
     super()
 
+    @state = state
     @gui = gui
     @settings = Settings.instance
-
     connect(@gui.applyButton,  SIGNAL('clicked()'), self, SLOT('apply_settings()'))
-
+    connect(@gui.cancelButton,  SIGNAL('clicked()'), self, SLOT('cancel()'))
   end
 
   def apply_settings
@@ -140,7 +138,15 @@ class SettingsController < Qt::Widget
 
     puts @settings.to_s
 
+    self.close
+    @state.open_title
+
     @settings.is_valid?
+  end
+
+  def cancel
+    self.close
+    @state.open_title
   end
 
 end
@@ -148,16 +154,7 @@ end
 class SettingsScreenState < StatePattern::State
   include Test::Unit::Assertions
 
-  def initialize()
-    super()
-
-    @title = TitleController.new(self)
-
-    assert @Title.is_a? TitleController
-  end
-
-
-  def is_valid?
+  def valid?
     # assert @window.height > 0
     # assert @window.width > 0
     # assert @window.visible
@@ -165,9 +162,14 @@ class SettingsScreenState < StatePattern::State
   end
 
   def enter
-    is_valid?
-    @controller = SettingsController.new(stateful.settings_gui)
-    is_valid?
+    valid?
+    stateful.settings_gui.setupUi(stateful.main_window)
+    @controller = SettingsController.new(self, stateful.settings_gui)
+    valid?
+  end
+
+  def open_title
+    transition_to(TitleScreenState)
   end
 
 end
@@ -175,7 +177,7 @@ end
 class ApplicationStateMachine < Qt::Widget
   include StatePattern
   include Test::Unit::Assertions
-  attr_accessor :window, :settings_gui
+  attr_accessor :window, :settings_gui, :main_window
   set_initial_state(TitleScreenState)
   slots 'open_title_screen()'
 
@@ -194,14 +196,12 @@ class ApplicationStateMachine < Qt::Widget
     @settings_gui = SettingsGUI.new
     # @title_screen_gui = TitleScreenGUI.new
     @main_window = Qt::MainWindow.new
+    @main_window.setFixedSize(800,600)
+    open_title_screen
 
-    @settings_gui.setup_ui(@main_window)
-
-    # Setup callbacks.
-    connect(@settings_gui.cancelButton, SIGNAL('clicked()'), self, SLOT('open_title_screen()'))
 
     # TODO: Remove later.
-    transition_to(SettingsScreenState)
+  #  transition_to(SettingsScreenState)
 
     @main_window.show
 
@@ -211,8 +211,7 @@ class ApplicationStateMachine < Qt::Widget
   # Callback:
   def open_title_screen # TODO...
     #@title_screen_gui.setup_ui(@main_window)
-    #transition_to(TitleScreenState)
-    exit
+    transition_to(TitleScreenState)
   end
 
 end
