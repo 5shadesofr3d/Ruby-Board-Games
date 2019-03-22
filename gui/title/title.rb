@@ -8,12 +8,12 @@ class Title < Qt::Widget
   attr_reader :bSettings
   attr_reader :bQuit
 
-  def initialize(width = 800, height = 600)
+  def initialize(width = 800, height = 600, parent = nil)
     assert width.is_a? Numeric
     assert height.is_a? Numeric
     assert width > 0
     assert height > 0
-    super()
+    parent != nil ? super(parent) : super()
 
     @layout = Qt::VBoxLayout.new(self)
 		@layout.setSpacing(height/6) #This value seems to use the screen space well
