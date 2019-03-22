@@ -71,10 +71,9 @@ class Board < Qt::Widget
 		translate(item: chip, from: model.head(col), to: model.next_empty(col), time: time)
 	end
 
-private
 	def translate(item: nil, from: nil, to: nil, time: 0)
 		assert from.is_a?(BoardView)
-		assert to.is_a?(BoardTile)
+		assert to.is_a?(BoardView)
 		assert time.is_a?(Integer) and time >= 0
 
 		to.attach(item)
@@ -90,5 +89,8 @@ private
 		connect(animation, SIGNAL("finished()"), self, SIGNAL(:insertComplete))
 		animation.start
 	end
+
+private
+
 
 end
