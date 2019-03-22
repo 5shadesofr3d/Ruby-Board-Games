@@ -176,7 +176,7 @@ class ApplicationStateMachine < Qt::Widget
   include StatePattern
   include Test::Unit::Assertions
   attr_accessor :window, :settings_gui
-  set_initial_state(SettingsScreenState)
+  set_initial_state(TitleScreenState)
   slots 'open_title_screen()'
 
   def is_valid?
