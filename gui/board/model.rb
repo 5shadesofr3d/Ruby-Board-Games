@@ -2,6 +2,7 @@ require 'Qt'
 require 'test/unit'
 require_relative 'iterator'
 require_relative 'view'
+require_relative '../debug'
 
 class BoardModel
 	include Test::Unit::Assertions

@@ -2,10 +2,12 @@ require 'Qt'
 require 'test/unit'
 require_relative 'board/model'
 require_relative 'board/view'
+require_relative 'debug'
 
 class Board < Qt::Widget
 	include Test::Unit::Assertions
-
+	include Debug
+	
 	attr_reader :model
 
 	slots "insert(BoardView, int, int)"

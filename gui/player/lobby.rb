@@ -294,7 +294,7 @@ class PlayerInfo < Qt::Widget
   end
 
   def type
-    return @type.text
+    return @type.currentText
   end
 
   def wins

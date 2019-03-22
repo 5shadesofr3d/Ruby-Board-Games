@@ -2,9 +2,11 @@
 # are present for a player within the "Connect4" game
 require 'Qt'
 require 'test/unit'
+require_relative '../debug'
 
 class Player < Qt::Object
 	include Test::Unit::Assertions
+	include Debug
 
 	attr_reader :name, :color
 	attr_accessor :wins, :losses, :ties
@@ -27,11 +29,11 @@ class Player < Qt::Object
 	end
 
 	def valid?
-		return false unless @name.is_a?(String)
-		return false unless @wins.is_a?(Integer) and @wins >= 0
-		return false unless @losess.is_a?(Integer) and @losses >= 0
-		return false unless @ties.is_a?(Integer) and @ties >= 0
-		return false unless @color.is_a?(Qt::Color)
+		return false unless name.is_a?(String)
+		return false unless wins.is_a?(Integer) and @wins >= 0
+		return false unless losses.is_a?(Integer) and @losses >= 0
+		return false unless ties.is_a?(Integer) and @ties >= 0
+		return false unless color.is_a?(Qt::Color)
 
 		return true
 	end

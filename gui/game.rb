@@ -26,7 +26,7 @@ class Game < Qt::Widget
 
   def setupUI()
     setupStack
-    # setupLobby
+    setupLobby
     setupBoard
   end
 
@@ -42,15 +42,31 @@ class Game < Qt::Widget
 
   def setupLobby()
     @lobby = PlayerLobby.new(parent: self)
-    w = Qt::Widget.new(self)
-    hlayout = Qt::HBoxLayout.new(w)
+    @lobbyWidget = Qt::Widget.new(self)
+    hlayout = Qt::HBoxLayout.new(@lobbyWidget)
     hlayout.addWidget(lobby)
-    w.setLayout(hlayout)
-    @stack.addWidget(w)
+    @lobbyWidget.setLayout(hlayout)
+    @stack.addWidget(@lobbyWidget)
+  end
+
+  def start()
+    state.transition_to(GameLobby)
+  end
+
+  def showLobby()
+    @stack.setCurrentWidget(@lobbyWidget)
+  end
+
+  def showBoard()
+    @stack.setCurrentWidget(@board)
   end
 
   def status()
     raise NotImplementedError
+  end
+
+  def updatePlayers()
+    @players = lobby.getPlayers()
   end
 
   def addPlayer(player)

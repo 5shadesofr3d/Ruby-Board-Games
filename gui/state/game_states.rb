@@ -4,25 +4,23 @@ require 'state_pattern'
 require_relative '../player/player'
 require_relative '../debug'
 
-class GameLobby < StatePattern::State
+class GameInitial < StatePattern::State
   include Debug
 
   def enter
 
   end
 
-  def change_state
+  def next()
     transition_to(GamePlay)
   end
 
   def execute
-    # add player screen
-    # option screen
-    stateful.connect(game.lobby.buttons.start, SIGNAL("clicked()"), stateful, SLOT(:next))
+
   end
 
   def exit
-    stateful.disconnect(game.lobby.buttons.start, SIGNAL("clicked()"))
+
   end
 
 end
@@ -32,9 +30,10 @@ class GameStateMachine < Qt::Object
   include StatePattern
   include Debug
   
-  set_initial_state GameLobby
+  set_initial_state(GameInitial)
 
   slots :next
+
   attr_reader :game
 
   def initialize(game)
@@ -53,59 +52,78 @@ class GameStateMachine < Qt::Object
 
 end
 
-class GamePlay < StatePattern::State
-  def enter
+class GameLobby < StatePattern::State
+  include Debug
 
+  def start_button()
+    return stateful.game.lobby.buttons.start
   end
 
-  def change_state
+  def next()
+    transition_to(GamePlay)
+  end
+
+  def enter()
+    # show game lobby
+    stateful.game.showLobby()
+
+    # when start button is clicked, go to the next state
+    stateful.connect(start_button, SIGNAL("clicked()"), stateful, SLOT("next()"))
+  end
+
+  def exit()
+    # disconnect the start button so it no longer works
+    stateful.disconnect(start_button, SIGNAL("clicked()"))
+    stateful.game.updatePlayers()
+  end
+
+end
+
+class GamePlay < StatePattern::State
+  include Debug
+
+  def enter()
+    # show game board
+    stateful.game.showBoard()
+    # game time
+    # game score
     transition_to(GamePlayerMove)
   end
 
-  def execute
-    # setup game board
-    # game time
-    # game score
-  end
-
-  def exit
+  def exit()
 
   end
 end
 
 class GamePlayerMove < StatePattern::State
-  def enter
+  include Debug
 
-  end
-
-  def change_state
-    transition_to(GameDetermineStatus)
-  end
-
-  def execute
+  def enter()
     # get next player
     # connect signal for next player move
   end
 
-  def exit
+  def next()
+    transition_to(GameDetermineStatus)
+  end
+
+  def exit()
     # disconnect signal for the player that just played his move
   end
 end
 
 class GameDetermineStatus < StatePattern::State
-  def enter
+  include Debug
 
-  end
-
-  def change_state
-    transition_to(GamePlayerMove)
-  end
-
-  def execute
+  def enter()
     # check for a winner
 
     # if winner
     transition_to(GameEnd)
+  end
+
+  def next()
+    transition_to(GamePlayerMove)
   end
 
   def exit
@@ -114,19 +132,17 @@ class GameDetermineStatus < StatePattern::State
 end
 
 class GameEnd < StatePattern::State
-  def enter
+  include Debug
 
-  end
-
-  def change_state
-    # transition_to(GamePlay)
-  end
-
-  def execute
+  def enter()
     # display winner, clear game board, score
   end
 
-  def exit
+  def next()
+    # transition_to(GamePlay)
+  end
+
+  def exit()
 
   end
 end
