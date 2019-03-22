@@ -54,8 +54,10 @@ class BoardItem < Qt::Widget
 end
 
 class BoardTile < BoardItem
+	attr_reader :attached
+
 	def initialize(color: Qt::blue, parent: nil)
-		@attached = []
+		@attached = nil
 
 		super(primary: color, secondary: Qt::transparent, parent: parent)
 
@@ -67,20 +69,28 @@ class BoardTile < BoardItem
 		return false unless super
 		return false unless @primary != Qt::transparent
 		return false unless @secondary == Qt::transparent
-		return false unless @attached.is_a?(Array)
+		return false unless empty? or @attached.is_a?(BoardItem)
 
 		return true
 	end
 
+	def empty?()
+		return @attached.is_a?(NilClass)
+	end
+
 	def resizeEvent(event)
-		@attached.each { |item| item.geometry = geometry() }
+		@attached.geometry = geometry() if not empty?
 	end
 
 	def attach(item)
 		# attaching an item ensures that when the tile is resized, so is the attached item.
+		# NOTE: attached items are treated like chips
 		assert item.is_a?(BoardItem)
+
 		item.size = size()
-		@attached << item
+		@attached = item
+
+		assert valid?
 	end
 
 end
@@ -106,6 +116,8 @@ class BoardChip < BoardItem
 	def initialize(color: Qt::red, parent: nil)
 		super(primary: Qt::transparent, secondary: color, parent: parent)
 
+		lower() # place chip behind tiles
+
 		assert @secondary == color
 		assert valid?
 	end
@@ -116,5 +128,66 @@ class BoardChip < BoardItem
 		return false unless @secondary != Qt::transparent
 
 		return true
+	end
+
+	def ==(chip)
+		raise NotImplementedError
+	end
+end
+
+class Connect4Chip < BoardChip
+	def initialize(color: Qt::red, parent: nil)
+		super(color: color, parent: parent)
+
+		assert valid?
+	end
+
+	def ==(chip)
+		assert chip.is_a?(Connect4Chip)
+		
+		# chips are equivalent if they are the same color:
+		return self.secondary == chip.secondary
+	end
+end
+
+class OTTOChip < BoardChip
+	attr_reader :id
+
+	def initialize(id, color: Qt::gray, parent: nil)
+		assert id.is_a?(Symbol) and (id == :T or id == :O)
+
+		@id = id
+
+		super(color: color, parent: parent)		
+		assert valid?
+	end
+
+	def valid?()
+		return false unless super()
+		return false unless @id.is_a?(Symbol) and (id == :T or id == :O)
+
+		return true
+	end
+
+	def ==(chip)
+		assert chip.is_a?(OTTOChip)
+		
+		# chips are equivalent if they have the same text (id):
+		return self.id == chip.id
+	end
+
+	def paintEvent(event)
+		super(event)
+
+		rect = Qt::Rect.new(0, 0, width, height)
+
+		painter = Qt::Painter.new(self)
+		font = painter.font()
+		font.setPixelSize(32)
+		painter.setFont(font)
+		id == :T ? painter.drawText(rect, Qt::AlignCenter, "T") : painter.drawText(rect, Qt::AlignCenter, "O")
+		painter.end
+
+		assert valid?
 	end
 end

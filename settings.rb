@@ -1,101 +1,67 @@
-class settings
+require 'singleton'
+require "test/unit"
 
-  def initialize(gameType, gameMode, color, width, height)
-    include Test::Unit::Assertions
+class Settings
+  include Test::Unit::Assertions
+  include Singleton
 
-    @validGameType = ["Connect4", "TOOT"]
-    @validGameMode = ["Single", "Multi"]
-    @validColors = ["Red", "Orange", "Yellow", "Green", "Blue", "Purple", "Black"]
+  attr_accessor :game_type, :game_mode, :number_of_players
+  attr_accessor :theme
+  attr_accessor :window_height, :window_width, :window_length
 
-    @gameType = gameType
-    @gameMode = gameMode
-    @color = color
-    @windowWidth = width
-    @windowHeight = height
+  # NOTE: Singleton gem does not allow us to initialize
+  # our objects. We can either create our own singleton class,
+  # pass around a settings variable or initialize it with
+  # default values. The last option reduces dependancy injection
+  # potential.
+  #
+  # NOTE 2: We'll have to call Settings.is_valid? as contracts
+  # in other functions. Just not this one.
+  def initialize
 
-    assert valid?
+    @valid_game_type = [:Single, :Multi]
+    @valid_game_mode = [:Connect4, :TOOT]
+    @valid_themes = [:Default]
+    # @valid_number_of_players = [1, 2]
+
+    @game_type = :Single
+    @game_mode = :Connect4
+    @theme = :Default
+    @window_width = 12
+    @window_height = 34
+    # @number_of_players = 1
+
+    is_valid?
 
   end
 
-  def valid?
+  def is_valid?
     #class invariant
 
-    assert @gameType.in? @validGameType
-    assert @gameMode.in? @validGameMode
-    assert @color.in? @validColors
+    assert @valid_game_type.include? @game_type
+    assert @valid_game_mode.include? @game_mode
+    assert @valid_themes.include? @theme
 
-    assert @windowWidth.is_a? Numeric
-    assert @windowWidth > 0 and @windowLength <= 1080
+    assert @window_width.is_a? Numeric
+    assert @window_width > 0 and @windowLength <= 1080
 
-    assert @windowHeight.is_a? Numeric
-    assert @windowHeight > 0 and @windowHeight <= 1080
+    assert @window_height.is_a? Numeric
+    assert @window_height > 0 and @window_height <= 1080
 
   end
 
-  def getGameType()
-    assert valid?
-    return @gameType
+  def to_s
+    "Game Type: " + @game_type.to_s + "\n" +
+    "Game Mode: " + @game_mode.to_s + "\n" +
+    "Theme: " + @theme.to_s + "\n" +
+    # "Number of players: " + @number_of_players.to_s + "\n" +
+    "Resolution: " + @window_width.to_s + "x" + @window_height.to_s
   end
 
-  def getGameMode()
-    assert valid?
-    return @gameMode
-  end
-
-  def getColor()
-    assert valid?
-    return @color
-  end
-
-  def getWindowWidth()
-    assert valid?
-    return @windowWidth
-  end
-
-  def getWindowHeight()
-    assert valid?
-    return @windowHeight
-  end
-
-  def setGameType(gameType)
-    assert valid?
-    assert gameType.in? @validGameType
-
-    @gameType = gameType
-    assert valid?
-  end
-
-  def setGameMode(gameMode)
-    assert valid?
-    assert gameMode.in? @validGameMode
-
-    @gameMode = gameMode
-    assert valid?
-  end
-
-  def setColor(color)
-    assert valid?
-    assert color.in? @validColors
-
-    @color = color
-    assert valid?
-  end
-
-  def setWindowWidth(windowWidth)
-    assert valid?
-    assert windowWidth.is_a? Numeric
-    assert windowWidth > 0 and windowLength <= 1080
-
-    @windowWidth = windowWidth
-    assert valid?
-  end
-
-  def setWindowHeight(windowHeight)
-    assert valid?
-    assert windowHeight.is_a? Numeric
-    assert windowHeight > 0 and windowHeight <= 1080
-
-    @windowHeight = windowHeight
-    assert valid?
-  end
 end
+
+# test = Settings.instance
+# puts test.gameType
+#
+# test.gameType = "Not valid"
+# puts test.gameType
