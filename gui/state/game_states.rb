@@ -2,8 +2,11 @@ require 'Qt'
 require "test/unit"
 require 'state_pattern'
 require_relative '../player/player'
+require_relative '../debug'
 
 class GameLobby < StatePattern::State
+  include Debug
+
   def enter
 
   end
@@ -15,10 +18,11 @@ class GameLobby < StatePattern::State
   def execute
     # add player screen
     # option screen
+    stateful.connect(game.lobby.buttons.start, SIGNAL("clicked()"), stateful, SLOT(:next))
   end
 
   def exit
-
+    stateful.disconnect(game.lobby.buttons.start, SIGNAL("clicked()"))
   end
 
 end
@@ -26,7 +30,11 @@ end
 class GameStateMachine < Qt::Object
   include Test::Unit::Assertions  
   include StatePattern
+  include Debug
+  
   set_initial_state GameLobby
+
+  slots :next
   attr_reader :game
 
   def initialize(game)

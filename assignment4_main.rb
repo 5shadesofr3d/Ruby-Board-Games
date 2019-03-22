@@ -2,6 +2,9 @@ require 'Qt'
 require_relative 'gui/game'
 require_relative 'gui/player/lobby'
 require_relative 'gui/board/board_item.rb'
+require_relative 'gui/debug'
+
+Debug::on
 
 app = Qt::Application.new ARGV
 
