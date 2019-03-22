@@ -80,18 +80,9 @@ class TitleScreenState < StatePattern::State
   def initialize()
     super()
 
-    app = Qt::Application.new ARGV
+    @title = TitleController.new(self)
 
-    @title = Title.new
-
-    app.exec
-
-
-    connect(@title.bPlay,  SIGNAL('clicked()'), self, SLOT('play_game()'))
-    connect(@title.bSettings,  SIGNAL('clicked()'), self, SLOT('open_settings()'))
-    connect(@title.bQuit,  SIGNAL('clicked()'), self, SLOT('quit_game()'))
-
-    assert @title.is_a? Title
+    assert @Title.is_a? TitleController
   end
 
 
@@ -118,6 +109,40 @@ class TitleScreenState < StatePattern::State
 
   def quit_game
     puts "quit"
+  end
+
+end
+
+class TitleController < Qt::Widget
+  slots 'play_game()'
+  slots 'open_settings()'
+  slots 'quit_game()'
+
+  def initialize(state)
+    assert state.is_a? TitleScreenState
+    super()
+
+    @state = state
+
+    @title = Title.new
+
+    connect(@title.bPlay,  SIGNAL('clicked()'), self, SLOT('play_game()'))
+    connect(@title.bSettings,  SIGNAL('clicked()'), self, SLOT('open_settings()'))
+    connect(@title.bQuit,  SIGNAL('clicked()'), self, SLOT('quit_game()'))
+
+    assert @title.is_a? Title
+  end
+
+  def open_settings
+    @state.open_settings
+  end
+
+  def open_game
+    @state.open_game
+  end
+
+  def quit_game
+    @state.quit_settings
   end
 
 end
