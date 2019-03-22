@@ -1,6 +1,7 @@
 require "test/unit"
 require 'state_pattern'
 require_relative 'qt_application'
+require_relative 'gui/title/title.rb'
 
 # TODO:
 # The state_pattern already defines an abstract state that we inherit
@@ -10,7 +11,7 @@ require_relative 'qt_application'
 class ApplicationStateMachine
   include StatePattern
   attr_accessor :window
-  set_initial_state(TitleScreenState)
+#  set_initial_state(TitleScreenState)
 
   def is_valid?
     assert @window.height > 0
@@ -76,20 +77,21 @@ end
 
 class TitleScreenState < StatePattern::State
 
-
-  slots 'play()'
-  slots 'settings()'
-  slots 'quit()'
   def initialize()
     super()
 
+    app = Qt::Application.new ARGV
+
     @title = Title.new
 
-    connect(@title.bPlay,  SIGNAL('clicked()'), self, SLOT('play()'))
-    connect(@title.bSettings,  SIGNAL('clicked()'), self, SLOT('settings()'))
-    connect(@title.bQuit,  SIGNAL('clicked()'), self, SLOT('quit()'))
+    app.exec
 
 
+    connect(@title.bPlay,  SIGNAL('clicked()'), self, SLOT('play_game()'))
+    connect(@title.bSettings,  SIGNAL('clicked()'), self, SLOT('open_settings()'))
+    connect(@title.bQuit,  SIGNAL('clicked()'), self, SLOT('quit_game()'))
+
+    assert @title.is_a? Title
   end
 
 
@@ -114,17 +116,7 @@ class TitleScreenState < StatePattern::State
     transition_to(GameScreenState)
   end
 
-private
-
-  def play
-    puts "play"
-  end
-
-  def settings
-    puts "settings"
-  end
-
-  def quit
+  def quit_game
     puts "quit"
   end
 
