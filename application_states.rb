@@ -76,6 +76,23 @@ end
 
 class TitleScreenState < StatePattern::State
 
+
+  slots 'play()'
+  slots 'settings()'
+  slots 'quit()'
+  def initialize()
+    super()
+
+    @title = Title.new
+
+    connect(@title.bPlay,  SIGNAL('clicked()'), self, SLOT('play()'))
+    connect(@title.bSettings,  SIGNAL('clicked()'), self, SLOT('settings()'))
+    connect(@title.bQuit,  SIGNAL('clicked()'), self, SLOT('quit()'))
+
+
+  end
+
+
   def is_valid?
     assert @window.height > 0
     assert @window.width > 0
@@ -95,6 +112,20 @@ class TitleScreenState < StatePattern::State
 
   def open_game
     transition_to(GameScreenState)
+  end
+
+private
+
+  def play
+    puts "play"
+  end
+
+  def settings
+    puts "settings"
+  end
+
+  def quit
+    puts "quit"
   end
 
 end

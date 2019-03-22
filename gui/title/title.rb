@@ -45,9 +45,9 @@ class Title < Qt::Widget
     fontT = Qt::Font.new
     fontT.family = "Sans Serif"
     fontT.pointSize = 36
-    font = Qt::Font.new
-    font.family = "Sans Serif"
-    font.pointSize = 24
+    fontB = Qt::Font.new
+    fontB.family = "Sans Serif"
+    fontB.pointSize = 24
 
 
     title = Qt::Label.new
@@ -55,29 +55,29 @@ class Title < Qt::Widget
     title.font = fontT
     title.text = "Connect N"
 
-    b1 = Qt::PushButton.new("Play")
-    b1.font = font
-    b1.setAutoFillBackground(true)
-    b1.setStyleSheet("background-color: rgb(66, 134, 244); color: rgb(255, 255, 255)")
-    b1.maximumSize = Qt::Size.new(300, 50)
-    b2 = Qt::PushButton.new("Settings")
-    b2.font = font
-    b2.setAutoFillBackground(true)
-    b2.setStyleSheet("background-color: rgb(66, 134, 244); color: rgb(255, 255, 255)")
-    b2.maximumSize = Qt::Size.new(300, 50)
-    b3 = Qt::PushButton.new("Exit")
-    b3.font = font
-    b3.setAutoFillBackground(true)
-    b3.setStyleSheet("background-color: rgb(66, 134, 244); color: rgb(255, 255, 255)")
-    b3.maximumSize = Qt::Size.new(300, 50)
+    @bPlay = Qt::PushButton.new("Play")
+    @bPlay.font = fontB
+    @bPlay.setAutoFillBackground(true)
+    @bPlay.setStyleSheet("background-color: rgb(66, 134, 244); color: rgb(255, 255, 255)")
+    @bPlay.maximumSize = Qt::Size.new(300, 50)
+    @bSettings = Qt::PushButton.new("Settings")
+    @bSettings.font = fontB
+    @bSettings.setAutoFillBackground(true)
+    @bSettings.setStyleSheet("background-color: rgb(66, 134, 244); color: rgb(255, 255, 255)")
+    @bSettings.maximumSize = Qt::Size.new(300, 50)
+    @bQuit = Qt::PushButton.new("Exit")
+    @bQuit.font = fontB
+    @bQuit.setAutoFillBackground(true)
+    @bQuit.setStyleSheet("background-color: rgb(66, 134, 244); color: rgb(255, 255, 255)")
+    @bQuit.maximumSize = Qt::Size.new(300, 50)
 
 
     @layout.setAlignment(Qt::AlignTop | Qt::AlignHCenter)
-    
+
     @layout.addWidget(title)
-    @layout.addWidget(b1)
-    @layout.addWidget(b2)
-    @layout.addWidget(b3)
+    @layout.addWidget(@bPlay)
+    @layout.addWidget(@bSettings)
+    @layout.addWidget(@bQuit)
 
 
     assert valid?
@@ -92,7 +92,3 @@ class Title < Qt::Widget
 
 
 end
-
-app = Qt::Application.new ARGV
-t = Title.new
-app.exec
