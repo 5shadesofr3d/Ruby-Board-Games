@@ -5,17 +5,17 @@ require_relative 'gui/board/board_item.rb'
 
 app = Qt::Application.new ARGV
 
-lobby = PlayerLobby.new()
-lobby.show()
+# lobby = PlayerLobby.new()
+# lobby.show()
 
-lobby.addPlayer
-lobby.addPlayer
+# lobby.addPlayer
+# lobby.addPlayer
 
-# game = Connect4.new()
-# game.board.background = Qt::white
-# game.board.color = Qt::Color.new("#48dbfb")
+game = Connect4.new()
+game.board.background = Qt::white
+game.board.color = Qt::Color.new("#48dbfb")
 
-# game.show()
+game.show()
 
 # chip_red = Connect4Chip.new(color: Qt::red, parent: game.board)
 # chip_yellow = Connect4Chip.new(color: Qt::yellow, parent: game.board)

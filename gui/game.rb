@@ -14,17 +14,38 @@ class Game < Qt::Widget
     assert height.is_a?(Integer) and  height >= 300
 
     parent != nil ? super(parent) : super()
-
     resize(width, height)
-    @board = Board.new(7, 8, parent: self)
-    @layout = Qt::VBoxLayout.new(self)
-    @layout.addWidget(@board)
-    setLayout(@layout)
+    setupUI
 
     @players = []
-    @state = GameState.new()
+    @state = GameStateMachine.new(self)
 
     assert valid?
+  end
+
+  def setupUI()
+    setupStack
+    setupLobby
+    setupBoard
+  end
+
+  def setupStack()
+    @stack = Qt::StackedLayout.new(self)
+    setLayout(@stack)
+  end
+
+  def setupBoard()
+    @board = Board.new(7, 8, parent: self)
+    @stack.addWidget(board)
+  end
+
+  def setupLobby()
+    @lobby = PlayerLobby.new(parent: self)
+    w = Qt::Widget.new(self)
+    hlayout = Qt::HBoxLayout.new(w)
+    hlayout.addWidget(lobby)
+    w.setLayout(hlayout)
+    @stack.addWidget(w)
   end
 
   def status()
@@ -38,7 +59,7 @@ class Game < Qt::Widget
 
   def valid?()
     return false unless @board == nil or @board.is_a?(Board)
-    return false unless @layout.is_a?(Qt::VBoxLayout)
+    return false unless @stack.is_a?(Qt::StackedLayout)
 
     return true
   end

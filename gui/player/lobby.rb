@@ -14,6 +14,76 @@ module LobbyColor
 end
 
 class PlayerLobby < Qt::Frame
+  attr_reader :room, :buttons
+
+  slots :addPlayer
+
+  def initialize(parent: nil)
+    parent != nil ? super(parent) : super()
+
+    @room = PlayerRoom.new(parent: self)
+    @buttons = PlayerLobbyButtons.new(parent: self)
+
+    setSizePolicy(Qt::SizePolicy::Preferred, Qt::SizePolicy::Minimum)
+    setMaximumWidth(550)
+    # setMaximumHeight(300)
+
+    layout = Qt::VBoxLayout.new(self)
+    layout.addWidget(room)
+    layout.addWidget(buttons)
+    layout.setAlignment(buttons, Qt::AlignHCenter | Qt::AlignBottom)
+    setLayout(layout)
+
+    connect(buttons.add, SIGNAL("clicked()"), self, SLOT(:addPlayer))
+
+    setStyleSheet("background-color:#{LobbyColor::DARK_BLUE}; border: 1px; border-radius: 10px")
+  end
+
+  def addPlayer()
+    @room.addPlayer()
+  end
+
+  def getPlayers()
+    players = []
+    @room.playerInfos.each {|info| players << info.construct_player(parent) }
+    return players
+  end
+
+end
+
+class PlayerLobbyButtons < Qt::Widget
+  attr_reader :add, :start
+
+    def initialize(parent: nil)
+    parent != nil ? super(parent) : super()
+
+    buttonLayout = Qt::HBoxLayout.new(self)
+    @add = PlayerLobbyButton.new("Add", self)
+    @start = PlayerLobbyButton.new("Start", self)
+    buttonLayout.addWidget(add)
+    buttonLayout.addWidget(start)
+    setLayout(buttonLayout)
+
+  end
+
+end
+
+class PlayerLobbyButton < Qt::PushButton
+  def initialize(str, parent)
+    super(str, parent)
+
+    setStyleSheet("color:white; background-color:#{LobbyColor::BLUE}; border: 1px; border-radius: 10px")
+    
+    setMaximumSize(75, 50)
+    setMinimumSize(75, 50)
+
+    font = self.font()
+    font.setPixelSize(17)
+    self.setFont(font)
+  end
+end
+
+class PlayerRoom < Qt::Frame
   include Test::Unit::Assertions
 
   attr_reader :playerInfos
@@ -25,8 +95,9 @@ class PlayerLobby < Qt::Frame
     @layout = Qt::VBoxLayout.new(self)
     setLayout(@layout)
 
+    setSizePolicy(Qt::SizePolicy::Preferred, Qt::SizePolicy::Maximum)
+
     addHeader
-    setStyleSheet("background-color:#{LobbyColor::DARK_BLUE}; border: 1px; border-radius: 10px")
 
     assert valid?
   end
