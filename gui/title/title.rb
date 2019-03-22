@@ -4,6 +4,10 @@ require 'test/unit'
 class Title < Qt::Widget
   include Test::Unit::Assertions
 
+  attr_reader :bPlay
+  attr_reader :bSettings
+  attr_reader :bQuit
+
   def initialize(width = 800, height = 600)
     assert width.is_a? Numeric
     assert height.is_a? Numeric
