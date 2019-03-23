@@ -9,6 +9,8 @@ class LocalPlayer < Player
 
 	def enable()
 		super()
+		assert game.is_a? Game
+		assert game.board.is_a? Board
 
 		connect(game.board, SIGNAL("translateStarted()"), self, SLOT("ignore_keyboard()"))
 		connect(game.board, SIGNAL("translateCompleted()"), self, SLOT("acknowledge_keyboard()"))
@@ -17,6 +19,9 @@ class LocalPlayer < Player
 	end
 
 	def disable()
+		assert game.is_a? Game
+		assert game.board.is_a? Board
+
 		super()
 
 		disconnect(game.board, SIGNAL("translateStarted()"), self, SLOT("ignore_keyboard()"))
@@ -26,10 +31,12 @@ class LocalPlayer < Player
 	end
 
 	def acknowledge_keyboard()
+		assert game.is_a? Game
 		connect(game, SIGNAL("keyPressed(const QKeyEvent*)"), self, SLOT("play(const QKeyEvent*)"))
 	end
 
 	def ignore_keyboard()
+		assert game.is_a? Game
 		disconnect(game, SIGNAL("keyPressed(const QKeyEvent*)"), self, SLOT("play(const QKeyEvent*)"))
 	end
 
