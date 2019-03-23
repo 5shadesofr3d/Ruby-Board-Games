@@ -19,6 +19,7 @@ class TitleScreenState < StatePattern::State
 
   def enter
     #no preconditions as setup is performed here
+    assert stateful.main_window.is_a? Qt::MainWindow
 
     @title = TitleController.new(self,stateful.main_window)
 
@@ -28,11 +29,19 @@ class TitleScreenState < StatePattern::State
   end
 
   def open_settings
+    assert valid?
+
     transition_to(SettingsScreenState)
+
+    assert valid?
   end
 
   def open_game
+    assert valid?
+
     transition_to(GameScreenState)
+
+    assert valid?
   end
 
 end
@@ -45,28 +54,42 @@ class TitleController < Qt::Widget
 
   def initialize(state,window)
     assert state.is_a? TitleScreenState
+    assert window.is_a? Qt::MainWindow
     super()
 
     @state = state
     @window = window
 
-    @title = Title.new(800,600,window)
+    @title = Title.new(800,600,window) #TODO: Dynamic screen size
 
     connect(@title.bPlay,  SIGNAL('clicked()'), self, SLOT('play_game()'))
     connect(@title.bSettings,  SIGNAL('clicked()'), self, SLOT('open_settings()'))
     connect(@title.bQuit,  SIGNAL('clicked()'), $qApp, SLOT('quit()'))
 
+    assert @state.is_a? TitleScreenState
+    assert @window.is_a? Qt::MainWindow
     assert @title.is_a? Title
+    assert @title.visible
   end
 
   def open_settings
+    assert @state.is_a? TitleScreenState
+    assert @title.is_a? Title
+
     @title.close
     @state.open_settings
+
+    assert @title.visible == false
   end
 
   def play_game
+    assert @state.is_a? TitleScreenState
+    assert @title.is_a? Title
+
     @title.close
     @state.open_game
+
+    assert @title.visible == false
   end
 
 end
@@ -75,33 +98,40 @@ class GameScreenState < StatePattern::State
   include Test::Unit::Assertions
 
   def valid?
-    #assert @window.height > 0
-    #assert @window.width > 0
-    #assert @window.visible
-    #assert @window.is_a? QTApplication
+    return false unless @game.is_a? Game
+    return true
   end
 
   def enter
     # Add the assertions from the game as before.
-    puts stateful.main_window.is_a? Qt::Widget
+    assert stateful.main_window.is_a? Qt::MainWindow
+    assert Settings.instance.game_mode == :Connect4 or Settings.instance.game_mode == :TOOT
 
-    game = nil
+    @game = nil
     case Settings.instance.game_mode
     when :Connect4
-      game = Connect4.new(parent: stateful.main_window)
+      @game = Connect4.new(parent: stateful.main_window)
     when :TOOT
 
     end
 
-    assert game.is_a?(Game)
+    assert @game.is_a?(Game)
 
-    game.start
-    game.show
+    @game.start
+    @game.show
 
+    assert @game.is_a? Game
+    assert @game.visible
+    assert @game.players > 0
+    assert valid?
   end
 
   def open_title_screen
+    assert valid?
+
     transition_to(TitleScreenState)
+
+    assert valid?
   end
 
 end
@@ -111,15 +141,22 @@ class SettingsController < Qt::Widget
 
   def initialize(state,gui)
     super()
+    assert gui.is_a? SettingsGUI
+    assert state.is_a? SettingsScreenState
 
     @state = state
     @gui = gui
     @settings = Settings.instance
     connect(@gui.applyButton,  SIGNAL('clicked()'), self, SLOT('apply_settings()'))
     connect(@gui.cancelButton,  SIGNAL('clicked()'), self, SLOT('cancel()'))
+
+    assert @settings.is_a? Settings
+    assert @gui.is_a? SettingsGUI
+    assert @state.is_a? SettingsScreenState
   end
 
   def apply_settings
+    assert @settings.is_a? Settings
 
     # @settings.number_of_players = @gui.numberPlayersComboBox.currentText
     @settings.theme =  @gui.themeComboBox.currentText.to_sym
@@ -146,12 +183,20 @@ class SettingsController < Qt::Widget
     self.close
     @state.open_title
 
-    @settings.is_valid?
+    assert @settings.game_mode == :Connect4 or @settings.game_mode == :TOOT
+    assert @settings.game_type == :Single or @settings.game_type == :Multi
+    assert @settings.window_width > 0
+    assert @settings.window_height > 0
+    assert self.visible == false
   end
 
   def cancel
+    assert @state.is_a? SettingsScreenState
+
     self.close
     @state.open_title
+
+    assert self.visible == false
   end
 
 end
@@ -209,7 +254,7 @@ class ApplicationStateMachine < Qt::Widget
     @window = QTApplication.instance
     @settings_gui = SettingsGUI.new
     @main_window = Qt::MainWindow.new
-    @main_window.setFixedSize(800,600) #TODO: Set to dynamic size
+    @main_window.setFixedSize(800,600) #TODO: Set to a dynamic size
 
     open_title_screen #init title screen
 
@@ -225,7 +270,6 @@ class ApplicationStateMachine < Qt::Widget
 
   # Callback:
   def open_title_screen # TODO...
-    #@title_screen_gui.setup_ui(@main_window)
     assert valid?
 
     transition_to(TitleScreenState)
@@ -234,11 +278,3 @@ class ApplicationStateMachine < Qt::Widget
   end
 
 end
-
-# sup = GameApplication.new
-
-# a = QTApplication.instance
-# hello = Qt::PushButton.new('Hello World!', nil)
-# hello.resize(100, 30)
-# hello.show()
-# a.app.exec()

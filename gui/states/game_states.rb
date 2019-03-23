@@ -19,6 +19,8 @@ class GameStateMachine < Qt::StateMachine
   end
 
   def setup()
+    assert game.is_a? Game
+
     lobby = GameLobbyState.new(self, game)
     start = GamePlayState.new(self, game)
     move = GamePlayerMoveState.new(self, game)
@@ -33,6 +35,12 @@ class GameStateMachine < Qt::StateMachine
     complete.addTransition(complete, SIGNAL("done()"), lobby)
 
     setInitialState(lobby)
+
+    assert lobby.is_a? GameLobbyState
+    assert start.is_a? GamePlayState
+    assert move.is_a? GamePlayerMoveState
+    assert status.is_a? GameDetermineStatusState
+    assert complete.is_a? GameEndState
   end
 
   def valid?()
@@ -49,8 +57,11 @@ class GameState < Qt::State
   signals :done
 
   def initialize(machine, game)
+    assert machine.is_a? Qt::StateMachine
+    assert game.is_a? Game
     super(machine)
     @game = game
+    assert @game.is_a? Game
   end
 
 end
@@ -58,11 +69,14 @@ end
 class GameLobbyState < GameState
 
   def startButton()
+    assert game.is_a? Game
     return game.lobby.buttons.start
   end
 
   def onEntry(event)
     # show game lobby
+    assert game.is_a? Game
+
     game.showLobby()
 
     # when start button is clicked, go to the next state
@@ -70,9 +84,14 @@ class GameLobbyState < GameState
   end
 
   def onExit(event)
+    assert game.is_a? Game
     # disconnect the start button so it no longer works
     disconnect(startButton, SIGNAL("clicked()"))
     game.updatePlayers()
+
+    assert game.players.is_a? Array
+    assert game.players.size > 0
+    assert game.players.each {|p| assert p.is_a? Player}
   end
 
 end
@@ -95,6 +114,7 @@ end
 class GamePlayerMoveState < GameState
 
   def onEntry(event)
+    assert game.players.first.is_a? Player
     # get next player
     player = game.players.first
     # acknowledge moves from this player
@@ -104,6 +124,7 @@ class GamePlayerMoveState < GameState
   end
 
   def onExit(event)
+    assert game.players.first.is_a? Player
     player = game.players.first
     # disconnect signal for the player that just played his move
     disconnect(player, SIGNAL("finished()"), self, SIGNAL("done()"))
@@ -118,6 +139,7 @@ class GameDetermineStatusState < GameState
   signals :win
 
   def onEntry(event)
+    assert game.is_a? Game
     Thread.new do
       if game.winner?
         win()
@@ -138,6 +160,9 @@ end
 class GameEndState < GameState
 
   def onEntry(event)
+    assert game.is_a? Game #TODO: check and assert event type
+    assert game.players.first.is_a? Player
+    assert game.players.each {|p| assert p.is_a? Player}
     # display winner, clear game board, score
     if (game.winner?)
       player = game.players.first
