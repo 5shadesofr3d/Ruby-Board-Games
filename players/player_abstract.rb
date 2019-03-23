@@ -42,7 +42,7 @@ class Player
 	end
 
 	def scored
-		# The player has won a game
+		# The player has won a game. Continue to add to their scoreboard
 		@score = @score + 1
 
 		#post
