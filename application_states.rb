@@ -93,7 +93,9 @@ class GameScreenState < StatePattern::State
 
   def enter
     # Add the assertions from the game as before.
-    board = Board.new(7, 8)
+    puts stateful.main_window.is_a? Qt::Widget
+
+    board = Board.new(7, 8, 800, 600, stateful.main_window)
 
     board.background = Qt::white
     board.color = Qt::Color.new("#48dbfb")
