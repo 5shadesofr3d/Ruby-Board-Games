@@ -1,7 +1,7 @@
 # This is the ai player that is available if the local player can play
 require 'test/unit'
 require 'Qt'
-require_relative 'player'
+require_relative 'abstract_player'
 
 class AIPlayer < Player
 

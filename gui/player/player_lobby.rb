@@ -1,7 +1,7 @@
 require 'Qt'
 require 'test/unit'
 
-require_relative 'player'
+require_relative 'abstract_player'
 require_relative 'local_player'
 require_relative 'ai_player'
 

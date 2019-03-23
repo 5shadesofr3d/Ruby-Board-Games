@@ -1,6 +1,6 @@
 require 'Qt'
 require_relative 'gui/game'
-require_relative 'gui/player/lobby'
+require_relative 'gui/player/player_lobby'
 require_relative 'gui/board'
 require_relative 'gui/debug'
 require_relative 'application'

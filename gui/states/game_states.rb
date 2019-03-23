@@ -1,6 +1,6 @@
 require 'Qt'
 require "test/unit"
-require_relative '../player/player'
+require_relative '../player/abstract_player'
 require_relative '../debug'
 
 class GameStateMachine < Qt::StateMachine

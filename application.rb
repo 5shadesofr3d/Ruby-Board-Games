@@ -2,7 +2,7 @@ require 'singleton'
 require 'Qt'
 
 require_relative 'gui/settings'
-require_relative 'gui/states/application'
+require_relative 'gui/states/application_states'
 
 class QTApplication
   include Singleton
