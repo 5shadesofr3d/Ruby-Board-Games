@@ -6,9 +6,9 @@ require_relative 'settings'
 require_relative 'gui/settings_gui'
 require_relative 'gui/title/title'
 
-# TODO:
-# The state_pattern already defines an abstract state that we inherit
-# from, do we need contracts for it?
+require_relative 'gui/board/board'
+require_relative 'gui/board/board_item.rb'
+
 
 class TitleScreenState < StatePattern::State
   include Test::Unit::Assertions
@@ -36,11 +36,6 @@ class TitleScreenState < StatePattern::State
     transition_to(GameScreenState)
   end
 
-  def quit_game
-    puts "quit"
-    exit
-  end
-
 end
 
 #TODO: Get rid of this
@@ -54,12 +49,13 @@ class TitleController < Qt::Widget
     super()
 
     @state = state
+    @window = window
 
     @title = Title.new(800,600,window)
 
     connect(@title.bPlay,  SIGNAL('clicked()'), self, SLOT('play_game()'))
     connect(@title.bSettings,  SIGNAL('clicked()'), self, SLOT('open_settings()'))
-    connect(@title.bQuit,  SIGNAL('clicked()'), self, SLOT('quit_game()'))
+    connect(@title.bQuit,  SIGNAL('clicked()'), $qApp, SLOT('quit()'))
 
     assert @title.is_a? Title
   end
@@ -70,14 +66,8 @@ class TitleController < Qt::Widget
   end
 
   def play_game
-    # @title.close
-    puts 'execution'
-    @state.open_game
-  end
-
-  def quit_game
     @title.close
-    @state.quit_game
+    @state.open_game
   end
 
 end
@@ -94,6 +84,26 @@ class GameScreenState < StatePattern::State
 
   def enter
     # Add the assertions from the game as before.
+    puts stateful.main_window.is_a? Qt::Widget
+
+    board = Board.new(7, 8, 800, 600, stateful.main_window)
+
+    board.background = Qt::white
+    board.color = Qt::Color.new("#48dbfb")
+
+    chip_red = Connect4Chip.new(color: Qt::red, parent: board)
+    chip_yellow = Connect4Chip.new(color: Qt::yellow, parent: board)
+
+    chip_t = OTTOChip.new(:T, parent: board)
+    chip_o = OTTOChip.new(:O, parent: board)
+
+    chip_red == chip_yellow ? puts("yes") : puts("no")
+    chip_t == chip_o ? puts("yes") : puts("no")
+
+    board.insert(chip_yellow, 3)
+    board.insert(chip_red, 3)
+    board.insert(chip_t, 3)
+    board.insert(chip_o, 3)
   end
 
   def open_title_screen
@@ -202,7 +212,7 @@ class ApplicationStateMachine < Qt::Widget
 
 
     # TODO: Remove later.
-  #  transition_to(SettingsScreenState)
+    #  transition_to(SettingsScreenState)
 
     @main_window.show
 
