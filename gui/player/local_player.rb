@@ -5,34 +5,44 @@ require_relative 'player'
 
 class LocalPlayer < Player
 
+	slots "play(const QKeyEvent*)", :acknowledge_keyboard, :ignore_keyboard
+
 	def enable()
-		super
-		setFocus(Qt::OtherFocusReason)
-		setFocusPolicy(Qt::StrongFocus)
+		super()
+
+		connect(game.board, SIGNAL("translateStarted()"), self, SLOT("ignore_keyboard()"))
+		connect(game.board, SIGNAL("translateCompleted()"), self, SLOT("acknowledge_keyboard()"))
+
+		acknowledge_keyboard
 	end
 
 	def disable()
-		super
-		setFocusPolicy(Qt::NoFocus)
+		super()
+
+		disconnect(game.board, SIGNAL("translateStarted()"), self, SLOT("ignore_keyboard()"))
+		disconnect(game.board, SIGNAL("translateCompleted()"), self, SLOT("acknowledge_keyboard()"))
+
+		ignore_keyboard
 	end
 
-	def keyPressEvent(event)
-		assert game.is_a?(Game)
-		super() unless play(event)
+	def acknowledge_keyboard()
+		connect(game, SIGNAL("keyPressed(const QKeyEvent*)"), self, SLOT("play(const QKeyEvent*)"))
+	end
+
+	def ignore_keyboard()
+		disconnect(game, SIGNAL("keyPressed(const QKeyEvent*)"), self, SLOT("play(const QKeyEvent*)"))
 	end
 
 	def play(event)
 		# Position is in terms of the column position on the board
-		
 		#pre
+		assert game.is_a?(Game)
 		assert event.is_a?(Qt::KeyEvent) or event.is_a?(Qt::MouseEvent)
 
-		# Get the event type to check what value must be returned
-		result = self.handle_key(event) or self.handle_mouse(event)
+		handle_key(event) # or self.handle_mouse(event)
 
 		#post
 		assert current_column.is_a?(Numeric)
-		return result
 	end
 
 	def handle_key(key_event)
@@ -50,18 +60,14 @@ class LocalPlayer < Player
 		case key_event.key
 		when Qt::Key_Left.value
 			left()
-			return true
 		when Qt::Key_Right.value
 			right()
-			return true
 		when Qt::Key_Space.value
 			drop()
-			return true
 		end
 
 		#post
 		assert current_column.is_a?(Numeric)
-		return false
 	end
 
 	def handle_mouse(current_position, event)

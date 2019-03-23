@@ -4,13 +4,14 @@ require 'Qt'
 require 'test/unit'
 require_relative '../debug'
 
-class Player < Qt::Widget
+class Player < Qt::Object
 	include Test::Unit::Assertions
 	include Debug
 
 	attr_reader :name, :color, :current_chip
 	attr_accessor :wins, :losses, :ties, :game, :current_column
-
+	
+	slots :enable, :disable
 	signals :finished
 
 	public
@@ -43,40 +44,43 @@ class Player < Qt::Widget
 
 	def left()
 		return if current_column == 0
+
 		model = game.board.model
 		game.board.translate(
 			item: current_chip,
 			from: model.head(current_column),
 			to: model.head(current_column - 1),
-			time: 250)
+			time: 100)
+		
 		@current_column -= 1
 	end
 
 	def right()
 		return if current_column == game.board.model.columns.max
+
 		model = game.board.model
 		game.board.translate(
 			item: current_chip,
 			from: model.head(current_column),
 			to: model.head(current_column + 1),
-			time: 250)
+			time: 100)
+		
 		@current_column += 1
 	end
 
 	def drop()
 		game.board.drop(current_chip, current_column)
 		@current_chip = nil
-		finished # signal
 	end
 
 	def enable()
-		setEnabled(true)
 		@current_chip = game.constructChip(color)
 		@current_column = 0
+		connect(game.board, SIGNAL("dropped()"), self, SIGNAL("finished()"))
 	end
 
 	def disable()
-		setEnabled(false)
+		disconnect(game.board, SIGNAL("dropped()"), self, SIGNAL("finished()"))
 	end
 
 	def total_score

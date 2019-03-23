@@ -104,8 +104,9 @@ class GamePlayerMoveState < GameState
   end
 
   def onExit(event)
+    player = game.players.first
     # disconnect signal for the player that just played his move
-    disconnect(player, SIGNAL("finished()"))
+    disconnect(player, SIGNAL("finished()"), self, SIGNAL("done()"))
     # no longer acknowledge moves from this player
     player.disable
   end
@@ -117,13 +118,14 @@ class GameDetermineStatusState < GameState
   signals :win
 
   def onEntry(event)
-    if game.winner?
-      win()
-    else
-      # cycle to next player and get his move
-      game.players.rotate 
-      done()
-    end 
+    done()
+    # if game.winner?
+    #   win()
+    # else
+    #   # cycle to next player and get his move
+    #   game.players.rotate 
+    #   done()
+    # end 
   end
 
   def onExit(event)

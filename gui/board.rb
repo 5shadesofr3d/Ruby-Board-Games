@@ -8,10 +8,10 @@ class Board < Qt::Widget
 	include Test::Unit::Assertions
 	include Debug
 	
-	attr_reader :model
+	attr_reader :model, :animation
 
-	slots "insert(BoardView, int, int)"
-	signals :insertComplete
+	slots :onDrop
+	signals :translateStarted, :translateCompleted, :dropped
 
 	def initialize(rows, cols, width: 800, height: 600, parent: nil)
 		parent != nil ? super(parent) : super()
@@ -20,6 +20,7 @@ class Board < Qt::Widget
 
 		setupLayout()
 		setupWindow(width, height)
+		setupAnimation()
 
 		assert valid?
 	end
@@ -29,6 +30,11 @@ class Board < Qt::Widget
 		return false unless @model.is_a?(BoardModel)
 
 		return true
+	end
+
+	def setupAnimation()
+		@animation = Qt::PropertyAnimation.new(self)
+		connect(animation, SIGNAL("finished()"), self, SIGNAL("translateCompleted()"))
 	end
 
 	def setupLayout()
@@ -67,8 +73,14 @@ class Board < Qt::Widget
 		@model.color = c
 	end
 
-	def drop(chip, col, time: 1000)
+	def drop(chip, col, time: 750)
+		connect(self, SIGNAL("translateCompleted()"), self, SLOT("onDrop()"))
 		translate(item: chip, from: model.head(col), to: model.next_empty(col), time: time)
+	end
+
+	def onDrop()
+		dropped
+		disconnect(self, SIGNAL("translateCompleted()"), self, SLOT("onDrop()"))
 	end
 
 	def translate(item: nil, from: nil, to: nil, time: 0)
@@ -81,13 +93,14 @@ class Board < Qt::Widget
 
 		return if from == to
 
-		animation = Qt::PropertyAnimation.new(self)
 		animation.targetObject = item
 		animation.propertyName = "geometry"
 		animation.duration = time
 		animation.startValue = from.geometry
 		animation.endValue = to.geometry
-		connect(animation, SIGNAL("finished()"), self, SIGNAL("insertComplete()"))
+		
+		translateStarted
+
 		animation.start
 	end
 
