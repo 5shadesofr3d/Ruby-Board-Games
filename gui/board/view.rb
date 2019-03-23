@@ -1,7 +1,7 @@
 require 'Qt'
 require 'test/unit'
 
-class BoardItem < Qt::Widget
+class BoardView < Qt::Widget
 	include Test::Unit::Assertions
 
 	attr_accessor :primary, :secondary # colors
@@ -53,7 +53,7 @@ class BoardItem < Qt::Widget
 	end
 end
 
-class BoardTile < BoardItem
+class BoardTile < BoardView
 	attr_reader :attached
 
 	def initialize(color: Qt::blue, parent: nil)
@@ -67,9 +67,8 @@ class BoardTile < BoardItem
 
 	def valid?()
 		return false unless super
-		return false unless @primary != Qt::transparent
 		return false unless @secondary == Qt::transparent
-		return false unless empty? or @attached.is_a?(BoardItem)
+		return false unless empty? or @attached.is_a?(BoardView)
 
 		return true
 	end
@@ -85,7 +84,7 @@ class BoardTile < BoardItem
 	def attach(item)
 		# attaching an item ensures that when the tile is resized, so is the attached item.
 		# NOTE: attached items are treated like chips
-		assert item.is_a?(BoardItem)
+		assert item.is_a?(BoardView)
 
 		item.size = size()
 		@attached = item
@@ -93,11 +92,16 @@ class BoardTile < BoardItem
 		assert valid?
 	end
 
+	def detach()
+		@attached = nil
+		assert valid?
+	end
+
 end
 
-class BoardHead < BoardItem
+class BoardHead < BoardTile
 	def initialize(parent: nil)
-		super(primary: Qt::transparent, secondary: Qt::transparent, parent: parent)
+		super(color: Qt::transparent, parent: parent)
 
 		assert valid?
 	end
@@ -112,7 +116,7 @@ class BoardHead < BoardItem
 
 end
 
-class BoardChip < BoardItem
+class BoardChip < BoardView
 	def initialize(color: Qt::red, parent: nil)
 		super(primary: Qt::transparent, secondary: color, parent: parent)
 
@@ -143,8 +147,7 @@ class Connect4Chip < BoardChip
 	end
 
 	def ==(chip)
-		assert chip.is_a?(Connect4Chip)
-		
+		return false if chip == nil
 		# chips are equivalent if they are the same color:
 		return self.secondary == chip.secondary
 	end

@@ -2,9 +2,11 @@ module BoardIterator
 
 	def [](type, row, col)
 		assert valid?
-		assert type.is_a?(Symbol) and (type == :tile or type == :chip)
+		assert valid_type?(type)
 
 		case type
+		when :head
+			return head(col)
 		when :tile
 			return tile(row, col)
 		when :chip
@@ -21,34 +23,34 @@ module BoardIterator
 	end
 
 	def diagonals
-		return (0..[@rows, @cols].max - 1)
+		return (0..([@rows, @cols].min - 1))
 	end
 
 	def each(type)
-		self.each_with_index(type) do |val, row, col|
+		each_with_index(type) do |val, row, col|
 			yield val
 		end
 	end
 
 	def valid_type?(type)
-		return (type.is_a?(Symbol) and (type == :tile or type == :chip))
+		return (type.is_a?(Symbol) and (type == :tile or type == :chip or type == :head))
 	end
 
 	def each_with_index(type)
 		assert valid?
-		assert valid_type?(type)
 
 		rows.each do |row|
 			columns.each do |col|
 				yield self[type, row, col], row, col
 			end
+			break if type == :head
 		end
 
 		assert valid?
 	end
 
 	def each_in_diagonal(type, diagonal, direction)
-		assert diagonal.between?(0, [@rows, @cols].min - 1)
+		assert diagonals.include?(diagonal)
 		assert direction.is_a?(Symbol) and (direction == :up or direction == :down)
 		assert valid_type?(type)
 
