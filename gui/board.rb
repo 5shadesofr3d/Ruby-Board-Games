@@ -69,6 +69,11 @@ class Board < Qt::Widget
 		setPalette(palette)
 	end
 
+	def clear()
+		@model.each(:chip) {|chip| chip.deleteLater unless chip == nil }
+		@model.each(:tile) {|tile| tile.detach }
+	end
+
 	def color=(c)
 		@model.color = c
 	end

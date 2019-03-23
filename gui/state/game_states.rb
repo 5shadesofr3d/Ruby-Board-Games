@@ -147,6 +147,7 @@ class GameEndState < GameState
       game.players.each { |player| player.ties += 1 }
     end
     game.updatePlayerInfos()
+    game.board.clear()
     done()
   end
 

@@ -57,6 +57,7 @@ class PlayerLobby < Qt::Frame
     @room.playerInfos.each do |info|
       player = players.shift
       info.name = player.name
+      info.color = player.color
       info.type = player.class
       info.wins = player.wins
       info.losses = player.losses
@@ -185,7 +186,7 @@ class PlayerInfoTypeBox < Qt::ComboBox
 end
 
 class PlayerInfoColorBox < Qt::Widget
-  attr_reader :color
+  attr_accessor :color
 
   @@colors = ["red", "green", LobbyColor::LIGHT_BLUE, "yellow", "pink", "magenta"]
 
@@ -196,9 +197,13 @@ class PlayerInfoColorBox < Qt::Widget
     setColor
   end
 
+  def updateColor
+    setStyleSheet("background-color:#{@color};")
+  end
+
   def setColor
     @color = @@colors.first
-    setStyleSheet("background-color:#{@color};")
+    updateColor
     @@colors.rotate!
   end
 
@@ -305,7 +310,8 @@ class PlayerInfo < Qt::Widget
   end
 
   def color=(c)
-    @color.color = c
+    @color.color = c.name
+    @color.updateColor
   end
 
   def type
@@ -330,11 +336,11 @@ class PlayerInfo < Qt::Widget
   end
 
   def losses
-    return @wins.text.to_i
+    return @loss.text.to_i
   end
 
   def losses=(l)
-    @losses.text = l
+    @loss.text = l
   end
 
   def ties
@@ -368,11 +374,9 @@ class PlayerInfo < Qt::Widget
 
   def valid?()
     # return false unless @name.is_a?(String)
-    # return false unless @type.is_a?(Symbol) and (@type == :local or @type == :ai)
     # return false unless @wins.is_a?(Integer) and @wins >= 0
     # return false unless @loss.is_a?(Integer) and @loss >= 0
     # return false unless @ties.is_a?(Integer) and @ties >= 0
-    return false unless @layout.is_a?(Qt::HBoxLayout)
 
     return true
   end

@@ -134,7 +134,7 @@ class Connect4 < Game
 
     # check every row
     model.rows.each do |row|
-      rows = model.to_enum(:each_in_column, :chip, row)
+      rows = model.to_enum(:each_in_row, :chip, row)
       rows.each_cons(4) { |chips| return chips if consecutive4?(chips) }
     end
 
