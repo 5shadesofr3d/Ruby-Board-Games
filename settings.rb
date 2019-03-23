@@ -1,5 +1,6 @@
 require 'singleton'
 require "test/unit"
+require_relative 'theme'
 
 class Settings
   include Test::Unit::Assertions
@@ -13,13 +14,11 @@ class Settings
   # in other functions. Just not this one.
   def initialize
 
-    # @valid_game_type = [:Single, :Multi] # TODO: Deprecate this to?
     @valid_game_mode = [:Connect4, :TOOT]
     @valid_themes = [:Default]
 
-    # @game_type = :Single
     @game_mode = :Connect4
-    @theme = :Default
+    @theme = Theme.new(:Default)
     @window_width = 800
     @window_height = 600
 
@@ -31,7 +30,7 @@ class Settings
     #class invariant
 
     assert @valid_game_mode.include? @game_mode
-    assert @valid_themes.include? @theme
+    assert @valid_themes.include? @theme.name
 
     assert @window_width.is_a? Numeric
     assert @window_width > 0 and @windowLength <= 1080
@@ -49,9 +48,3 @@ class Settings
   end
 
 end
-
-# test = Settings.instance
-# puts test.gameType
-#
-# test.gameType = "Not valid"
-# puts test.gameType

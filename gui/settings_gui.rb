@@ -1,6 +1,10 @@
 require 'Qt4'
+require 'test/unit'
+require_relative '../settings'
 
 class SettingsGUI
+  include Test::Unit::Assertions
+
   attr_reader :gameModeComboBox
   attr_reader :themeComboBox
   attr_reader :resolutionComboBox
@@ -10,8 +14,19 @@ class SettingsGUI
   attr_reader :applyButton
   attr_reader :cancelButton
 
+  def set_background(c = Qt::white, parent)
+    puts c.is_a? Qt::Color
+    assert c.is_a? Qt::Color or c.is_a? Qt::Enum
+    palette = Qt::Palette.new(c)
+    parent.setAutoFillBackground(true)
+    parent.setPalette(palette)
+    assert palette.is_a? Qt::Palette
+  end
+
   # --- Auto-generated section ---
   def setupUi(settingsWindow)
+
+    theme = Settings.instance.theme
 
     if settingsWindow.objectName.nil?
       settingsWindow.objectName = "settingsWindow"
@@ -19,6 +34,10 @@ class SettingsGUI
 
     settingsWindow.resize(854, 611)
     settingsWindow.styleSheet = ""
+
+    # Change the background.
+    set_background(theme.color[:background], settingsWindow)
+
     @centralWidget = Qt::Widget.new(settingsWindow)
     @centralWidget.objectName = "centralWidget"
     @verticalLayoutWidget = Qt::Widget.new(@centralWidget)

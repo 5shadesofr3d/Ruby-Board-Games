@@ -2,6 +2,13 @@ require 'Qt'
 require_relative 'gui/board/board'
 require_relative 'gui/board/board_item.rb'
 
+# TODO: Complete later.
+# To run assignment4_main.rb, ensure you have the following
+# dependancies:
+#
+# gem install state_pattern
+# gem install qtbindings
+
 app = Qt::Application.new ARGV
 
 board = Board.new(7, 8)
