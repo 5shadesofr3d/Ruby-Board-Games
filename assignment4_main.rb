@@ -8,9 +8,9 @@ Debug::on
 
 app = Qt::Application.new ARGV
 
-board = Board.new(7, 8)
-board.background = Qt::white
-board.color = Qt::Color.new("#48dbfb")
+# board = Board.new(7, 8)
+# board.background = Qt::white
+# board.color = Qt::Color.new("#48dbfb")
 
 # lobby = PlayerLobby.new()
 # lobby.show()

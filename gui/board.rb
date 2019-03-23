@@ -76,6 +76,7 @@ class Board < Qt::Widget
 		assert to.is_a?(BoardView)
 		assert time.is_a?(Integer) and time >= 0
 
+		from.detach()
 		to.attach(item)
 
 		return if from == to
@@ -86,7 +87,7 @@ class Board < Qt::Widget
 		animation.duration = time
 		animation.startValue = from.geometry
 		animation.endValue = to.geometry
-		connect(animation, SIGNAL("finished()"), self, SIGNAL(:insertComplete))
+		connect(animation, SIGNAL("finished()"), self, SIGNAL("insertComplete()"))
 		animation.start
 	end
 

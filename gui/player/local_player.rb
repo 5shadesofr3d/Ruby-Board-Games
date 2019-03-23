@@ -5,29 +5,37 @@ require_relative 'player'
 
 class LocalPlayer < Player
 
-	def get_move(current_position, event)
+	def enable()
+		super
+		setFocus(Qt::OtherFocusReason)
+		setFocusPolicy(Qt::StrongFocus)
+	end
+
+	def disable()
+		super
+		setFocusPolicy(Qt::NoFocus)
+	end
+
+	def keyPressEvent(event)
+		assert game.is_a?(Game)
+		super() unless play(event)
+	end
+
+	def play(event)
 		# Position is in terms of the column position on the board
 		
 		#pre
-		assert current_position.is_a?(Numeric) and current_position >= 0
 		assert event.is_a?(Qt::KeyEvent) or event.is_a?(Qt::MouseEvent)
 
-		new_position = current_position
 		# Get the event type to check what value must be returned
-		if event.type == Qt::KeyEvent
-			# get the new column position from the keypress
-			new_position = self.get_keyboard_press(current_position, event)
-		elsif event.type == Qt::MouseEvent
-			new_position = self.get_mouse_click(current_position, event)
-		end
+		result = self.handle_key(event) or self.handle_mouse(event)
 
 		#post
-		assert new_position.is_a?(Numeric)
-
-		return new_position
+		assert current_column.is_a?(Numeric)
+		return result
 	end
 
-	def get_keyboard_press(current_position, key_event)
+	def handle_key(key_event)
 		# This is going to get the input from the keyboard from what the player should
 		# be doing. This is going to return the Key press ENUM
 
@@ -37,37 +45,37 @@ class LocalPlayer < Player
 		# Qt::Key_Space
 
 		#pre
-		assert current_position.is_a?(Numeric) and current_position >= 0
-		assert event.is_a? Qt::KeyPress
+		assert current_column.is_a?(Numeric) and current_column >= 0
 
-		new_position
-		if key_event.key == Qt::Key_Left
-			new_position = current_position - 1
-		elsif key_event.key == Qt::Key_Right
-			new_position = current_position + 1
-		elsif key_event.key == Qt::Key_Space
-			new_position = -1
+		case key_event.key
+		when Qt::Key_Left.value
+			left()
+			return true
+		when Qt::Key_Right.value
+			right()
+			return true
+		when Qt::Key_Space.value
+			drop()
+			return true
 		end
 
 		#post
-		assert new_position.is_a?(Numeric)
-
-		return new_position
+		assert current_column.is_a?(Numeric)
+		return false
 	end
 
-	def get_mouse_click(current_position, event)
+	def handle_mouse(current_position, event)
 		# this will change the position of the cursor based on wherever the mouse clicked
 
 		#pre
-		assert current_position.is_a?(Numeric) and current_position >= 0
+		assert current_column.is_a?(Numeric) and current_column >= 0
 		assert event.is_a?(Qt::MouseEvent)
 		# assert Game.Settings.Window exists and are valid numbers
 
 		# handle the mouse event. Will return a new position
-		new_position = 1 # will add rest of functionality later
 
 		#post
-		assert new_position.is_a?(Numeric)
-		return new_position
+		assert current_column.is_a?(Numeric)
+		return false
 	end
 end

@@ -4,12 +4,14 @@ require 'Qt'
 require 'test/unit'
 require_relative '../debug'
 
-class Player < Qt::Object
+class Player < Qt::Widget
 	include Test::Unit::Assertions
 	include Debug
 
-	attr_reader :name, :color
-	attr_accessor :wins, :losses, :ties, :board
+	attr_reader :name, :color, :current_chip
+	attr_accessor :wins, :losses, :ties, :game, :current_column
+
+	signals :finished
 
 	public
 	def initialize(player_name, player_color, parent: nil)
@@ -34,38 +36,54 @@ class Player < Qt::Object
 		return false unless losses.is_a?(Integer) and @losses >= 0
 		return false unless ties.is_a?(Integer) and @ties >= 0
 		return false unless color.is_a?(Qt::Color)
-		return false unless board.is_a?(Board) or board == nil
+		return false unless game.is_a?(Game) or game == nil
 
 		return true
 	end
 
-	def get_name
-		return @name
+	def left()
+		return if current_column == 0
+		model = game.board.model
+		game.board.translate(
+			item: current_chip,
+			from: model.head(current_column),
+			to: model.head(current_column - 1),
+			time: 250)
+		@current_column -= 1
 	end
 
-	def set_name(new_name)
-		#pre
-		assert new_name.is_a? String
+	def right()
+		return if current_column == game.board.model.columns.max
+		model = game.board.model
+		game.board.translate(
+			item: current_chip,
+			from: model.head(current_column),
+			to: model.head(current_column + 1),
+			time: 250)
+		@current_column += 1
+	end
 
-		@name = new_name
-
-		#post
-		assert valid?
+	def drop()
+		game.board.drop(current_chip, current_column)
+		@current_chip = nil
+		finished # signal
 	end
 
 	def enable()
-
+		setEnabled(true)
+		@current_chip = game.constructChip(color)
+		@current_column = 0
 	end
 
 	def disable()
-
+		setEnabled(false)
 	end
 
 	def total_score
 		return wins - losses
 	end
 
-	def get_move
+	def play
 		# This function will be implemented differently based on the player type
 		raise AbstractClassError
 	end

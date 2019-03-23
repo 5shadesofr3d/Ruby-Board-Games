@@ -1,38 +1,11 @@
 require 'Qt'
 require "test/unit"
-require 'state_pattern'
 require_relative '../player/player'
 require_relative '../debug'
 
-class GameInitial < StatePattern::State
+class GameStateMachine < Qt::StateMachine
+  include Test::Unit::Assertions
   include Debug
-
-  def enter
-
-  end
-
-  def next()
-    transition_to(GamePlay)
-  end
-
-  def execute
-
-  end
-
-  def exit
-
-  end
-
-end
-
-class GameStateMachine < Qt::Object
-  include Test::Unit::Assertions  
-  include StatePattern
-  include Debug
-  
-  set_initial_state(GameInitial)
-
-  slots :next
 
   attr_reader :game
 
@@ -45,6 +18,23 @@ class GameStateMachine < Qt::Object
     assert valid?
   end
 
+  def setup()
+    lobby = GameLobbyState.new(self, game)
+    start = GamePlayState.new(self, game)
+    move = GamePlayerMoveState.new(self, game)
+    status = GameDetermineStatusState.new(self, game)
+    complete = GameEndState.new(self, game)
+
+    lobby.addTransition(lobby, SIGNAL("done()"), start)
+    start.addTransition(start, SIGNAL("done()"), move)
+    move.addTransition(move, SIGNAL("done()"), status)
+    status.addTransition(status, SIGNAL("win()"), complete)
+    status.addTransition(status, SIGNAL("done()"), move)
+    complete.addTransition(complete, SIGNAL("done()"), lobby)
+
+    setInitialState(lobby)
+  end
+
   def valid?()
     return false unless @game.is_a?(Game)
     return true
@@ -52,262 +42,112 @@ class GameStateMachine < Qt::Object
 
 end
 
-class GameLobby < StatePattern::State
+class GameState < Qt::State
   include Debug
 
-  def start_button()
-    return stateful.game.lobby.buttons.start
+  attr_reader :game
+  signals :done
+
+  def initialize(machine, game)
+    super(machine)
+    @game = game
   end
 
-  def next()
-    transition_to(GamePlay)
+end
+
+class GameLobbyState < GameState
+
+  def startButton()
+    return game.lobby.buttons.start
   end
 
-  def enter()
+  def onEntry(event)
     # show game lobby
-    stateful.game.showLobby()
+    game.showLobby()
 
     # when start button is clicked, go to the next state
-    stateful.connect(start_button, SIGNAL("clicked()"), stateful, SLOT("next()"))
+    connect(startButton, SIGNAL("clicked()"), self, SIGNAL("done()"))
   end
 
-  def exit()
+  def onExit(event)
     # disconnect the start button so it no longer works
-    stateful.disconnect(start_button, SIGNAL("clicked()"))
-    stateful.game.updatePlayers()
+    disconnect(startButton, SIGNAL("clicked()"))
+    game.updatePlayers()
   end
 
 end
 
-class GamePlay < StatePattern::State
-  include Debug
+class GamePlayState < GameState
 
-  def enter()
+  def onEntry(event)
     # show game board
-    stateful.game.showBoard()
+    game.showBoard()
     # game time
     # game score
-    transition_to(GamePlayerMove)
+    done()
   end
 
-  def exit()
+  def onExit(event)
 
   end
 end
 
-class GamePlayerMove < StatePattern::State
-  include Debug
+class GamePlayerMoveState < GameState
 
-  def enter()
+  def onEntry(event)
     # get next player
-    player = stateful.games.players.first
+    player = game.players.first
     # acknowledge moves from this player
     player.enable
     # after player completes his move, go to the next state
-    stateful.connect(player, SIGNAL("finished()"), stateful, SLOT("next()"))
+    connect(player, SIGNAL("finished()"), self, SIGNAL("done()"))
   end
 
-  def next()
-    transition_to(GameDetermineStatus)
-  end
-
-  def exit()
+  def onExit(event)
     # disconnect signal for the player that just played his move
-    stateful.disconnect(player, SIGNAL("finished()"))
+    disconnect(player, SIGNAL("finished()"))
     # no longer acknowledge moves from this player
     player.disable
   end
+
 end
 
-class GameDetermineStatus < StatePattern::State
-  include Debug
+class GameDetermineStatusState < GameState
 
-  def enter()
-    if stateful.game.winner?
-      transition_to(GameEnd)
+  signals :win
+
+  def onEntry(event)
+    if game.winner?
+      win()
     else
       # cycle to next player and get his move
-      stateful.game.players.rotate 
-      transition_to(GamePlayerMove)
+      game.players.rotate 
+      done()
     end 
   end
 
-  def exit
+  def onExit(event)
 
   end
 
 end
 
-class GameEnd < StatePattern::State
-  include Debug
+class GameEndState < GameState
 
-  def enter()
+  def onEntry(event)
     # display winner, clear game board, score
-    if (stateful.game.winner?)
-      player = stateful.game.players.first
+    if (game.winner?)
+      player = game.players.first
       player.wins += 1
-      stateful.game.players.drop(1).each { |player| player.losses += 1 }
+      game.players.drop(1).each { |player| player.losses += 1 }
     else # we had a tie
-      stateful.game.players.each { |player| player.ties += 1 }
+      game.players.each { |player| player.ties += 1 }
     end
-
-    transition_to(GameLobby)
-    
+    done()
   end
 
-  def exit()
+  def onExit(event)
 
-  end
-end
-
-class GameClear < StatePattern::State
-  def clear_board
-    #pre
-    assert valid?
-    @board.is_a? Board
-
-    #clear the board
-
-    #post
-    @board.is_a? Board
-    assert valid?
-  end
-end
-
-class PlayerTurnState < StatePattern::State
-  include Test::Unit::Assertions
-
-  def initialize(game_type,piece_type,player)
-    #pre
-    assert game_type.is_a? Game
-    assert piece_type.is_a? BoardItem
-    assert player.is_a? Player
-
-    @player = player
-    @game_type = game_type
-    @piece_type = piece_type
-
-    #post
-    assert @game_type.is_a? Game
-    assert @piece_type.is_a? BoardItem
-    assert @player.is_a? Player
-  end
-
-  def valid?
-    #class invariant
-    @game_type.is_a? Game
-    @piece_type.is_a? BoardItem
-    @player.is_a? Player
-  end
-
-  def begin_turn
-    #pre
-    assert valid?
-    @player.is_a? Player
-
-    #player do things
-
-    #post
-    @player.is_a? Player
-    assert valid?
-  end
-
-  def perform_move(colNumber)
-    #pre
-    assert valid?
-    assert colNumber.is_a? Numeric
-    assert @board.is_a? Board
-    assert colNumber > 0
-    assert colNumber < @board.columns
-    assert @player.is_a? Player
-    #NOTE: What else makes a move valid? Add if you have any
-
-    #perform move
-
-    #post
-    assert colNumber.is_a? Numeric
-    assert colNumber > 0
-    assert @player.is_a? Player
-    assert valid?
-  end
-end
-
-class GameCompleteState < StatePattern::State
-  include Test::Unit::Assertions
-
-  def initialize(game_type,board,players)
-    #pre
-    assert game_type.is_a? Game
-    assert board.is_a? Board
-    assert players.is_a? Array
-    players.each {|a| assert a.is_a? Player}
-
-    @game_type = game_type
-    @board = board
-    @players = players
-
-    #post
-    assert @game_type.is_a? Game
-    assert @board.is_a? Board
-    assert @players.is_a? Array
-    @players.each {|a| assert a.is_a? Player}
-  end
-
-  def valid?
-    #class invariant
-    assert @game_type.is_a? Game
-    assert @board.is_a? Board
-    assert @players.is_a? Array
-    @players.each {|a| assert a.is_a? Player}
-  end
-
-  def modify_score(player, score)
-    #pre
-    assert valid?
-    assert player.is_a? Player
-    assert score.is_a? Numeric
-
-    #do stuff with score & player
-
-    #post
-    assert player.score >= score
-    assert player.is_a? Player
-    assert score.is_a? Numeric
-    assert valid?
-  end
-
-  def end_game(winner)
-    #pre
-    assert valid?
-    assert board.is_a? Board
-    assert winner.is_a? Player
-
-    # end game, clear board, show winner
-
-    #post
-    assert board.is_a? Board
-    assert winner.is_a? Winner
-    assert valid?
-  end
-
-  def exit_state
-    #pre
-    assert valid?
-
-    # end state, transition out
-
-  end
-
-  def display_score(player)
-    #pre
-    assert valid?
-    assert player.is_a? Player
-
-    #show winner/score
-
-    #post
-    assert player.is_a? Player
-    assert valid?
   end
 
 end

@@ -6,7 +6,7 @@ require_relative 'debug'
 class Game < Qt::Widget
   include Test::Unit::Assertions
   include Debug
-  attr_reader :board, :lobby, :state, :players
+  attr_reader :board, :lobby, :machine, :players
 
   def initialize(rows: 7, columns: 8, width: 800, height: 600, parent: nil)
     assert rows.is_a?(Integer) and rows > 0
@@ -19,7 +19,7 @@ class Game < Qt::Widget
     setupUI
 
     @players = []
-    @state = GameStateMachine.new(self)
+    @machine = GameStateMachine.new(self)
 
     assert valid?
   end
@@ -50,7 +50,8 @@ class Game < Qt::Widget
   end
 
   def start()
-    state.transition_to(GameLobby)
+    machine.setup()
+    machine.start()
   end
 
   def showLobby()
@@ -67,7 +68,11 @@ class Game < Qt::Widget
 
   def updatePlayers()
     @players = lobby.getPlayers()
-    @players.each { |player| player.board = board }
+    @players.each { |player| player.game = self }
+  end
+
+  def constructChip(color: c)
+    raise NotImplementedError
   end
 
   def addPlayer(player)
@@ -87,6 +92,12 @@ end
 class Connect4 < Game
   def initialize(rows: 7, columns: 8, width: 800, height: 600, parent: nil)
     super(rows: rows, columns: columns, width: width, height: height, parent: parent)
+  end
+
+  def constructChip(c)
+    chip = Connect4Chip.new(color: c, parent: board)
+    chip.geometry = board.model.head(0).geometry
+    return chip
   end
 
   def consecutive4?(chips)

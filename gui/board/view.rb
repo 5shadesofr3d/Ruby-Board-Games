@@ -92,6 +92,11 @@ class BoardTile < BoardView
 		assert valid?
 	end
 
+	def detach()
+		@attached = nil
+		assert valid?
+	end
+
 end
 
 class BoardHead < BoardTile
