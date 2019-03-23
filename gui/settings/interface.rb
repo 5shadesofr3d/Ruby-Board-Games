@@ -11,6 +11,7 @@ class SettingsGUI
 
   # --- Auto-generated section ---
   def setupUi(settingsWindow)
+    assert settingsWindow.is_a? Qt::MainWindow
 
     if settingsWindow.objectName.nil?
       settingsWindow.objectName = "settingsWindow"
@@ -171,6 +172,16 @@ class SettingsGUI
     retranslateUi(settingsWindow)
 
     Qt::MetaObject.connectSlotsByName(settingsWindow) # TODO: Might not need this.
+
+    assert @menuBar.is_a? Qt::MenuBar
+    assert @mainToolBar.is_a? Qt::ToolBar
+    assert @statusBar.is_a? Qt::Statusbar
+    assert @cancelButton.is_a? Qt::PushButton
+    assert @applyButton.is_a? Qt::PushButton
+    assert @gameModeComboBox.is_a? Qt::ComboBox
+    assert @gameTypeComboBox.is_a? Qt::ComboBox
+    assert @themeComboBox.is_a? Qt::ComboBox
+    assert @resolutionComboBox.is_a? Qt::ComboBox
   end # setupUi
 
   def setup_ui(settingsWindow)
@@ -179,6 +190,8 @@ class SettingsGUI
 
   # TODO: Adds elements into the combo boxes, this can be cleaned up/
   def retranslateUi(settingsWindow)
+    assert settingsWindow.is_a? Qt::MainWindow
+
     settingsWindow.windowTitle = Qt::Application.translate("SettingsWindow", "Settings", nil, Qt::Application::UnicodeUTF8)
     @gameSettingsText.text = Qt::Application.translate("SettingsWindow", "Game Settings", nil, Qt::Application::UnicodeUTF8)
     # @numberOfPlayersText.text = Qt::Application.translate("SettingsWindow", "Number of players:", nil, Qt::Application::UnicodeUTF8)
