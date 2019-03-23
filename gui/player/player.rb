@@ -9,7 +9,7 @@ class Player < Qt::Object
 	include Debug
 
 	attr_reader :name, :color
-	attr_accessor :wins, :losses, :ties
+	attr_accessor :wins, :losses, :ties, :board
 
 	public
 	def initialize(player_name, player_color, parent: nil)
@@ -34,6 +34,7 @@ class Player < Qt::Object
 		return false unless losses.is_a?(Integer) and @losses >= 0
 		return false unless ties.is_a?(Integer) and @ties >= 0
 		return false unless color.is_a?(Qt::Color)
+		return false unless board.is_a?(Board) or board == nil
 
 		return true
 	end
@@ -50,6 +51,14 @@ class Player < Qt::Object
 
 		#post
 		assert valid?
+	end
+
+	def enable()
+
+	end
+
+	def disable()
+
 	end
 
 	def total_score

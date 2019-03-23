@@ -100,7 +100,11 @@ class GamePlayerMove < StatePattern::State
 
   def enter()
     # get next player
-    # connect signal for next player move
+    player = stateful.games.players.first
+    # acknowledge moves from this player
+    player.enable
+    # after player completes his move, go to the next state
+    stateful.connect(player, SIGNAL("finished()"), stateful, SLOT("next()"))
   end
 
   def next()
@@ -109,6 +113,9 @@ class GamePlayerMove < StatePattern::State
 
   def exit()
     # disconnect signal for the player that just played his move
+    stateful.disconnect(player, SIGNAL("finished()"))
+    # no longer acknowledge moves from this player
+    player.disable
   end
 end
 
@@ -116,19 +123,19 @@ class GameDetermineStatus < StatePattern::State
   include Debug
 
   def enter()
-    # check for a winner
-
-    # if winner
-    transition_to(GameEnd)
-  end
-
-  def next()
-    transition_to(GamePlayerMove)
+    if stateful.game.winner?
+      transition_to(GameEnd)
+    else
+      # cycle to next player and get his move
+      stateful.game.players.rotate 
+      transition_to(GamePlayerMove)
+    end 
   end
 
   def exit
 
   end
+
 end
 
 class GameEnd < StatePattern::State
@@ -136,10 +143,16 @@ class GameEnd < StatePattern::State
 
   def enter()
     # display winner, clear game board, score
-  end
+    if (stateful.game.winner?)
+      player = stateful.game.players.first
+      player.wins += 1
+      stateful.game.players.drop(1).each { |player| player.losses += 1 }
+    else # we had a tie
+      stateful.game.players.each { |player| player.ties += 1 }
+    end
 
-  def next()
-    # transition_to(GamePlay)
+    transition_to(GameLobby)
+    
   end
 
   def exit()

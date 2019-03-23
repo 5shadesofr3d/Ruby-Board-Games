@@ -61,12 +61,13 @@ class Game < Qt::Widget
     @stack.setCurrentWidget(@board)
   end
 
-  def status()
+  def winner?()
     raise NotImplementedError
   end
 
   def updatePlayers()
     @players = lobby.getPlayers()
+    @players.each { |player| player.board = board }
   end
 
   def addPlayer(player)
@@ -92,7 +93,7 @@ class Connect4 < Game
     return (chips.size == 4 and chips.uniq.length == 1)
   end
 
-  def status()
+  def findConsecutive4()
     assert valid?
 
     # check every column first for a "4 in a row"
@@ -117,6 +118,10 @@ class Connect4 < Game
     end
 
     assert valid?
+  end
+
+  def winner?()
+    return findConsecutive4() == nil
   end
 
   def valid?
