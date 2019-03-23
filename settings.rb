@@ -5,31 +5,23 @@ class Settings
   include Test::Unit::Assertions
   include Singleton
 
-  attr_accessor :game_type, :game_mode, :number_of_players
+  attr_accessor :game_type, :game_mode
   attr_accessor :theme
   attr_accessor :window_height, :window_width, :window_length
 
-  # NOTE: Singleton gem does not allow us to initialize
-  # our objects. We can either create our own singleton class,
-  # pass around a settings variable or initialize it with
-  # default values. The last option reduces dependancy injection
-  # potential.
-  #
   # NOTE 2: We'll have to call Settings.is_valid? as contracts
   # in other functions. Just not this one.
   def initialize
 
-    @valid_game_type = [:Single, :Multi]
+    # @valid_game_type = [:Single, :Multi] # TODO: Deprecate this to?
     @valid_game_mode = [:Connect4, :TOOT]
     @valid_themes = [:Default]
-    # @valid_number_of_players = [1, 2]
 
-    @game_type = :Single
+    # @game_type = :Single
     @game_mode = :Connect4
     @theme = :Default
-    @window_width = 12
-    @window_height = 34
-    # @number_of_players = 1
+    @window_width = 800
+    @window_height = 600
 
     is_valid?
 
@@ -38,7 +30,6 @@ class Settings
   def is_valid?
     #class invariant
 
-    assert @valid_game_type.include? @game_type
     assert @valid_game_mode.include? @game_mode
     assert @valid_themes.include? @theme
 
@@ -54,7 +45,6 @@ class Settings
     "Game Type: " + @game_type.to_s + "\n" +
     "Game Mode: " + @game_mode.to_s + "\n" +
     "Theme: " + @theme.to_s + "\n" +
-    # "Number of players: " + @number_of_players.to_s + "\n" +
     "Resolution: " + @window_width.to_s + "x" + @window_height.to_s
   end
 
