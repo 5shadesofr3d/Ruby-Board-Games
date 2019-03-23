@@ -3,10 +3,13 @@ require_relative 'gui/game'
 require_relative 'gui/player/lobby'
 require_relative 'gui/board'
 require_relative 'gui/debug'
+require_relative 'application'
 
 Debug::on
 
-app = Qt::Application.new ARGV
+app = GameApplication.new
+
+# app = Qt::Application.new ARGV
 
 # board = Board.new(7, 8)
 # board.background = Qt::white
@@ -18,11 +21,11 @@ app = Qt::Application.new ARGV
 # lobby.addPlayer
 # lobby.addPlayer
 
-game = Connect4.new()
-game.board.background = Qt::white
-game.board.color = Qt::Color.new("#48dbfb")
-game.show()
-game.start()
+# game = Connect4.new()
+# game.board.background = Qt::white
+# game.board.color = Qt::Color.new("#48dbfb")
+# game.show()
+# game.start()
 
 # chip_red = Connect4Chip.new(color: Qt::red, parent: board)
 # chip_yellow = Connect4Chip.new(color: Qt::yellow, parent: board)
@@ -41,4 +44,4 @@ game.start()
 # board.drop(chip_t, 3)
 # board.drop(chip_o, 3)
 
-app.exec
+# app.exec

@@ -1,13 +1,12 @@
 require "test/unit"
 require 'state_pattern'
 require 'Qt'
-require_relative 'qt_application'
-require_relative 'settings'
-require_relative 'gui/settings_gui'
-require_relative 'gui/title/title'
 
-require_relative 'gui/board/board'
-require_relative 'gui/board/board_item.rb'
+require_relative '../settings'
+require_relative '../settings/interface'
+require_relative '../title'
+
+require_relative '../game'
 
 
 class TitleScreenState < StatePattern::State
@@ -86,24 +85,19 @@ class GameScreenState < StatePattern::State
     # Add the assertions from the game as before.
     puts stateful.main_window.is_a? Qt::Widget
 
-    board = Board.new(7, 8, 800, 600, stateful.main_window)
+    game = nil
+    case Settings.instance.game_mode
+    when :Connect4
+      game = Connect4.new(parent: stateful.main_window)
+    when :TOOT
 
-    board.background = Qt::white
-    board.color = Qt::Color.new("#48dbfb")
+    end
 
-    chip_red = Connect4Chip.new(color: Qt::red, parent: board)
-    chip_yellow = Connect4Chip.new(color: Qt::yellow, parent: board)
+    assert game.is_a?(Game)
 
-    chip_t = OTTOChip.new(:T, parent: board)
-    chip_o = OTTOChip.new(:O, parent: board)
+    game.start
+    game.show
 
-    chip_red == chip_yellow ? puts("yes") : puts("no")
-    chip_t == chip_o ? puts("yes") : puts("no")
-
-    board.insert(chip_yellow, 3)
-    board.insert(chip_red, 3)
-    board.insert(chip_t, 3)
-    board.insert(chip_o, 3)
   end
 
   def open_title_screen
@@ -227,56 +221,7 @@ class ApplicationStateMachine < Qt::Widget
 
 end
 
-class GameApplication
-  include Test::Unit::Assertions
-
-  def is_valid?
-    # assert @window.height > 0
-    # assert @window.width > 0
-    # assert @window.visible
-    assert @window.is_a? QTApplication
-    assert @state_machine.is_a? ApplicationStateMachine
-  end
-
-  # Create GUI here.
-  def initialize
-    # Use a singleton to create the QT GUI.
-    @window = QTApplication.instance
-    @settings = Settings.instance
-    @state_machine = ApplicationStateMachine.new
-
-    # Setup "connections" for QT to capture mouse clicks.
-
-    # Display the window
-    # NOTE: While window is displayed, we're stuck here.
-    @window.app.exec
-    # When window is closed, we execute the rest of the code.
-
-    is_valid?
-  end
-
-  # Main application loop.
-  def main
-    is_valid?
-    # On launch.
-    # Display title screen.
-    # If settings button clicked from title screen.
-    # Open settings screen.
-    # If game button clicked from title screen.
-    # Open game screen.
-    # When game ends.
-    # Open title screen.
-    is_valid?
-  end
-
-  # This gets called whenever a user clicks.
-  def call_back
-
-  end
-
-end
-
-sup = GameApplication.new
+# sup = GameApplication.new
 
 # a = QTApplication.instance
 # hello = Qt::PushButton.new('Hello World!', nil)
