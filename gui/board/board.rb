@@ -21,7 +21,7 @@ class Board < Qt::Widget
 		setWindowSize(width, height)
 		setBoardSize(rows, cols)
 		setWindowTitle("Ruby-Board-Games")
-		move(100, 100)
+		# move(100, 100)
 		show()
 
 		assert valid?

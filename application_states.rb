@@ -36,11 +36,6 @@ class TitleScreenState < StatePattern::State
     transition_to(GameScreenState)
   end
 
-  def quit_game
-    puts "quit"
-    exit
-  end
-
 end
 
 #TODO: Get rid of this
@@ -54,12 +49,13 @@ class TitleController < Qt::Widget
     super()
 
     @state = state
+    @window = window
 
     @title = Title.new(800,600,window)
 
     connect(@title.bPlay,  SIGNAL('clicked()'), self, SLOT('play_game()'))
     connect(@title.bSettings,  SIGNAL('clicked()'), self, SLOT('open_settings()'))
-    connect(@title.bQuit,  SIGNAL('clicked()'), self, SLOT('quit_game()'))
+    connect(@title.bQuit,  SIGNAL('clicked()'), $qApp, SLOT('quit()'))
 
     assert @title.is_a? Title
   end
@@ -72,11 +68,6 @@ class TitleController < Qt::Widget
   def play_game
     @title.close
     @state.open_game
-  end
-
-  def quit_game
-    @title.close
-    @state.quit_game
   end
 
 end
@@ -221,7 +212,7 @@ class ApplicationStateMachine < Qt::Widget
 
 
     # TODO: Remove later.
-  #  transition_to(SettingsScreenState)
+    #  transition_to(SettingsScreenState)
 
     @main_window.show
 
