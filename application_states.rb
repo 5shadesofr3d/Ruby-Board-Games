@@ -69,8 +69,9 @@ class TitleController < Qt::Widget
     @state.open_settings
   end
 
-  def open_game
-    @title.close
+  def play_game
+    # @title.close
+    puts 'execution'
     @state.open_game
   end
 
