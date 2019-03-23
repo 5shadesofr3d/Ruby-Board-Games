@@ -166,21 +166,28 @@ class SettingsScreenState < StatePattern::State
   include Test::Unit::Assertions
 
   def valid?
-    # assert @window.height > 0
-    # assert @window.width > 0
-    # assert @window.visible
-    # assert @window.is_a? QTApplication
+    return false unless @controller.is_a? SettingsController
+    return true
   end
 
   def enter
-    valid?
+    assert stateful.settings_gui.is_a? SettingsGUI
+    assert stateful.main_window.is_a? Qt::MainWindow
+
     stateful.settings_gui.setupUi(stateful.main_window)
     @controller = SettingsController.new(self, stateful.settings_gui)
-    valid?
+
+    asset @controller.is_a? SettingsController
+    assert valid?
   end
 
   def open_title
+    assert valid?
+
     transition_to(TitleScreenState)
+
+    assert stateful.state.is_a? TitleScreenState #TODO: Test this
+    assert valid?
   end
 
 end
@@ -192,11 +199,13 @@ class ApplicationStateMachine < Qt::Widget
   set_initial_state(TitleScreenState)
   slots 'open_title_screen()'
 
-  def is_valid?
-    # assert @window.height > 0
-    # assert @window.width > 0
-    # assert @window.visible
-    # assert @window.is_a? QTApplication
+  def valid?
+    return false unless @main_window.height > 0
+    return false unless @main_window.width > 0
+    return false unless @main_window.visible
+    return false unless @window.is_a? QTApplication
+    return false unless @main_window.is_a? Qt::MainWindow
+    return true
   end
 
   # Create GUI here.
@@ -205,24 +214,29 @@ class ApplicationStateMachine < Qt::Widget
 
     @window = QTApplication.instance
     @settings_gui = SettingsGUI.new
-    # @title_screen_gui = TitleScreenGUI.new
     @main_window = Qt::MainWindow.new
-    @main_window.setFixedSize(800,600)
-    open_title_screen
+    @main_window.setFixedSize(800,600) #TODO: Set to dynamic size
 
+    open_title_screen #init title screen
 
-    # TODO: Remove later.
-    #  transition_to(SettingsScreenState)
+    @main_window.show #show title
 
-    @main_window.show
-
-    is_valid?
+    assert @window.is_a? QTApplication
+    assert @main_window.is_a? Qt::MainWindow
+    assert @main_window.width > 0
+    assert @main_window.height > 0
+    assert @main_window.visible
+    assert valid?
   end
 
   # Callback:
   def open_title_screen # TODO...
     #@title_screen_gui.setup_ui(@main_window)
+    assert valid?
+
     transition_to(TitleScreenState)
+
+    assert valid?
   end
 
 end
@@ -230,12 +244,10 @@ end
 class GameApplication
   include Test::Unit::Assertions
 
-  def is_valid?
-    # assert @window.height > 0
-    # assert @window.width > 0
-    # assert @window.visible
-    assert @window.is_a? QTApplication
-    assert @state_machine.is_a? ApplicationStateMachine
+  def valid?
+    return false unless @window.is_a? QTApplication
+    return false unless @state_machine.is_a? ApplicationStateMachine
+    return true
   end
 
   # Create GUI here.
@@ -252,7 +264,7 @@ class GameApplication
     @window.app.exec
     # When window is closed, we execute the rest of the code.
 
-    is_valid?
+    assert valid?
   end
 
   # Main application loop.
