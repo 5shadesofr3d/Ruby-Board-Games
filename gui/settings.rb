@@ -31,23 +31,23 @@ class Settings
     @window_height = 34
     # @number_of_players = 1
 
-    is_valid?
-
+    assert valid?
   end
 
-  def is_valid?
+  def valid?
     #class invariant
 
-    assert @valid_game_type.include? @game_type
-    assert @valid_game_mode.include? @game_mode
-    assert @valid_themes.include? @theme
+    return false unless @valid_game_type.include? @game_type
+    return false unless @valid_game_mode.include? @game_mode
+    return false unless @valid_themes.include? @theme
 
-    assert @window_width.is_a? Numeric
-    assert @window_width > 0 and @windowLength <= 1080
+    return false unless @window_width.is_a? Integer
+    return false unless @window_width > 0 and @windowLength <= 1080
 
-    assert @window_height.is_a? Numeric
-    assert @window_height > 0 and @window_height <= 1080
+    return false unless @window_height.is_a? Integer
+    return false unless @window_height > 0 and @window_height <= 1080
 
+    return true
   end
 
   def to_s
