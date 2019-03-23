@@ -67,7 +67,7 @@ class Board < Qt::Widget
 		@model.color = c
 	end
 
-	def insert(chip, col, time: 1000)
+	def drop(chip, col, time: 1000)
 		translate(item: chip, from: model.head(col), to: model.next_empty(col), time: time)
 	end
 

@@ -67,7 +67,6 @@ class BoardTile < BoardView
 
 	def valid?()
 		return false unless super
-		return false unless @primary != Qt::transparent
 		return false unless @secondary == Qt::transparent
 		return false unless empty? or @attached.is_a?(BoardView)
 
@@ -95,9 +94,9 @@ class BoardTile < BoardView
 
 end
 
-class BoardHead < BoardView
+class BoardHead < BoardTile
 	def initialize(parent: nil)
-		super(primary: Qt::transparent, secondary: Qt::transparent, parent: parent)
+		super(color: Qt::transparent, parent: parent)
 
 		assert valid?
 	end
