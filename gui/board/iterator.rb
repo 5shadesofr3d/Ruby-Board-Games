@@ -2,6 +2,10 @@ module BoardIterator
 
 	def [](type, row, col)
 		assert valid?
+		assert row.is_a? Integer
+		assert col.is_a? Integer
+		assert row >= 0
+		assert col >= 0
 		assert valid_type?(type)
 
 		case type
@@ -68,6 +72,8 @@ module BoardIterator
 	def each_in_row(type, row)
 		assert valid?
 		assert valid_type?(type)
+		assert row.is_a? Integer
+		assert row >= 0
 
 		columns.each do |col|
 			yield self[type, row, col]
@@ -88,6 +94,8 @@ module BoardIterator
 	end
 
 	def next_empty(col)
+		assert col.is_a? Integer
+		assert col >= 0
 		# iterates from bottom to top and returns the tile if its empty
 		# returns nil if the selected col is full
 

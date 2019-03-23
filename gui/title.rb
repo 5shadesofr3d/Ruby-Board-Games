@@ -24,6 +24,7 @@ class Title < Qt::Widget
     drawMenu()
     show()
 
+    assert self.visible
     assert @layout.is_a? Qt::VBoxLayout
   end
 
