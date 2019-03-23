@@ -1,7 +1,7 @@
 # This is the local player object. It is inherited from the player abstract class
 require 'test/unit'
 require 'Qt'
-require_relative 'player_abstract'
+require_relative 'players/player_abstract'
 
 class LocalPlayer < Player
 
