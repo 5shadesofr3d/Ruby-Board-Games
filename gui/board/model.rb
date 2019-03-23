@@ -52,12 +52,12 @@ class BoardModel
 	def tile(row, col)
 		assert row.is_a?(Integer) and rows.include?(row)
 		assert col.is_a?(Integer) and columns.include?(col)
-
+		
 		return @tile[row][col]
 	end
 
 	def chip(row, col)
-		return @tile[row][col].attached
+		return tile(row, col).attached
 	end
 
 	def color=(c)

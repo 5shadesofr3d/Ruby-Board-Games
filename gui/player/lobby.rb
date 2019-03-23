@@ -53,6 +53,17 @@ class PlayerLobby < Qt::Frame
     return players
   end
 
+  def setPlayers(players)
+    @room.playerInfos.each do |info|
+      player = players.shift
+      info.name = player.name
+      info.type = player.class
+      info.wins = player.wins
+      info.losses = player.losses
+      info.ties = player.ties
+    end
+  end
+
 end
 
 class PlayerLobbyButtons < Qt::Widget
@@ -293,20 +304,45 @@ class PlayerInfo < Qt::Widget
     return @color.color
   end
 
+  def color=(c)
+    @color.color = c
+  end
+
   def type
     return @type.currentText
+  end
+
+  def type=(t)
+    case t
+    when LocalPlayer
+      @type.currentText = "Local"
+    when AIPlayer
+      @type.currentText = "Computer"
+    end
   end
 
   def wins
     return @wins.text.to_i
   end
 
+  def wins=(w)
+    @wins.text = w
+  end
+
   def losses
     return @wins.text.to_i
   end
 
+  def losses=(l)
+    @losses.text = l
+  end
+
   def ties
     return @wins.text.to_i
+  end
+
+  def ties=(t)
+    @ties.text = t
   end
 
   def construct_player(parent)

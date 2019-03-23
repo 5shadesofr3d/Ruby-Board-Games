@@ -118,14 +118,15 @@ class GameDetermineStatusState < GameState
   signals :win
 
   def onEntry(event)
-    done()
-    # if game.winner?
-    #   win()
-    # else
-    #   # cycle to next player and get his move
-    #   game.players.rotate 
-    #   done()
-    # end 
+    Thread.new do
+      if game.winner?
+        win()
+      else
+        # cycle to next player and get his move
+        game.players.rotate!
+        done()
+      end
+    end
   end
 
   def onExit(event)
@@ -145,6 +146,7 @@ class GameEndState < GameState
     else # we had a tie
       game.players.each { |player| player.ties += 1 }
     end
+    game.updatePlayerInfos()
     done()
   end
 

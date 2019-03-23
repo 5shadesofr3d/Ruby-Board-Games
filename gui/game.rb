@@ -57,6 +57,7 @@ class Game < Qt::Widget
     hlayout.addWidget(lobby)
     @lobbyWidget.setLayout(hlayout)
     @stack.addWidget(@lobbyWidget)
+    @lobby.addPlayer() # we have at least 1 player
   end
 
   def start()
@@ -79,6 +80,10 @@ class Game < Qt::Widget
   def updatePlayers()
     @players = lobby.getPlayers()
     @players.each { |player| player.game = self }
+  end
+
+  def updatePlayerInfos()
+    @lobby.setPlayers(players)
   end
 
   def constructChip(color: c)
@@ -106,12 +111,14 @@ class Connect4 < Game
 
   def constructChip(c)
     chip = Connect4Chip.new(color: c, parent: board)
-    chip.geometry = board.model.head(0).geometry
+    chip.geometry = board.model.head(0).geometry # place new chip on the first slot at the top of the board
     return chip
   end
 
   def consecutive4?(chips)
-    return (chips.size == 4 and chips.uniq.length == 1)
+    return false unless chips.size == 4
+    return false if chips.include?(nil)
+    return chips.uniq { |c| c.secondary }.length == 1
   end
 
   def findConsecutive4()
@@ -144,7 +151,8 @@ class Connect4 < Game
   end
 
   def winner?()
-    return findConsecutive4() == nil
+    result = findConsecutive4()
+    return result != nil
   end
 
   def valid?

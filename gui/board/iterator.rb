@@ -23,7 +23,7 @@ module BoardIterator
 	end
 
 	def diagonals
-		return (0..[@rows, @cols].max - 1)
+		return (0..([@rows, @cols].min - 1))
 	end
 
 	def each(type)
@@ -50,15 +50,15 @@ module BoardIterator
 	end
 
 	def each_in_diagonal(type, diagonal, direction)
-		assert diagonal.between?(0, [@rows, @cols].min - 1)
+		assert diagonals.include?(diagonal)
 		assert direction.is_a?(Symbol) and (direction == :up or direction == :down)
 		assert valid_type?(type)
 
 		(0..diagonal).each do |i|
 			if direction == :up
-				yield self[type, i, diagonal - i] unless self[type, i, diagonal - i] == nil
+				yield self[type, i, diagonal - i]
 			elsif direction == :down
-				yield self[type, diagonal - i, i] unless self[type, diagonal - i, i] == nil
+				yield self[type, diagonal - i, i]
 			end
 		end
 

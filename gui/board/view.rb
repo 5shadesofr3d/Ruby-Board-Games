@@ -147,8 +147,7 @@ class Connect4Chip < BoardChip
 	end
 
 	def ==(chip)
-		assert chip.is_a?(Connect4Chip)
-		
+		return false if chip == nil
 		# chips are equivalent if they are the same color:
 		return self.secondary == chip.secondary
 	end
