@@ -52,7 +52,7 @@ class TitleController < Qt::Widget
 
   slots 'play_game()','open_settings()','quit_game()'
 
-  def initialize(state,window)
+  def initialize(state, window)
     assert state.is_a? TitleScreenState
     assert window.is_a? Qt::MainWindow
     super()
@@ -139,10 +139,10 @@ class SettingsController < Qt::Widget
 
   slots 'apply_settings()','cancel()'
 
-  def initialize(state,gui)
-    super()
+  def initialize(state, gui, parent=nil)
     assert gui.is_a? SettingsGUI
     assert state.is_a? SettingsScreenState
+    parent != nil ? super(parent) : super()
 
     @state = state
     @gui = gui
@@ -172,8 +172,6 @@ class SettingsController < Qt::Widget
       @settings.window_width = 600
     end
 
-    puts @settings.to_s
-
     self.close
     @state.open_title
 
@@ -186,8 +184,8 @@ class SettingsController < Qt::Widget
   def cancel
     assert @state.is_a? SettingsScreenState
 
-    self.close
-    @state.open_title
+    @gui.close
+    # @state.open_title
 
     assert self.visible == false
   end
@@ -206,7 +204,9 @@ class SettingsScreenState < StatePattern::State
     assert stateful.settings_gui.is_a? SettingsGUI
     assert stateful.main_window.is_a? Qt::MainWindow
 
-    stateful.settings_gui.setupUi(stateful.main_window)
+    # stateful.settings_gui.setupUi(stateful.main_window)
+    stateful.settings_gui.setupUi
+    stateful.settings_gui.show
     @controller = SettingsController.new(self, stateful.settings_gui)
 
     assert @controller.is_a? SettingsController

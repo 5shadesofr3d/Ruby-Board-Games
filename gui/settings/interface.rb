@@ -2,7 +2,7 @@ require 'Qt4'
 require 'test/unit'
 require_relative '../settings'
 
-class SettingsGUI
+class SettingsGUI < Qt::Widget
   include Test::Unit::Assertions
 
   attr_reader :gameModeComboBox
@@ -14,38 +14,52 @@ class SettingsGUI
   attr_reader :applyButton
   attr_reader :cancelButton
 
-  def set_background(c = Qt::white, parent)
+  def initialize(width = 800, height = 600, parent = nil)
+    assert width.is_a? Integer
+    assert height.is_a? Integer
+    assert width > 0
+    assert height > 0
+    parent != nil ? super(parent) : super()
+
+    setup_ui
+
+  end
+
+  def set_background(c = Qt::white)
     puts c.is_a? Qt::Color
     assert c.is_a? Qt::Color or c.is_a? Qt::Enum
     palette = Qt::Palette.new(c)
-    parent.setAutoFillBackground(true)
-    parent.setPalette(palette)
+    setAutoFillBackground(true)
+    setPalette(palette)
     assert palette.is_a? Qt::Palette
   end
 
   # --- Auto-generated section ---
-  def setupUi(settingsWindow)
-    assert settingsWindow.is_a? Qt::MainWindow
+  def setupUi()
+    # assert settingsWindow.is_a? Qt::MainWindow
     assert Settings.instance.valid?
 
     theme = Settings.instance.theme
 
-    if settingsWindow.objectName.nil?
-      settingsWindow.objectName = "settingsWindow"
-    end
-
-    settingsWindow.resize(854, 611)
-    settingsWindow.styleSheet = ""
+    # if settingsWindow.objectName.nil?
+    #   settingsWindow.objectName = "settingsWindow"
+    # end
+    #
+    # settingsWindow.resize(854, 611)
+    # settingsWindow.styleSheet = ""
 
     puts theme
     # Change the background.
-    set_background(theme.color[:background], settingsWindow)
+    set_background(theme.color[:background])
 
-    @centralWidget = Qt::Widget.new(settingsWindow)
-    @centralWidget.objectName = "centralWidget"
-    @verticalLayoutWidget = Qt::Widget.new(@centralWidget)
+    # @centralWidget = Qt::Widget.new(settingsWindow)
+    # @centralWidget.objectName = "centralWidget"
+    # @verticalLayoutWidget = Qt::Widget.new(@centralWidget)
+
+    @verticalLayoutWidget = Qt::Widget.new(self)
     @verticalLayoutWidget.objectName = "verticalLayoutWidget"
     @verticalLayoutWidget.geometry = Qt::Rect.new(40, 9, 761, 541)
+
     @verticalLayout = Qt::VBoxLayout.new(@verticalLayoutWidget)
     @verticalLayout.spacing = 6
     @verticalLayout.margin = 11
@@ -214,25 +228,25 @@ class SettingsGUI
 
     @verticalLayout.addLayout(@horizontalLayout)
 
-    settingsWindow.centralWidget = @centralWidget
-    @menuBar = Qt::MenuBar.new(settingsWindow)
-    @menuBar.objectName = "menuBar"
-    @menuBar.geometry = Qt::Rect.new(0, 0, 854, 25)
-    settingsWindow.setMenuBar(@menuBar)
-    @mainToolBar = Qt::ToolBar.new(settingsWindow)
-    @mainToolBar.objectName = "mainToolBar"
-    settingsWindow.addToolBar(Qt::TopToolBarArea, @mainToolBar)
-    @statusBar = Qt::StatusBar.new(settingsWindow)
-    @statusBar.objectName = "statusBar"
-    settingsWindow.statusBar = @statusBar
+    # settingsWindow.centralWidget = @centralWidget
+    # @menuBar = Qt::MenuBar.new(settingsWindow)
+    # @menuBar.objectName = "menuBar"
+    # @menuBar.geometry = Qt::Rect.new(0, 0, 854, 25)
+    # settingsWindow.setMenuBar(@menuBar)
+    # @mainToolBar = Qt::ToolBar.new(settingsWindow)
+    # @mainToolBar.objectName = "mainToolBar"
+    # settingsWindow.addToolBar(Qt::TopToolBarArea, @mainToolBar)
+    # @statusBar = Qt::StatusBar.new(settingsWindow)
+    # @statusBar.objectName = "statusBar"
+    # settingsWindow.statusBar = @statusBar
 
-    retranslateUi(settingsWindow)
+    retranslateUi
 
-    Qt::MetaObject.connectSlotsByName(settingsWindow) # TODO: Might not need this.
+    # Qt::MetaObject.connectSlotsByName(settingsWindow) # TODO: Might not need this.
 
-    assert @menuBar.is_a? Qt::MenuBar
-    assert @mainToolBar.is_a? Qt::ToolBar
-    assert @statusBar.is_a? Qt::StatusBar
+    #assert @menuBar.is_a? Qt::MenuBar
+    #assert @mainToolBar.is_a? Qt::ToolBar
+    #assert @statusBar.is_a? Qt::StatusBar
     assert @cancelButton.is_a? Qt::PushButton
     assert @applyButton.is_a? Qt::PushButton
     assert @gameModeComboBox.is_a? Qt::ComboBox
@@ -241,14 +255,14 @@ class SettingsGUI
 
   end # setupUi
 
-  def setup_ui(settingsWindow)
-    setupUi(settingsWindow)
+  def setup_ui
+    setupUi
   end
 
-  def retranslateUi(settingsWindow)
-    assert settingsWindow.is_a? Qt::MainWindow
+  def retranslateUi
+    # assert settingsWindow.is_a? Qt::MainWindow
 
-    settingsWindow.windowTitle = Qt::Application.translate("SettingsWindow", "Settings", nil, Qt::Application::UnicodeUTF8)
+    windowTitle = Qt::Application.translate("SettingsWindow", "Settings", nil, Qt::Application::UnicodeUTF8)
     @gameSettingsText.text = Qt::Application.translate("SettingsWindow", "Game Settings", nil, Qt::Application::UnicodeUTF8)
     @gameModeComboBox.insertItems(0, [Qt::Application.translate("SettingsWindow", "Connect 4", nil, Qt::Application::UnicodeUTF8),
                                       Qt::Application.translate("SettingsWindow", "OTTO/TOOT", nil, Qt::Application::UnicodeUTF8)])
@@ -269,9 +283,9 @@ class SettingsGUI
     @cancelButton.text = Qt::Application.translate("SettingsWindow", "Cancel", nil, Qt::Application::UnicodeUTF8)
   end # retranslateUi
 
-  def retranslate_ui(settingsWindow)
-    retranslateUi(settingsWindow)
-  end
+  # def retranslate_ui(settingsWindow)
+  #   retranslateUi(settingsWindow)
+  # end
 
   # When apply button is clicked, run call back.
   # create a settingsGUI instance and change the variables.
