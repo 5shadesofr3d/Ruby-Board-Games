@@ -52,6 +52,7 @@ end
 
 class GameState < Qt::State
   include Debug
+  include Test::Unit::Assertions
 
   attr_reader :game
   signals :done

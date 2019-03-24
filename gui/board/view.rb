@@ -14,7 +14,6 @@ class BoardView < Qt::Widget
 
 		show()
 
-		assert self.visible
 		assert primary != nil
 		assert secondary != nil
 		assert valid?

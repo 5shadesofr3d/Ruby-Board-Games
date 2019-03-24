@@ -42,7 +42,7 @@ class Settings
     return false unless @valid_themes.include? @theme
 
     return false unless @window_width.is_a? Integer
-    return false unless @window_width > 0 and @windowLength <= 1080
+    return false unless @window_width > 0 and @window_height <= 1080
 
     return false unless @window_height.is_a? Integer
     return false unless @window_height > 0 and @window_height <= 1080

@@ -86,7 +86,7 @@ private
 			@tile << row
 		end
 
-		assert @title.size > 0
+		assert @tile.size > 0
 		assert @tile.size == @rows
 		assert @tile.first.size == @cols
 	end

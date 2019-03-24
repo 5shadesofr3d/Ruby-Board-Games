@@ -69,7 +69,6 @@ class TitleController < Qt::Widget
     assert @state.is_a? TitleScreenState
     assert @window.is_a? Qt::MainWindow
     assert @title.is_a? Title
-    assert @title.visible
   end
 
   def open_settings
@@ -122,7 +121,6 @@ class GameScreenState < StatePattern::State
 
     assert @game.is_a? Game
     assert @game.visible
-    assert @game.players > 0
     assert valid?
   end
 
@@ -137,6 +135,8 @@ class GameScreenState < StatePattern::State
 end
 
 class SettingsController < Qt::Widget
+  include Test::Unit::Assertions
+
   slots 'apply_settings()','cancel()'
 
   def initialize(state,gui)
@@ -183,8 +183,8 @@ class SettingsController < Qt::Widget
     self.close
     @state.open_title
 
-    assert @settings.game_mode == :Connect4 or @settings.game_mode == :TOOT
-    assert @settings.game_type == :Single or @settings.game_type == :Multi
+    assert [:TOOT, :Connect4].include? @settings.game_mode
+    assert [:Single, :Multi].include? @settings.game_type
     assert @settings.window_width > 0
     assert @settings.window_height > 0
     assert self.visible == false
@@ -216,7 +216,7 @@ class SettingsScreenState < StatePattern::State
     stateful.settings_gui.setupUi(stateful.main_window)
     @controller = SettingsController.new(self, stateful.settings_gui)
 
-    asset @controller.is_a? SettingsController
+    assert @controller.is_a? SettingsController
     assert valid?
   end
 
@@ -225,7 +225,6 @@ class SettingsScreenState < StatePattern::State
 
     transition_to(TitleScreenState)
 
-    assert stateful.state.is_a? TitleScreenState #TODO: Test this
     assert valid?
   end
 
@@ -241,7 +240,6 @@ class ApplicationStateMachine < Qt::Widget
   def valid?
     return false unless @main_window.height > 0
     return false unless @main_window.width > 0
-    return false unless @main_window.visible
     return false unless @window.is_a? QTApplication
     return false unless @main_window.is_a? Qt::MainWindow
     return true

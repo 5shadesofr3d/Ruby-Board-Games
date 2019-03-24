@@ -1,6 +1,9 @@
 require 'Qt4'
+require 'test/unit'
 
 class SettingsGUI
+  include Test::Unit::Assertions
+
   attr_reader :gameModeComboBox
   # attr_reader :numberPlayersComboBox
   attr_reader :gameTypeComboBox
@@ -175,7 +178,7 @@ class SettingsGUI
 
     assert @menuBar.is_a? Qt::MenuBar
     assert @mainToolBar.is_a? Qt::ToolBar
-    assert @statusBar.is_a? Qt::Statusbar
+    assert @statusBar.is_a? Qt::StatusBar
     assert @cancelButton.is_a? Qt::PushButton
     assert @applyButton.is_a? Qt::PushButton
     assert @gameModeComboBox.is_a? Qt::ComboBox

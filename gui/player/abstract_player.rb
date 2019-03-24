@@ -51,7 +51,7 @@ class Player < Qt::Object
 
 	def left()
 		assert game.is_a? Game
-		assert model.is_a? BoardModel
+		assert game.board.model.is_a? BoardModel
 
 		return if current_column == 0
 
@@ -66,12 +66,12 @@ class Player < Qt::Object
 
 		assert @current_column.is_a? Integer
 		assert game.is_a? Game
-		assert model.is_a? BoardModel
+		assert game.board.model.is_a? BoardModel
 	end
 
 	def right()
 		assert game.is_a? Game
-		assert model.is_a? BoardModel
+		assert game.board.model.is_a? BoardModel
 
 		return if current_column == game.board.model.columns.max
 
@@ -86,13 +86,13 @@ class Player < Qt::Object
 
 		assert @current_column.is_a? Integer
 		assert game.is_a? Game
-		assert model.is_a? BoardModel
+		assert game.board.model.is_a? BoardModel
 	end
 
 	def drop()
 		assert game.is_a? Game
 		assert current_column.is_a? Integer
-		assert current_column.is_a? >= 0
+		assert current_column >= 0
 		assert current_chip.is_a? BoardChip
 
 		game.board.drop(current_chip, current_column)
