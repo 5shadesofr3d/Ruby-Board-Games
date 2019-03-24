@@ -63,6 +63,8 @@ class LocalPlayer < Player
 
 		#pre
 		assert current_column.is_a?(Numeric) and current_column >= 0
+		assert event.is_a?(Qt::KeyEvent)
+
 
 		case key_event.key
 		when Qt::Key_Left.value

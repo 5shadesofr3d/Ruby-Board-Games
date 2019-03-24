@@ -36,6 +36,7 @@ class Game < Qt::Widget
   end
 
   def keyPressEvent(event)
+    assert event.is_a?(Qt::KeyEvent)
     super(event)
     keyPressed(event) # signal
   end
