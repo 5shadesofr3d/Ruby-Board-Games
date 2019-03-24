@@ -95,6 +95,7 @@ class Player < Qt::Object
 		assert current_column >= 0
 		assert current_chip.is_a? BoardChip
 
+
 		game.board.drop(current_chip, current_column)
 		@current_chip = nil
 
