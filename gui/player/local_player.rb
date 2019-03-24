@@ -63,7 +63,7 @@ class LocalPlayer < Player
 
 		#pre
 		assert current_column.is_a?(Numeric) and current_column >= 0
-		assert event.is_a?(Qt::KeyEvent)
+		assert key_event.is_a?(Qt::KeyEvent)
 
 
 		case key_event.key
@@ -72,7 +72,17 @@ class LocalPlayer < Player
 		when Qt::Key_Right.value
 			right()
 		when Qt::Key_Space.value
-			drop()
+			tile = nil
+			begin
+				tile = game.board.model.next_empty(current_column)
+			rescue BoardIterator::ColumnFullError
+				tile = nil
+				puts "Column full, try again"
+			end
+
+			if tile != nil
+				drop()
+			end
 		end
 
 		#post
