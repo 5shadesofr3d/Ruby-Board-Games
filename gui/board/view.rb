@@ -1,7 +1,7 @@
 require 'Qt'
 require 'test/unit'
 
-class BoardItem < Qt::Widget
+class BoardView < Qt::Widget
 	include Test::Unit::Assertions
 
 	attr_accessor :primary, :secondary # colors
@@ -14,6 +14,8 @@ class BoardItem < Qt::Widget
 
 		show()
 
+		assert primary != nil
+		assert secondary != nil
 		assert valid?
 	end
 
@@ -46,17 +48,19 @@ class BoardItem < Qt::Widget
 		painter.drawPath(path)
 		painter.setBrush brush_circle
 		painter.drawEllipse(circle_boundary)
-		
+
 		painter.end
 
 		assert valid?
 	end
 end
 
-class BoardTile < BoardItem
+class BoardTile < BoardView
 	attr_reader :attached
 
 	def initialize(color: Qt::blue, parent: nil)
+		assert color != nil
+
 		@attached = nil
 
 		super(primary: color, secondary: Qt::transparent, parent: parent)
@@ -67,9 +71,8 @@ class BoardTile < BoardItem
 
 	def valid?()
 		return false unless super
-		return false unless @primary != Qt::transparent
 		return false unless @secondary == Qt::transparent
-		return false unless empty? or @attached.is_a?(BoardItem)
+		return false unless empty? or @attached.is_a?(BoardView)
 
 		return true
 	end
@@ -85,7 +88,7 @@ class BoardTile < BoardItem
 	def attach(item)
 		# attaching an item ensures that when the tile is resized, so is the attached item.
 		# NOTE: attached items are treated like chips
-		assert item.is_a?(BoardItem)
+		assert item.is_a?(BoardView)
 
 		item.size = size()
 		@attached = item
@@ -93,11 +96,16 @@ class BoardTile < BoardItem
 		assert valid?
 	end
 
+	def detach()
+		@attached = nil
+		assert valid?
+	end
+
 end
 
-class BoardHead < BoardItem
+class BoardHead < BoardTile
 	def initialize(parent: nil)
-		super(primary: Qt::transparent, secondary: Qt::transparent, parent: parent)
+		super(color: Qt::transparent, parent: parent)
 
 		assert valid?
 	end
@@ -112,8 +120,9 @@ class BoardHead < BoardItem
 
 end
 
-class BoardChip < BoardItem
+class BoardChip < BoardView
 	def initialize(color: Qt::red, parent: nil)
+		assert color != nil
 		super(primary: Qt::transparent, secondary: color, parent: parent)
 
 		lower() # place chip behind tiles
@@ -137,14 +146,15 @@ end
 
 class Connect4Chip < BoardChip
 	def initialize(color: Qt::red, parent: nil)
+		assert color != nil
+
 		super(color: color, parent: parent)
 
 		assert valid?
 	end
 
 	def ==(chip)
-		assert chip.is_a?(Connect4Chip)
-		
+		return false if chip == nil
 		# chips are equivalent if they are the same color:
 		return self.secondary == chip.secondary
 	end
@@ -155,10 +165,12 @@ class OTTOChip < BoardChip
 
 	def initialize(id, color: Qt::gray, parent: nil)
 		assert id.is_a?(Symbol) and (id == :T or id == :O)
+		assert color != nil
 
 		@id = id
 
-		super(color: color, parent: parent)		
+		super(color: color, parent: parent)
+		assert @id.is_a?(Symbol) and (id == :T or id == :O)
 		assert valid?
 	end
 
@@ -171,12 +183,14 @@ class OTTOChip < BoardChip
 
 	def ==(chip)
 		assert chip.is_a?(OTTOChip)
-		
+
 		# chips are equivalent if they have the same text (id):
 		return self.id == chip.id
 	end
 
 	def paintEvent(event)
+		assert width > 0
+		assert height > 0
 		super(event)
 
 		rect = Qt::Rect.new(0, 0, width, height)

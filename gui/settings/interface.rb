@@ -25,6 +25,8 @@ class SettingsGUI
 
   # --- Auto-generated section ---
   def setupUi(settingsWindow)
+    assert settingsWindow.is_a? Qt::MainWindow
+    assert Settings.instance.valid?
 
     theme = Settings.instance.theme
 
@@ -35,6 +37,7 @@ class SettingsGUI
     settingsWindow.resize(854, 611)
     settingsWindow.styleSheet = ""
 
+    puts theme
     # Change the background.
     set_background(theme.color[:background], settingsWindow)
 
@@ -225,7 +228,17 @@ class SettingsGUI
 
     retranslateUi(settingsWindow)
 
-    Qt::MetaObject.connectSlotsByName(settingsWindow)
+    Qt::MetaObject.connectSlotsByName(settingsWindow) # TODO: Might not need this.
+
+    assert @menuBar.is_a? Qt::MenuBar
+    assert @mainToolBar.is_a? Qt::ToolBar
+    assert @statusBar.is_a? Qt::StatusBar
+    assert @cancelButton.is_a? Qt::PushButton
+    assert @applyButton.is_a? Qt::PushButton
+    assert @gameModeComboBox.is_a? Qt::ComboBox
+    assert @themeComboBox.is_a? Qt::ComboBox
+    assert @resolutionComboBox.is_a? Qt::ComboBox
+
   end # setupUi
 
   def setup_ui(settingsWindow)
@@ -233,6 +246,8 @@ class SettingsGUI
   end
 
   def retranslateUi(settingsWindow)
+    assert settingsWindow.is_a? Qt::MainWindow
+
     settingsWindow.windowTitle = Qt::Application.translate("SettingsWindow", "Settings", nil, Qt::Application::UnicodeUTF8)
     @gameSettingsText.text = Qt::Application.translate("SettingsWindow", "Game Settings", nil, Qt::Application::UnicodeUTF8)
     @gameModeComboBox.insertItems(0, [Qt::Application.translate("SettingsWindow", "Connect 4", nil, Qt::Application::UnicodeUTF8),

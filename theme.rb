@@ -1,4 +1,4 @@
-require 'qt'
+require 'Qt'
 
 class Theme
   attr_accessor :name, :color
@@ -6,7 +6,7 @@ class Theme
   def initialize(name)
 
     @name = name
-    @color = {:text => 'black'.paint.to_hex,
+    @color = {:text => Qt::Color.fromRgb(0, 0, 0),
               :background => Qt::Color.fromRgb(255, 255, 0)}
 
   end

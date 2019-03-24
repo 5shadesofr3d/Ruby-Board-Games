@@ -9,8 +9,8 @@ class Title < Qt::Widget
   attr_reader :bQuit
 
   def initialize(width = 800, height = 600, parent = nil)
-    assert width.is_a? Numeric
-    assert height.is_a? Numeric
+    assert width.is_a? Integer
+    assert height.is_a? Integer
     assert width > 0
     assert height > 0
     parent != nil ? super(parent) : super()
@@ -23,6 +23,8 @@ class Title < Qt::Widget
     setBackground(Qt::darkCyan)
     drawMenu()
     show()
+
+    assert @layout.is_a? Qt::VBoxLayout
   end
 
   def setScreenSize(width, height)
@@ -83,7 +85,9 @@ class Title < Qt::Widget
     @layout.addWidget(@bSettings)
     @layout.addWidget(@bQuit)
 
-
+    assert @bPlay.is_a? Qt::PushButton
+    assert @bSettings.is_a? Qt::PushButton
+    assert @bQuit.is_a? Qt::PushButton
     assert valid?
   end
 

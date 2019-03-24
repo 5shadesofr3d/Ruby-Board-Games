@@ -1,6 +1,10 @@
 require 'Qt'
-require_relative 'gui/board/board'
-require_relative 'gui/board/board_item.rb'
+require_relative 'gui/game'
+require_relative 'gui/player/player_lobby'
+require_relative 'gui/board'
+require_relative 'gui/debug'
+require_relative 'application'
+
 
 # TODO: Complete later.
 # To run assignment4_main.rb, ensure you have the following
@@ -9,25 +13,43 @@ require_relative 'gui/board/board_item.rb'
 # gem install state_pattern
 # gem install qtbindings
 
-app = Qt::Application.new ARGV
 
-board = Board.new(7, 8)
+Debug::on
+app = GameApplication.new
 
-board.background = Qt::white
-board.color = Qt::Color.new("#48dbfb")
+# app = Qt::Application.new ARGV
 
-chip_red = Connect4Chip.new(color: Qt::red, parent: board)
-chip_yellow = Connect4Chip.new(color: Qt::yellow, parent: board)
+# board = Board.new(7, 8)
+# board.background = Qt::white
+# board.color = Qt::Color.new("#48dbfb")
 
-chip_t = OTTOChip.new(:T, parent: board)
-chip_o = OTTOChip.new(:O, parent: board)
+# lobby = PlayerLobby.new()
+# lobby.show()
 
-chip_red == chip_yellow ? puts("yes") : puts("no")
-chip_t == chip_o ? puts("yes") : puts("no")
+# lobby.addPlayer
+# lobby.addPlayer
 
-board.insert(chip_yellow, 3)
-board.insert(chip_red, 3)
-board.insert(chip_t, 3)
-board.insert(chip_o, 3)
+# game = Connect4.new()
+# game.board.background = Qt::white
+# game.board.color = Qt::Color.new("#48dbfb")
+# game.show()
+# game.start()
 
-app.exec
+# chip_red = Connect4Chip.new(color: Qt::red, parent: board)
+# chip_yellow = Connect4Chip.new(color: Qt::yellow, parent: board)
+
+# chip_t = OTTOChip.new(:T, parent: board)
+# chip_o = OTTOChip.new(:O, parent: board)
+
+# chip_red == chip_yellow ? puts("yes") : puts("no")
+# chip_t == chip_o ? puts("yes") : puts("no")
+
+# model = board.model
+# board.translate(item: chip_yellow, from: model.head(0), to: model.head(4), time: 1000)
+
+# board.insert(chip_yellow, 3)
+# board.drop(chip_red, 2)
+# board.drop(chip_t, 3)
+# board.drop(chip_o, 3)
+
+# app.exec
