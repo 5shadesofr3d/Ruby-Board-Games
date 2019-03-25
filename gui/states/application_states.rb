@@ -39,6 +39,7 @@ class TitleScreenState < StatePattern::State
   def open_game
     assert valid?
 
+    stateful.main_window.centralWidget.close if stateful.main_window.centralWidget != nil
     transition_to(GameScreenState)
 
     assert valid?
@@ -187,6 +188,7 @@ class SettingsController < Qt::Widget
     @gui.close
     @state.open_title
 
+
     assert self.visible == false
   end
 
@@ -201,12 +203,13 @@ class SettingsScreenState < StatePattern::State
   end
 
   def enter
-    assert stateful.settings_gui.is_a? SettingsGUI
+    #assert stateful.settings_gui.is_a? SettingsGUI
     assert stateful.main_window.is_a? Qt::MainWindow
 
     stateful.settings_gui.show
     @controller = SettingsController.new(self, stateful.settings_gui)
 
+    # assert settings_gui.is_a? SettingsGUI
     assert @controller.is_a? SettingsController
     assert valid?
   end

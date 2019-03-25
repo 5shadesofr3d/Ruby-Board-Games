@@ -36,6 +36,7 @@ class Game < Qt::Widget
   end
 
   def keyPressEvent(event)
+    assert event.is_a?(Qt::KeyEvent)
     super(event)
     keyPressed(event) # signal
   end
@@ -177,8 +178,55 @@ class OTTO < Game
     assert valid?
   end
 
+  def constructChip(c)
+    chip = OTTOChip.new(color: c, parent: board)
+    chip.geometry = board.model.head(0).geometry # place new chip on the first slot at the top of the board
+    return chip
+  end
+
+  def consecutive4?(chips)
+    return false unless chips.size == 4
+    return false if chips.include?(nil)
+    return false if chips.length != 4
+    return if ((chips[0].id == :T and chips[1].id == :O and chips[2].id == :O and chips[3].id == :T) or (chips[0].id == :O and chips[1].id == :T and chips[2].id == :T and chips[3].id == :O))
+  end
+
   def gameAlgorithm()
     assert valid?
+  end
+
+  def findConsecutiveOTTO()
+    assert valid?
+
+    model = board.model
+
+    # check every column first for a "4 in a row"
+    model.columns.each do |col|
+      cols = model.to_enum(:each_in_column, :chip, col)
+      cols.each_cons(4) { |chips| return chips if consecutiveOTTO?(chips) }
+    end
+
+    # check every row
+    model.rows.each do |row|
+      rows = model.to_enum(:each_in_row, :chip, row)
+      rows.each_cons(4) { |chips| return chips if consecutiveOTTO?(chips) }
+    end
+
+    # check every diagonal
+    model.diagonals.each do |diagonal|
+      upper_diag = model.to_enum(:each_in_diagonal, :chip, diagonal, :up)
+      upper_diag.each_cons(4) { |chips| return chips if consecutiveOTTO?(chips) }
+
+      lower_diag = model.to_enum(:each_in_diagonal, :chip, diagonal, :down)
+      lower_diag.each_cons(4) { |chips| return chips if consecutiveOTTO?(chips) }
+    end
+
+    assert valid?
+  end
+
+  def winner?
+    result = findConsecutiveOTTO()
+    return result != nil
   end
 
   def valid?

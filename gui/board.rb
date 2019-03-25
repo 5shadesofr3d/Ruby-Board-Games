@@ -7,7 +7,7 @@ require_relative 'debug'
 class Board < Qt::Widget
 	include Test::Unit::Assertions
 	include Debug
-	
+
 	attr_reader :model, :animation
 
 	slots :onDrop
@@ -103,7 +103,7 @@ class Board < Qt::Widget
 		animation.duration = time
 		animation.startValue = from.geometry
 		animation.endValue = to.geometry
-		
+
 		translateStarted
 
 		animation.start
