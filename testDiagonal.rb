@@ -29,19 +29,19 @@ class BoardModel
 	end
 
   def diagonals
-		return (0..(([@rows, @cols].min) * 2) - 2)
+		return (0..(([@rows, @cols].max) * 2) - 2)
 	end
 
-  def each_in_diagonal(diagonal, direction, max)
+  def each_in_diagonal(diagonal, direction, maxX, maxY)
 
 		(0..diagonal).each do |i|
       if direction == 1
-        if i <= max and diagonal - i <= max
+        if i <= maxX and diagonal - i <= maxY
 				  yield [i, diagonal - i]
         end
 			elsif direction == 2
-        if i <= max and max - diagonal + i >= 0
-				  yield [i, max - diagonal + i]
+        if i <= maxX and maxY - diagonal + i >= 0
+				  yield [i, maxY - diagonal + i]
         end
 			end
 
@@ -91,7 +91,7 @@ class BoardModel
 
     # check every diagonal
     self.diagonals.each do |diagonal|
-      upper_diag = self.to_enum(:each_in_diagonal, diagonal, 1, [@rows, @cols].min - 1)
+      upper_diag = self.to_enum(:each_in_diagonal, diagonal, 1, @rows - 1, @cols - 1)
       upper_diag.each do |u|
         print(u)
         print("\n")
@@ -99,7 +99,7 @@ class BoardModel
       print("\n")
       print("\n")
 
-      lower_diag = self.to_enum(:each_in_diagonal, diagonal, 2, [@rows, @cols].min - 1)
+      lower_diag = self.to_enum(:each_in_diagonal, diagonal, 2, @rows - 1, @cols - 1)
       lower_diag.each do |d|
         print(d)
         print("\n")
