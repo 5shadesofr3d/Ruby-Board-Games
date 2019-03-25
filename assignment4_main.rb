@@ -14,14 +14,14 @@ require_relative 'application'
 # gem install qtbindings
 
 
-# Debug::on
+Debug::on # may cause animation lag due to excessive printing to terminal
 app = GameApplication.new
 
 # app = Qt::Application.new ARGV
 
 # board = Board.new(7, 8)
 # board.background = Qt::white
-# board.color = Qt::Color.new("#48dbfb")
+# board.color = Qt::Color.new("#48dbfb").name
 
 # lobby = PlayerLobby.new()
 # lobby.show()

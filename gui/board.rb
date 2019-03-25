@@ -14,6 +14,10 @@ class Board < Qt::Widget
 	signals :translateStarted, :translateCompleted, :dropped
 
 	def initialize(rows, cols, width: 800, height: 600, parent: nil)
+		assert rows.is_a? Integer
+		assert cols.is_a? Integer
+		assert rows > 0
+		assert cols > 0
 		parent != nil ? super(parent) : super()
 
 		@model = BoardModel.new(rows, cols, parent: self)
@@ -21,7 +25,9 @@ class Board < Qt::Widget
 		setupLayout()
 		setupWindow(width, height)
 		setupAnimation()
+		setupBackground()
 
+		assert @model.is_a? BoardModel
 		assert valid?
 	end
 
@@ -51,6 +57,9 @@ class Board < Qt::Widget
 		setWindowTitle("Ruby-Board-Games")
 		move(100, 100)
 		show()
+
+		assert width() == width
+		assert height() == height
 	end
 
 	def setWindowSize(width, height)
@@ -69,6 +78,12 @@ class Board < Qt::Widget
 		setPalette(palette)
 	end
 
+	# TODO: Might not be worth fixing. Set the background of the window.
+	def setupBackground
+		#theme = Settings.instance.theme
+		#setStyleSheet("background-color: #{theme.color[:board_background]};")
+	end
+
 	def clear()
 		@model.each(:chip) {|chip| chip.deleteLater unless chip == nil }
 		@model.each(:tile) {|tile| tile.detach }
@@ -79,8 +94,19 @@ class Board < Qt::Widget
 	end
 
 	def drop(chip, col, time: 750)
+		assert chip.is_a? BoardChip
+		assert col.is_a? Integer
+		assert col >= 0
+		r = model.next_empty(col)
 		connect(self, SIGNAL("translateCompleted()"), self, SLOT("onDrop()"))
 		translate(item: chip, from: model.head(col), to: model.next_empty(col), time: time)
+
+		begin
+			assert r != model.next_empty(col) #this confirms the piece was added to the array
+		rescue BoardIterator::ColumnFullError
+			#This happens when the column is full after we place it, we just ignore this case
+			#but in this sense the assertion still passes as r != the next row
+		end
 	end
 
 	def onDrop()

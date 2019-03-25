@@ -1,3 +1,5 @@
+require 'matrix'
+
 module BoardIterator
 
 	def [](type, row, col)
@@ -53,10 +55,13 @@ module BoardIterator
 		assert valid?
 	end
 
-	def each_in_diagonal(type, diagonal, direction, maxX, maxY)
+	def each_in_diagonal(type, diagonal, direction)
 		assert diagonals.include?(diagonal)
 		assert direction.is_a?(Symbol) and (direction == :up or direction == :down)
 		assert valid_type?(type)
+
+		maxX = rows.max
+		maxY = columns.max
 
 		(0..diagonal).each do |i|
 			if direction == :up
@@ -64,7 +69,7 @@ module BoardIterator
 					yield self[type, i, diagonal - i]
 				end
 			elsif direction == :down
-				if i <= maxX and maxY - diagonal + i >= 0
+				if i <=  maxX and maxY - diagonal + i >= 0
 					yield self[type, i, maxY - diagonal + i]
 				end
 			end

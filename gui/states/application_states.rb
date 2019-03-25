@@ -108,11 +108,15 @@ class GameScreenState < StatePattern::State
     assert Settings.instance.valid?
 
     @game = nil
-    case Settings.instance.game_mode
-    when :Connect4
-      @game = Connect4.new(parent: stateful.main_window)
-    when :TOOT
+    settings = Settings.instance
 
+    case settings.game_mode
+    when :Connect4
+      @game = Connect4.new(height: settings.window_height,
+                           width: settings.window_width,
+                           parent: stateful.main_window)
+    when :TOOT
+      @game = OTTO.new(parent: stateful.main_window)
     end
 
     @game.start
@@ -172,11 +176,12 @@ class SettingsController < Qt::Widget
     end
 
     if @gui.resolutionComboBox.currentText == "600x800"
-      @settings.window_height = 800
       @settings.window_width = 600
+      @settings.window_height = 800
     end
 
     puts @settings.to_s
+    @settings.save_settings
 
     @gui.close
     @state.open_title
@@ -211,7 +216,6 @@ class SettingsScreenState < StatePattern::State
     #assert stateful.settings_gui.is_a? SettingsGUI
     assert stateful.main_window.is_a? Qt::MainWindow
 
-    # ***** Stopped here.... *****
     @settings_gui = SettingsGUI.new(800, 600, stateful.main_window)
     @settings_gui.show
     @controller = SettingsController.new(self, @settings_gui)
@@ -253,7 +257,7 @@ class ApplicationStateMachine < Qt::Widget
     @window = QTApplication.instance
     @main_window = Qt::MainWindow.new
     @main_window.setFixedSize(800,600) #TODO: Set to a dynamic size
-
+    @main_window.setWindowTitle("Ruby-Board-Games")
     open_title_screen #init title screen
 
     @main_window.show #show title

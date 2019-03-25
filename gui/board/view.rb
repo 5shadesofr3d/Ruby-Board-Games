@@ -139,6 +139,10 @@ class BoardChip < BoardView
 		return true
 	end
 
+	def color()
+		return secondary.name
+	end
+
 	def ==(chip)
 		raise NotImplementedError
 	end
@@ -155,6 +159,8 @@ class Connect4Chip < BoardChip
 
 	def ==(chip)
 		return false if chip == nil
+
+		assert chip.is_a?(Connect4Chip)
 		# chips are equivalent if they are the same color:
 		return self.secondary == chip.secondary
 	end
@@ -182,6 +188,8 @@ class OTTOChip < BoardChip
 	end
 
 	def ==(chip)
+		return false if chip == nil
+
 		assert chip.is_a?(OTTOChip)
 
 		# chips are equivalent if they have the same text (id):

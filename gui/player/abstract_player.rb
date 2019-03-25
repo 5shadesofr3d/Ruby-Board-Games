@@ -9,7 +9,7 @@ class Player < Qt::Object
 	include Debug
 
 	attr_reader :name, :color, :current_chip
-	attr_accessor :wins, :losses, :ties, :game, :current_column
+	attr_accessor :wins, :losses, :ties, :game, :current_column, :goal
 
 	slots :enable, :disable
 	signals :finished

@@ -20,7 +20,7 @@ class Title < Qt::Widget
     setLayout(@layout)
     setScreenSize(width,height)
     setWindowTitle("Ruby-Board-Games")
-    setBackground(Qt::darkCyan)
+
     drawMenu()
     show()
 
@@ -37,16 +37,20 @@ class Title < Qt::Widget
 		assert height() == height
   end
 
-  def setBackground(c = Qt::white)
-    assert c.is_a? Qt::Enum or c.is_a? Qt::Color
-    palette = Qt::Palette.new(c)
-		setAutoFillBackground(true)
-		setPalette(palette)
-    assert palette.is_a? Qt::Palette
-  end
-
   def drawMenu
     assert valid?
+    assert Settings.instance.valid?
+
+    theme = Settings.instance.theme
+
+    # Set the background of the window.
+    setStyleSheet("background-color: #{theme.color[:background]};")
+
+    button_style = "background-color: #{theme.color[:button]};
+                    color: #{theme.color[:text]};
+                    border-radius: 5px;"
+
+    text_style = "color: #{theme.color[:text]}; "
 
     fontT = Qt::Font.new
     fontT.family = "Sans Serif"
@@ -60,21 +64,24 @@ class Title < Qt::Widget
     title.maximumSize = Qt::Size.new(16777215, 46)
     title.font = fontT
     title.text = "Connect N"
+    title.setStyleSheet(text_style)
 
     @bPlay = Qt::PushButton.new("Play")
     @bPlay.font = fontB
     @bPlay.setAutoFillBackground(true)
-    @bPlay.setStyleSheet("background-color: rgb(66, 134, 244); color: rgb(255, 255, 255); border-radius: 5px")
+    @bPlay.setStyleSheet(button_style)
     @bPlay.maximumSize = Qt::Size.new(300, 50)
+
     @bSettings = Qt::PushButton.new("Settings")
     @bSettings.font = fontB
     @bSettings.setAutoFillBackground(true)
-    @bSettings.setStyleSheet("background-color: rgb(66, 134, 244); color: rgb(255, 255, 255); border-radius: 5px")
+    @bSettings.setStyleSheet(button_style)
     @bSettings.maximumSize = Qt::Size.new(300, 50)
+
     @bQuit = Qt::PushButton.new("Exit")
     @bQuit.font = fontB
     @bQuit.setAutoFillBackground(true)
-    @bQuit.setStyleSheet("background-color: rgb(66, 134, 244); color: rgb(255, 255, 255); border-radius: 5px")
+    @bQuit.setStyleSheet(button_style)
     @bQuit.maximumSize = Qt::Size.new(300, 50)
 
 

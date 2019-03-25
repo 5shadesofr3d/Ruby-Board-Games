@@ -1,5 +1,6 @@
 require 'Qt'
 require 'test/unit'
+require 'chroma'
 require_relative 'iterator'
 require_relative 'view'
 require_relative '../debug'
@@ -74,13 +75,24 @@ class BoardModel
 	end
 
 private
+  # Takes values of format: rgb(X, X, X) and
+  # outputs a Qt color
+  def rgbString_to_QtColor(input)
+    Qt::Color.fromRgb(input.paint.rgb.r,
+                      input.paint.rgb.g,
+                      input.paint.rgb.b)
+  end
+
 	def generateTiles()
 		assert @tile.size == 0
+
+		theme = Settings.instance.theme
+    tile_color = rgbString_to_QtColor(theme.color[:tile_color])
 
 		rows.each do |r|
 			row = []
 			columns.each do |c|
-				item = BoardTile.new(parent: parent)
+				item = BoardTile.new(color: tile_color, parent: parent)
 				row << item
 			end
 			@tile << row
