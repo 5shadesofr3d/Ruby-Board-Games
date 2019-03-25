@@ -142,16 +142,16 @@ class Connect4 < Game
     model = board.model
 
     # check every column first for a "4 in a row"
-    # model.columns.each do |col|
-    #   cols = model.to_enum(:each_in_column, :chip, col)
-    #   cols.each_cons(4) { |chips| return chips if consecutive4?(chips) }
-    # end
+    model.columns.each do |col|
+      cols = model.to_enum(:each_in_column, :chip, col)
+      cols.each_cons(4) { |chips| return chips if consecutive4?(chips) }
+    end
 
     # check every row
-    # model.rows.each do |row|
-    #   rows = model.to_enum(:each_in_row, :chip, row)
-    #   rows.each_cons(4) { |chips| return chips if consecutive4?(chips) }
-    # end
+    model.rows.each do |row|
+      rows = model.to_enum(:each_in_row, :chip, row)
+      rows.each_cons(4) { |chips| return chips if consecutive4?(chips) }
+    end
 
     # check every diagonal
     model.diagonals.each do |diagonal|
