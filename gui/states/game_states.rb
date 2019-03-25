@@ -199,11 +199,9 @@ class GameEndState < GameState
     assert game.players.each {|p| assert p.is_a? Player}
     # display winner, clear game board, score
     if (game.winner?)
-      player = game.players.first
-      player.wins += 1
-      game.players.drop(1).each { |player| player.losses += 1 }
+      # game.players.each { |player| player.goal == game.last_win_condition? (player.wins += 1) : (player.losses += 1) }
     else # we had a tie
-      game.players.each { |player| player.ties += 1 }
+      # game.players.each { |player| player.ties += 1 }
     end
     game.updatePlayerInfos()
     game.board.clear()

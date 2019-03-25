@@ -202,9 +202,12 @@ end
 
 class OTTO < Game
   @@chip_iteration = 0
+  @@otto = [:O, :T, :T, :O]
+  @@toot = [:T, :O, :O, :T]
 
   def initialize(rows: 7, columns: 8, width: 800, height: 600, parent: nil)
     super(rows: rows, columns: columns, width: width, height: height, parent: parent)
+    lobby.addPlayer() # minimum 2 players
   end
 
   def constructChip(c)
@@ -218,8 +221,7 @@ class OTTO < Game
   def consecutiveOTTO?(chips)
     return false unless chips.size == 4
     return false if chips.include?(nil)
-    return false if chips.length != 4
-    return ((chips[0].id == :T and chips[1].id == :O and chips[2].id == :O and chips[3].id == :T) or (chips[0].id == :O and chips[1].id == :T and chips[2].id == :T and chips[3].id == :O))
+    return (chips.map(&:id) == @@otto or chips.map(&:id) == @@toot)
   end
 
   def findConsecutiveOTTO()
@@ -241,10 +243,10 @@ class OTTO < Game
 
     # check every diagonal
     model.diagonals.each do |diagonal|
-      upper_diag = model.to_enum(:each_in_diagonal, :chip, diagonal, :up, model.rows.max - 1, model.columns.max - 1)
+      upper_diag = model.to_enum(:each_in_diagonal, :chip, diagonal, :up)
       upper_diag.each_cons(4) { |chips| return chips if consecutiveOTTO?(chips) }
 
-      lower_diag = model.to_enum(:each_in_diagonal, :chip, diagonal, :down, model.rows.max - 1, model.columns.max - 1)
+      lower_diag = model.to_enum(:each_in_diagonal, :chip, diagonal, :down)
       lower_diag.each_cons(4) { |chips| return chips if consecutiveOTTO?(chips) }
     end
 
@@ -259,9 +261,7 @@ class OTTO < Game
   end
 
   def setPlayerGoals()
-    otto = [:O, :T, :T, :O]
-    toot = [:T, :O, :O, :T]
-    players.each_with_index { |player, index| player.goal = index.even? ? otto : toot }
+    players.each_with_index { |player, index| player.goal = index.even? ? @@otto : @@toot }
   end
 
   def valid?
