@@ -100,7 +100,13 @@ class Board < Qt::Widget
 		r = model.next_empty(col)
 		connect(self, SIGNAL("translateCompleted()"), self, SLOT("onDrop()"))
 		translate(item: chip, from: model.head(col), to: model.next_empty(col), time: time)
-		assert r != model.next_empty(col) #this confirms the piece was added to the array
+
+		begin
+			assert r != model.next_empty(col) #this confirms the piece was added to the array
+		rescue BoardIterator::ColumnFullError
+			#This happens when the column is full after we place it, we just ignore this case
+			#but in this sense the assertion still passes as r != the next row
+		end
 	end
 
 	def onDrop()
