@@ -45,21 +45,16 @@ class AIPlayer < Player
 		assert game.is_a?(Game)
 
 		# AI will get the next position, will be determined based on the difficulty setting
-		tried_col = []
-		begin
-			@current_column = @ai_object.getBestScore()
-			if @ai_object.is_a?(AI_OTTO)
-				# random value
-				temp_num = rand(2)
-				if temp_num == 0
-					up()
-				end
+		@current_column = @ai_object.getBestScore()
+		if @ai_object.is_a?(AI_OTTO)
+			# random value
+			temp_num = rand(2)
+			if temp_num == 0
+				up()
 			end
-			drop()
-			finished()
-		rescue BoardIterator::ColumnFullError
-			tried_col << @current_column
-			retry
+		end
+		drop()
+		finished()
 
 		#post
 		assert @current_column.is_a?(Numeric)
