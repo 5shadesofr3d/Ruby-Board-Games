@@ -166,6 +166,7 @@ class GamePlayerMoveState < GameState
   end
 
   def onExit(event)
+    puts "we are exiting"
     assert game.players.count > 0
     assert game.players.first.is_a? Player
     player = game.players.first

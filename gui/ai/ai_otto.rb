@@ -46,7 +46,7 @@ class AI_OTTO < AI
 		iter.each_cons(4) { |chips| method_score += 100 if consecutiveOTTO?(chips) }
         iter.each_cons(4) { |chips| method_score += 5 if contain3?(chips) }
         iter.each_cons(4) { |chips| method_score += 2 if contain2?(chips) }
-        iter.each_cons(4) { |chips| method_score -= 4 if block?(chips)}
+        iter.each_cons(4) { |chips| method_score -= 4 if prevent_opp_win?(chips)}
         return method_score
     end
 
@@ -80,7 +80,20 @@ class AI_OTTO < AI
 	def prevent_opp_win?(chips)
 		# Checks to see if it sets up the enemy to win
 		return false unless chips.size == 4
-		return true if chips.count(nil) == 1 and chips.count{|c| c != @current_chip and c != nil} >= 3
+		temp_cons = @player_goal.dup
+		(0..@player_goal.size).each do |i|
+			if temp_cons[i] == :T
+				temp_cons[i] = :O
+			elsif temp_cons[i] == :O
+				temp_cons[i] = :T
+			end
+		end
+
+		(0..temp_cons.size-1).each do |i|
+			temp_cons1 = temp_cons.dup
+			temp_cons1[i] = nil
+			return true if chips.map(&:id) == temp_cons1
+		end
 	end
 
 	# def block?(chips)

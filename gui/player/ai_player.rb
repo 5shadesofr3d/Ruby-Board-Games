@@ -28,6 +28,11 @@ class AIPlayer < Player
 		
 	end
 
+	def disable()
+		puts "we are about to disable"
+		super()
+	end
+
 	def play(ai_type)
 		# This will return the move that the player will take. This will come
 		# from a move generator for the AI
@@ -45,6 +50,7 @@ class AIPlayer < Player
 		puts @current_column
 		drop()
 		puts "finish drop"
+		finished()
 
 		#post
 		assert @current_column.is_a?(Numeric)

@@ -129,6 +129,7 @@ class Player < Qt::Object
 		assert game.board.is_a? Board
 
 		disconnect(game.board, SIGNAL("dropped()"), self, SIGNAL("finished()"))
+		puts "we should leave"
 	end
 
 	def total_score
