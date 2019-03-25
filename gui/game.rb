@@ -18,18 +18,20 @@ class Game < Qt::Widget
 
     parent != nil ? super(parent) : super()
     resize(width, height)
-    setupUI
+    setupUI(rows, columns)
 
     @players = []
     @machine = GameStateMachine.new(self)
 
+    assert width() == width
+    assert height() == height
     assert valid?
   end
 
-  def setupUI()
+  def setupUI(rows, cols)
     setupStack
     setupLobby
-    setupBoard
+    setupBoard(rows, cols)
 
     setFocus(Qt::OtherFocusReason)
     setFocusPolicy(Qt::StrongFocus)
@@ -46,8 +48,8 @@ class Game < Qt::Widget
     setLayout(@stack)
   end
 
-  def setupBoard()
-    @board = Board.new(7, 8, parent: self)
+  def setupBoard(rows, cols)
+    @board = Board.new(rows, cols, parent: self)
     @stack.addWidget(board)
   end
 
@@ -149,14 +151,22 @@ class Game < Qt::Widget
   end
 
   def updatePlayers()
+    assert lobby.is_a? PlayerLobby
+
     @players = lobby.getPlayers()
     players.each { |player| player.game = self }
     setPlayerGoals()
+
+    assert @players.is_a? Array
+    @players.each {|e| assert e.goal.is_a? Array}
+    @players.each {|e| assert e.is_a? Player}
     assert @players.count > 0
   end
 
   def updatePlayerInfos()
     @lobby.setPlayers(players)
+
+    assert @lobby.getPlayers.count > 0
   end
 
   def addPlayer(player)
@@ -201,7 +211,16 @@ class Connect4 < Game
   end
 
   def setPlayerGoals()
+    assert players.is_a? Array
+    assert players.size > 0
+
     players.each { |player| player.goal = Array.new(4, player.color.name) }
+
+    assert players.is_a? Array
+    assert players.size > 0
+    players.each {|p| assert p.goal.first == p.color.name}
+    players.each {|p| assert p.goal.is_a? Array}
+    players.each {|p| assert p.goal.size == 4}
   end
 
   def winnersGoal()

@@ -41,6 +41,11 @@ class GameStateMachine < Qt::StateMachine
     assert move.is_a? GamePlayerMoveState
     assert status.is_a? GameDetermineStatusState
     assert complete.is_a? GameEndState
+    #assert lobby.transition.count > 0 NOTE: unfortunately it seems the qtbindings gem fails with this transitions function
+    #assert start.transition.count > 0  #thse assertions would check that transitions were added
+    #assert move.transition.count > 0
+    #assert status.transition.count > 0
+    #assert complete.transition.count > 0
   end
 
   def valid?()
@@ -89,6 +94,7 @@ class GameLobbyState < GameState
 
   def start_game
     assert game.lobby.room.playerInfos.count > 0
+
     players = game.lobby.room.playerInfos
     cols = []
     duplicate = false
@@ -112,6 +118,7 @@ class GameLobbyState < GameState
 
   def onExit(event)
     assert game.is_a? Game
+    assert game.players.size == 0
     # disconnect the start button so it no longer works
     disconnect(startButton, SIGNAL("clicked()"))
     game.updatePlayers()
@@ -126,12 +133,15 @@ end
 class GamePlayState < GameState
 
   def onEntry(event)
+    assert game.is_a? Game
+
     # show game board
     game.showBoard()
     # game time
     # game score
     done()
 
+    assert game.is_a? Game
     assert game.board.visible
   end
 
@@ -151,6 +161,8 @@ class GamePlayerMoveState < GameState
     player.enable
     # after player completes his move, go to the next state
     connect(player, SIGNAL("finished()"), self, SIGNAL("done()"))
+
+    assert player.is_a? Player
   end
 
   def onExit(event)
@@ -161,6 +173,8 @@ class GamePlayerMoveState < GameState
     disconnect(player, SIGNAL("finished()"), self, SIGNAL("done()"))
     # no longer acknowledge moves from this player
     player.disable
+
+    assert player.is_a? Player
   end
 
 end
@@ -203,6 +217,8 @@ class GameEndState < GameState
     game.updatePlayerInfos()
     game.board.clear()
     done()
+
+    assert game.players.count == 0 #game is over
   end
 
   def onExit(event)
