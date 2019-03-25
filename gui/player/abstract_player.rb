@@ -49,6 +49,17 @@ class Player < Qt::Object
 		return true
 	end
 
+	def up()
+		return if @current_chip == nil
+		
+		@current_chip.deleteLater 
+		@current_chip = game.constructChip(color, column: @current_column)
+	end
+
+	def down()
+		up()
+	end
+
 	def left()
 		assert game.is_a? Game
 		assert game.board.model.is_a? BoardModel
