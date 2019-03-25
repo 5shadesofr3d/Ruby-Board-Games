@@ -16,7 +16,7 @@ end
 class PlayerLobby < Qt::Frame
   attr_reader :room, :buttons
 
-  slots :addPlayer
+  slots :addPlayer,:removePlayer
 
   @@MAX_PLAYER_COUNT = 4
 
@@ -38,13 +38,22 @@ class PlayerLobby < Qt::Frame
     setLayout(layout)
 
     connect(buttons.add, SIGNAL("clicked()"), self, SLOT(:addPlayer))
-
+    connect(buttons.remove, SIGNAL("clicked()"), self, SLOT(:removePlayer))
     setStyleSheet("background-color:#{LobbyColor::DARK_BLUE}; border: 1px; border-radius: 10px")
   end
 
   def addPlayer()
-    @room.addPlayer() if @player_count < @@MAX_PLAYER_COUNT
-    @player_count += 1
+    if @player_count < @@MAX_PLAYER_COUNT
+      @room.addPlayer()
+      @player_count += 1
+    end
+  end
+
+  def removePlayer()
+    if @player_count > 1
+      @room.removePlayer()
+      @player_count -= 1
+    end
   end
 
   def getPlayers()
@@ -68,7 +77,7 @@ class PlayerLobby < Qt::Frame
 end
 
 class PlayerLobbyButtons < Qt::Widget
-  attr_reader :add, :start
+  attr_reader :add, :start, :exit, :remove
 
     def initialize(parent: nil)
     parent != nil ? super(parent) : super()
@@ -76,7 +85,11 @@ class PlayerLobbyButtons < Qt::Widget
     buttonLayout = Qt::HBoxLayout.new(self)
     @add = PlayerLobbyButton.new("Add", self)
     @start = PlayerLobbyButton.new("Start", self)
+    @exit = PlayerLobbyButton.new("Exit",self)
+    @remove = PlayerLobbyButton.new("Remove",self)
+    buttonLayout.addWidget(exit)
     buttonLayout.addWidget(add)
+    buttonLayout.addWidget(remove)
     buttonLayout.addWidget(start)
     setLayout(buttonLayout)
 
@@ -89,7 +102,7 @@ class PlayerLobbyButton < Qt::PushButton
     super(str, parent)
 
     setStyleSheet("color:white; background-color:#{LobbyColor::BLUE}; border: 1px; border-radius: 10px")
-    
+
     setMaximumSize(75, 50)
     setMinimumSize(75, 50)
 
@@ -132,6 +145,15 @@ class PlayerRoom < Qt::Frame
     playerInfo = PlayerInfo.new(parent: self)
     @playerInfos << playerInfo
     @layout.addWidget(playerInfo)
+    assert valid?
+  end
+
+  def removePlayer()
+    assert valid?
+
+    player = @playerInfos.pop
+    player.close
+    @layout.removeWidget(player)
 
     assert valid?
   end
@@ -295,6 +317,10 @@ class PlayerInfo < Qt::Widget
     setLayout(@layout)
 
     assert valid?
+  end
+
+  def close_all
+    @layout.each {|e| e.hide}
   end
 
   def name=(str)
