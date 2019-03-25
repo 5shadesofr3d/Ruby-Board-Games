@@ -1,6 +1,6 @@
 # This is the main AI for the OTTO TOOT game
 require 'test/unit'
-require_relative 'AI/ai_abstract'
+require_relative 'ai_abstract'
 
 class AI_OTTO < AI
 	include Test::Unit::Assertions
@@ -12,9 +12,15 @@ class AI_OTTO < AI
 	def scoring(temp_board, player_piece)
 		# takes in the instance of the game board and returns a scoring matrix
 		# of size N x 1 (where N is the number of columns present in the game)
+		@player_goal = [:T, :O, :O, :T]
 		score = 0
 		model = temp_board.model
 		#assert board.is_a? Board
+
+		## Score center column
+		center_array = model.to_enum(:each_in_column, :chip, (model.columns.max / 2).to_i)
+		center_count = center_array.count(@current_chip)
+		score += center_count * 3
 
 		# check every column first for a "4 in a row"
 	    model.columns.each do |col|
@@ -63,8 +69,11 @@ class AI_OTTO < AI
 			temp_cons = @player_goal.dup
 			temp_cons[i] = nil
 			temp_cons[i+1] = nil
-			return true if chips.map(&:id) == temp_cons
+			if convertID(chips) == temp_cons
+				return true
+			end
 		end
+		return false
 	end
 
 	def contain3?(chips)
@@ -73,8 +82,11 @@ class AI_OTTO < AI
 		(0..@player_goal.size-1).each do |i|
 			temp_cons = @player_goal.dup
 			temp_cons[i] = nil
-			return true if chips.map(&:id) == temp_cons
+			if convertID(chips) == temp_cons
+				return true
+			end
 		end
+		return false
 	end
 
 	def prevent_opp_win?(chips)
@@ -92,8 +104,23 @@ class AI_OTTO < AI
 		(0..temp_cons.size-1).each do |i|
 			temp_cons1 = temp_cons.dup
 			temp_cons1[i] = nil
-			return true if chips.map(&:id) == temp_cons1
+			if convertID(chips) == temp_cons1
+				return true
+			end
 		end
+		return false
+	end
+
+	def convertID(chips)
+		return_array = []
+		chips.each do |chip|
+			if chip != nil
+				return_array << chip.id
+			else
+				return_array << chip
+			end
+		end
+		return return_array
 	end
 
 	# def block?(chips)

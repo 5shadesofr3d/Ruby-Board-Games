@@ -4,8 +4,9 @@
 require 'test/unit'
 require 'Qt'
 require_relative 'abstract_player'
-# require_relative '../AI'
+# require_relative '../ai'
 require_relative '../ai/ai_connect4'
+require_relative '../ai/ai_otto'
 
 class AIPlayer < Player
 	# slots "play(const QKeyEvent*)"
@@ -23,20 +24,19 @@ class AIPlayer < Player
 	def enable()
 		# TODO: change this if not correct.
 		super()
-		puts "We are about to play"
 		self.play("something")
 		
 	end
 
-	def disable()
-		puts "we are about to disable"
-		super()
-	end
+	# def disable()
+	# 	puts "we are about to disable"
+	# 	super()
+	# end
 
 	def play(ai_type)
 		# This will return the move that the player will take. This will come
 		# from a move generator for the AI
-		ai_test = AI_Connect4.new(self.game, 1, @current_chip)
+		ai_test = AI_OTTO.new(self.game, 2, @current_chip)
 		# The ai player will require the ai_type to be passed through
 		# TODO: To be changed possibly based off of the main gameplay code. Look
 		# 		into the player_lobby code
@@ -45,11 +45,9 @@ class AIPlayer < Player
 		assert game.is_a?(Game)
 
 		# AI will get the next position, will be determined based on the difficulty setting
-		puts "Getting Score"
 		@current_column = ai_test.getBestScore()
 		puts @current_column
 		drop()
-		puts "finish drop"
 		finished()
 
 		#post

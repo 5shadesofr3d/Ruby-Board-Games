@@ -158,15 +158,14 @@ class GamePlayerMoveState < GameState
     # get next player
     player = game.players.first
     # acknowledge moves from this player
+    connect(player, SIGNAL("finished()"), self, SIGNAL("done()"))
     player.enable
     # after player completes his move, go to the next state
-    connect(player, SIGNAL("finished()"), self, SIGNAL("done()"))
 
     assert player.is_a? Player
   end
 
   def onExit(event)
-    puts "we are exiting"
     assert game.players.count > 0
     assert game.players.first.is_a? Player
     player = game.players.first
