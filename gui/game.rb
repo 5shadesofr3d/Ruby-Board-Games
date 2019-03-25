@@ -23,6 +23,8 @@ class Game < Qt::Widget
     @players = []
     @machine = GameStateMachine.new(self)
 
+    assert width() == width
+    assert height() == height
     assert valid?
   end
 
@@ -99,14 +101,22 @@ class Game < Qt::Widget
   end
 
   def updatePlayers()
+    assert lobby.is_a? PlayerLobby
+
     @players = lobby.getPlayers()
     players.each { |player| player.game = self }
     setPlayerGoals()
+
+    assert @players.is_a? Array
+    @players.each {|e| assert e.goal.is_a? Array}
+    @players.each {|e| assert e.is_a? Player}
     assert @players.count > 0
   end
 
   def updatePlayerInfos()
     @lobby.setPlayers(players)
+
+    assert @lobby.getPlayers.count > 0
   end
 
   def addPlayer(player)
@@ -152,6 +162,10 @@ class Connect4 < Game
 
   def findConsecutive4()
     assert board.model.is_a? BoardModel
+    assert board.model.columns.max > 0
+    assert board.model.rows.max > 0 #if these are 0, we have an issue
+    assert board.model.diagonals.max > 0
+
     assert valid?
 
     model = board.model
@@ -183,7 +197,16 @@ class Connect4 < Game
   end
 
   def setPlayerGoals()
+    assert players.is_a? Array
+    assert players.size > 0
+
     players.each { |player| player.goal = Array.new(4, player.color.name) }
+
+    assert players.is_a? Array
+    assert players.size > 0
+    players.each {|p| assert p.goal.first == p.color.name}
+    players.each {|p| assert p.goal.is_a? Array}
+    players.each {|p| assert p.goal.size == 4}
   end
 
   def winner?()
