@@ -66,6 +66,15 @@ class Game < Qt::Widget
     machine.start()
   end
 
+  def set_state(state)
+    @statem = state
+  end
+
+  def stop()
+    machine.stop
+    @statem.open_title_screen
+  end
+
   def showLobby()
     @stack.setCurrentWidget(@lobbyWidget)
   end
