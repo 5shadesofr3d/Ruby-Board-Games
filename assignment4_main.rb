@@ -1,3 +1,9 @@
+# Group members
+# Vishal Patel
+# Rizwan Qureshi
+# Curtis Goud
+# Jose Ramirez
+# Jori Romans
 require 'Qt'
 require_relative 'gui/game'
 require_relative 'gui/player/player_lobby'
@@ -5,13 +11,12 @@ require_relative 'gui/board'
 require_relative 'gui/debug'
 require_relative 'application'
 
-
-# TODO: Complete later.
 # To run assignment4_main.rb, ensure you have the following
 # dependancies:
 #
 # gem install state_pattern
 # gem install qtbindings
+# gem install chroma
 
 
 # Debug::on # may cause animation lag due to excessive printing to terminal

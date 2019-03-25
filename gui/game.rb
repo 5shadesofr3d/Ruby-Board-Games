@@ -88,7 +88,7 @@ class Game < Qt::Widget
     @stack.setCurrentWidget(@board)
   end
 
-  def constructChip(color: c)
+  def constructChip(c, column: 0)
     raise NotImplementedError
   end
 
@@ -128,6 +128,13 @@ class Game < Qt::Widget
   def winner?()
     return winnersGoal != nil
   end
+
+  def tie?()
+    model = board.model
+    topRow = model.to_enum(:each_in_row, :chip,	0)
+    return (!topRow.include?(nil) and !winner?)
+  end
+
 
   def winnersGoal()
     raise NotImplementedError
@@ -197,7 +204,7 @@ class Connect4 < Game
     super(rows: rows, columns: columns, width: width, height: height, parent: parent)
   end
 
-  def constructChip(c)
+  def constructChip(c, column: 0)
     chip = Connect4Chip.new(color: c, parent: board)
     chip.geometry = board.model.head(0).geometry # place new chip on the first slot at the top of the board
     return chip
