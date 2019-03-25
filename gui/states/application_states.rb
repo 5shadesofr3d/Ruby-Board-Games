@@ -181,6 +181,7 @@ class SettingsController < Qt::Widget
     end
 
     puts @settings.to_s
+    @settings.save_settings
 
     @gui.close
     @state.open_title

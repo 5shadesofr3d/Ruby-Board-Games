@@ -247,6 +247,7 @@ class SettingsGUI < Qt::Widget
 
 
     retranslateUi
+    initialize_ui
 
     assert @cancelButton.is_a? Qt::PushButton
     assert @applyButton.is_a? Qt::PushButton
@@ -258,6 +259,34 @@ class SettingsGUI < Qt::Widget
 
   def setup_ui
     setupUi
+  end
+
+  def valid_settings?
+    return false if Settings.instance.valid_game_mode.index(Settings.instance.game_mode).nil?
+    return false if Settings.instance.valid_themes.index(Settings.instance.theme_setting).nil?
+    return false if Settings.instance.valid_window_mode.index(Settings.instance.window_mode).nil?
+    return true
+  end
+
+  def initialize_ui
+    assert Settings.instance.valid?
+    assert valid_settings?
+
+    settings = Settings.instance
+
+    @rowSpinBox.value = settings.num_rows
+    @colSpinBox.value = settings.num_cols
+
+    @gameModeComboBox.currentIndex = settings.valid_game_mode
+                                             .index(settings.game_mode)
+    @themeComboBox.currentIndex = settings.valid_themes
+                                          .index(settings.theme_setting)
+    @windowModeComboBox.currentIndex = settings.valid_window_mode
+                                               .index(settings.window_mode)
+
+    # attr_reader :resolutionComboBox
+
+
   end
 
   def retranslateUi
