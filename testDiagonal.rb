@@ -1,5 +1,4 @@
 class BoardModel
-	include Test::Unit::Assertions
 
 	attr_reader :parent
 
@@ -33,17 +32,19 @@ class BoardModel
 		return (0..([@rows, @cols].min - 1))
 	end
 
-  def each_in_diagonal(type, diagonal, direction)
+  def each_in_diagonal(diagonal, direction)
 
-		(0..diagonal).each do |i|
-			if direction == 1
-				yield [i, diagonal - i]
-			elsif direction == 2
-				yield [diagonal - i, i]
-			end
-		end
+		(0..((2 * diagonal) - 2)).each do |i|
+      if i <= diagonal
 
-		assert valid?
+        if direction == 1
+				  yield [i, diagonal - i]
+			  elsif direction == 2
+				  yield [diagonal - i, i]
+			  end
+		 end
+   end
+
 	end
 
 	def each_in_row(row)
@@ -66,26 +67,46 @@ class BoardModel
 
     # check every column first for a "4 in a row"
     self.columns.each do |col|
-      cols = model.to_enum(:each_in_column, col)
-      cols.each_cons(4) { |chips| return chips if consecutive4?(chips) }
+      cols = self.to_enum(:each_in_column, col)
+      cols.each do |c|
+        print(c)
+        print("\n")
+      end
+      print("\n")
+      print("\n")
     end
 
     # check every row
-    model.rows.each do |row|
-      rows = model.to_enum(:each_in_row, row)
-      rows.each_cons(4) { |chips| return chips if consecutive4?(chips) }
+    self.rows.each do |row|
+      rows = self.to_enum(:each_in_row, row)
+      rows.each do |r|
+        print(r)
+        print("\n")
+      end
+      print("\n")
+      print("\n")
     end
 
     # check every diagonal
-    model.diagonals.each do |diagonal|
-      upper_diag = model.to_enum(:each_in_diagonal, diagonal, 1)
-      print(upper_diag)
+    self.diagonals.each do |diagonal|
+      upper_diag = self.to_enum(:each_in_diagonal, diagonal, 1)
+      upper_diag.each do |u|
+        print(u)
+        print("\n")
+      end
+      print("\n")
+      print("\n")
 
-      lower_diag = model.to_enum(:each_in_diagonal, diagonal, 2)
-      lower_diag.each_cons(4) { |chips| return chips if consecutive4?(chips) }
+      lower_diag = self.to_enum(:each_in_diagonal, diagonal, 2)
+      lower_diag.each do |d|
+        print(d)
+        print("\n")
+      end
+      print("\n")
+      print("\n")
     end
 
-    assert valid?
+
   end
 
 end
