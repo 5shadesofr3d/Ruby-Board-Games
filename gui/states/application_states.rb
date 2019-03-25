@@ -206,8 +206,10 @@ class SettingsScreenState < StatePattern::State
     #assert stateful.settings_gui.is_a? SettingsGUI
     assert stateful.main_window.is_a? Qt::MainWindow
 
-    stateful.settings_gui.show
-    @controller = SettingsController.new(self, stateful.settings_gui)
+    # ***** Stopped here.... *****
+    @settings_gui = SettingsGUI.new(800, 600, stateful.main_window)
+    @settings_gui.show
+    @controller = SettingsController.new(self, @settings_gui)
 
     # assert settings_gui.is_a? SettingsGUI
     assert @controller.is_a? SettingsController
@@ -227,7 +229,7 @@ end
 class ApplicationStateMachine < Qt::Widget
   include StatePattern
   include Test::Unit::Assertions
-  attr_accessor :window, :settings_gui, :main_window
+  attr_accessor :window, :main_window
   set_initial_state(TitleScreenState)
   slots 'open_title_screen()'
 
@@ -245,10 +247,6 @@ class ApplicationStateMachine < Qt::Widget
 
     @window = QTApplication.instance
     @main_window = Qt::MainWindow.new
-
-    # ***** Stopped here.... *****
-    @settings_gui = SettingsGUI.new(800, 600, @main_window)
-
     @main_window.setFixedSize(800,600) #TODO: Set to a dynamic size
 
     open_title_screen #init title screen
