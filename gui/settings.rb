@@ -8,7 +8,7 @@ class Settings
 
   attr_accessor :game_mode, :num_cols, :num_rows
   attr_accessor :theme, :theme_setting
-  attr_accessor :window_height, :window_width, :window_length, :window_mode
+  attr_accessor :window_height, :window_width, :window_mode
 
   # NOTE 2: We'll have to call Settings.is_valid? as contracts
   # in other functions. Just not this one.
