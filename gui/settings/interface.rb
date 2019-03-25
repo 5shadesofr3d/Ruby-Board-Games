@@ -35,7 +35,6 @@ class SettingsGUI < Qt::Widget
 
   end
 
-  # --- Auto-generated section ---
   def setupUi()
     # assert settingsWindow.is_a? Qt::MainWindow
     assert Settings.instance.valid?
