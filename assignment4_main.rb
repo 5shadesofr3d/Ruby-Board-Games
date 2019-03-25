@@ -5,8 +5,16 @@ require_relative 'gui/board'
 require_relative 'gui/debug'
 require_relative 'application'
 
-Debug::on
 
+# TODO: Complete later.
+# To run assignment4_main.rb, ensure you have the following
+# dependancies:
+#
+# gem install state_pattern
+# gem install qtbindings
+
+
+Debug::on
 app = GameApplication.new
 
 # app = Qt::Application.new ARGV
