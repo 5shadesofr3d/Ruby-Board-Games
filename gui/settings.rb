@@ -19,7 +19,7 @@ class Settings
     @valid_game_mode = [:Connect4, :TOOT]
     @valid_themes = [:Default]
     @valid_window_mode = [:Windowed, :Fullscreen]
-    @valid_resolutions = ["600x800"]
+    @valid_resolutions = ["800x600"]
 
     # TODO: Load the settings into the GUI
     if File.file?("settings.json")
