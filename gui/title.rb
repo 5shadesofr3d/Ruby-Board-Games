@@ -21,8 +21,9 @@ class Title < Qt::Widget
     setScreenSize(width,height)
     setWindowTitle("Ruby-Board-Games")
 
-    drawMenu()
-    show()
+    drawMenu
+    draw_color
+    show
 
     assert @layout.is_a? Qt::VBoxLayout
   end
@@ -37,9 +38,7 @@ class Title < Qt::Widget
 		assert height() == height
   end
 
-  def drawMenu
-    assert valid?
-    assert Settings.instance.valid?
+  def draw_color
 
     theme = Settings.instance.theme
 
@@ -52,6 +51,21 @@ class Title < Qt::Widget
 
     text_style = "color: #{theme.color[:text]}; "
 
+    @title.setStyleSheet(text_style)
+
+    @bPlay.setStyleSheet(button_style)
+    @bSettings.setStyleSheet(button_style)
+    @bQuit.setStyleSheet(button_style)
+
+    # self.repaint
+
+  end
+
+  def drawMenu
+    assert valid?
+    assert Settings.instance.valid?
+
+
     fontT = Qt::Font.new
     fontT.family = "Sans Serif"
     fontT.pointSize = 36
@@ -59,35 +73,29 @@ class Title < Qt::Widget
     fontB.family = "Sans Serif"
     fontB.pointSize = 24
 
-
-    title = Qt::Label.new
-    title.maximumSize = Qt::Size.new(16777215, 46)
-    title.font = fontT
-    title.text = "Connect N"
-    title.setStyleSheet(text_style)
+    @title = Qt::Label.new
+    @title.maximumSize = Qt::Size.new(16777215, 46)
+    @title.font = fontT
+    @title.text = "Connect N"
 
     @bPlay = Qt::PushButton.new("Play")
     @bPlay.font = fontB
     @bPlay.setAutoFillBackground(true)
-    @bPlay.setStyleSheet(button_style)
     @bPlay.maximumSize = Qt::Size.new(300, 50)
 
     @bSettings = Qt::PushButton.new("Settings")
     @bSettings.font = fontB
     @bSettings.setAutoFillBackground(true)
-    @bSettings.setStyleSheet(button_style)
     @bSettings.maximumSize = Qt::Size.new(300, 50)
 
     @bQuit = Qt::PushButton.new("Exit")
     @bQuit.font = fontB
     @bQuit.setAutoFillBackground(true)
-    @bQuit.setStyleSheet(button_style)
     @bQuit.maximumSize = Qt::Size.new(300, 50)
-
 
     @layout.setAlignment(Qt::AlignTop | Qt::AlignHCenter)
 
-    @layout.addWidget(title)
+    @layout.addWidget(@title)
     @layout.addWidget(@bPlay)
     @layout.addWidget(@bSettings)
     @layout.addWidget(@bQuit)

@@ -150,11 +150,13 @@ class PlayerRoom < Qt::Frame
 
   def removePlayer()
     assert valid?
+    assert @playerInfos.count > 0
 
     player = @playerInfos.pop
     player.close
     @layout.removeWidget(player)
 
+    assert @playerInfos.include? player == false
     assert valid?
   end
 
@@ -288,6 +290,14 @@ class PlayerInfo < Qt::Widget
 
   def initialize(name: "Player", wins: 0, loss: 0, ties: 0, color: "blue", parent: nil)
     parent != nil ? super(parent) : super()
+    assert wins.is_a? Integer
+    assert loss.is_a? Integer
+    assert ties.is_a? Integer
+    assert wins >= 0
+    assert loss >= 0
+    assert ties >= 0
+
+
 
     setMaximumHeight(50)
     setMinimumHeight(50)
@@ -379,6 +389,7 @@ class PlayerInfo < Qt::Widget
 
   def construct_player(parent)
     # constructs and returns the player based off info
+    assert type.is_a? String
 
     player = nil
 
@@ -394,6 +405,12 @@ class PlayerInfo < Qt::Widget
     player.wins = self.wins
     player.losses = self.losses
     player.ties = self.ties
+
+
+    assert player.is_a? Player
+    assert player.ties >= 0
+    assert player.losses >= 0
+    assert player.wins >= 0
 
     return player
   end

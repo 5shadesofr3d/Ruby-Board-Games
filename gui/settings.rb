@@ -17,9 +17,9 @@ class Settings
     # Note: Assumes the order of items in these valid_... arrays
     # matches the order of the elements in the combo box.
     @valid_game_mode = [:Connect4, :TOOT]
-    @valid_themes = [:Default]
+    @valid_themes = [:Default, :Colorblind]
     @valid_window_mode = [:Windowed, :Fullscreen]
-    @valid_resolutions = ["800x600"]
+    @valid_resolutions = ["800x700"]
 
     # TODO: Load the settings into the GUI
     if File.file?("settings.json")
@@ -39,7 +39,7 @@ class Settings
       @window_mode = :Windowed
       @theme_setting = :Default
       @window_width = 800
-      @window_height = 600
+      @window_height = 700
     end
 
     @theme = Theme.new(theme_setting)

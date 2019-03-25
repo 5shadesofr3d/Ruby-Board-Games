@@ -61,7 +61,9 @@ class TitleController < Qt::Widget
     @state = state
     @window = window
 
-    @title = Title.new(800,600,window) #TODO: Dynamic screen size
+    settings = Settings.instance
+    @title = Title.new(settings.window_width,
+                       settings.window_height, window)
 
     connect(@title.bPlay,  SIGNAL('clicked()'), self, SLOT('play_game()'))
     connect(@title.bSettings,  SIGNAL('clicked()'), self, SLOT('open_settings()'))
@@ -112,7 +114,9 @@ class GameScreenState < StatePattern::State
 
     case settings.game_mode
     when :Connect4
-      @game = Connect4.new(height: settings.window_height,
+      @game = Connect4.new(rows: settings.num_rows,
+                           columns: settings.num_cols,
+                           height: settings.window_height,
                            width: settings.window_width,
                            parent: stateful.main_window)
     when :TOOT
@@ -166,6 +170,8 @@ class SettingsController < Qt::Widget
     @settings.theme_setting =  @gui.themeComboBox.currentText.to_sym
     @settings.window_mode = @gui.windowModeComboBox.currentText.to_sym
 
+    @settings.theme = Theme.new(@settings.theme_setting)
+
     @settings.num_cols = @gui.colSpinBox.value
     @settings.num_rows = @gui.rowSpinBox.value
 
@@ -216,7 +222,11 @@ class SettingsScreenState < StatePattern::State
     #assert stateful.settings_gui.is_a? SettingsGUI
     assert stateful.main_window.is_a? Qt::MainWindow
 
-    @settings_gui = SettingsGUI.new(800, 600, stateful.main_window)
+    settings = Settings.instance
+
+    @settings_gui = SettingsGUI.new(settings.window_width,
+                                    settings.window_height,
+                                    stateful.main_window)
     @settings_gui.show
     @controller = SettingsController.new(self, @settings_gui)
 
@@ -256,8 +266,11 @@ class ApplicationStateMachine < Qt::Widget
 
     @window = QTApplication.instance
     @main_window = Qt::MainWindow.new
-    @main_window.setFixedSize(800,600) #TODO: Set to a dynamic size
+
+    settings = Settings.instance
+    @main_window.setFixedSize(settings.window_width, settings.window_height)
     @main_window.setWindowTitle("Ruby-Board-Games")
+
     open_title_screen #init title screen
 
     @main_window.show #show title
