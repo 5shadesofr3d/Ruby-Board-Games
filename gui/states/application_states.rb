@@ -39,6 +39,7 @@ class TitleScreenState < StatePattern::State
   def open_game
     assert valid?
 
+    stateful.main_window.centralWidget.close if stateful.main_window.centralWidget != nil
     transition_to(GameScreenState)
 
     assert valid?
@@ -180,6 +181,7 @@ class SettingsController < Qt::Widget
 
     puts @settings.to_s
 
+    @gui.close
     self.close
     @state.open_title
 
@@ -193,8 +195,10 @@ class SettingsController < Qt::Widget
   def cancel
     assert @state.is_a? SettingsScreenState
 
+    @gui.close
     self.close
     @state.open_title
+
 
     assert self.visible == false
   end
@@ -210,12 +214,15 @@ class SettingsScreenState < StatePattern::State
   end
 
   def enter
-    assert stateful.settings_gui.is_a? SettingsGUI
+    #assert stateful.settings_gui.is_a? SettingsGUI
     assert stateful.main_window.is_a? Qt::MainWindow
 
-    stateful.settings_gui.setupUi(stateful.main_window)
-    @controller = SettingsController.new(self, stateful.settings_gui)
+    settings_gui = SettingsGUI.new
 
+    settings_gui.setupUi(stateful.main_window)
+    @controller = SettingsController.new(self, settings_gui)
+
+    assert settings_gui.is_a? SettingsGUI
     assert @controller.is_a? SettingsController
     assert valid?
   end
@@ -250,7 +257,7 @@ class ApplicationStateMachine < Qt::Widget
     super
 
     @window = QTApplication.instance
-    @settings_gui = SettingsGUI.new
+  #  @settings_gui = SettingsGUI.new
     @main_window = Qt::MainWindow.new
     @main_window.setFixedSize(800,600) #TODO: Set to a dynamic size
 

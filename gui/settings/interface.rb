@@ -1,7 +1,7 @@
 require 'Qt4'
 require 'test/unit'
 
-class SettingsGUI
+class SettingsGUI < Qt::Widget
   include Test::Unit::Assertions
 
   attr_reader :gameModeComboBox
