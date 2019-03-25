@@ -25,7 +25,7 @@ class SettingsGUI < Qt::Widget
     @verticalLayout.spacing = 6
     @verticalLayout.margin = 11
     @verticalLayout.objectName = "verticalLayout"
-    @verticalLayout.setContentsMargins(0, 0, 0, 0)
+    @verticalLayout.setContentsMargins(50, 50, 50, 50)
 
     setLayout(@verticalLayout)
     resize(width, height)
@@ -35,15 +35,6 @@ class SettingsGUI < Qt::Widget
 
   end
 
-  def set_background(c = Qt::white)
-    puts c.is_a? Qt::Color
-    assert c.is_a? Qt::Color or c.is_a? Qt::Enum
-    palette = Qt::Palette.new(c)
-    setAutoFillBackground(true)
-    setPalette(palette)
-    assert palette.is_a? Qt::Palette
-  end
-
   # --- Auto-generated section ---
   def setupUi()
     # assert settingsWindow.is_a? Qt::MainWindow
@@ -51,19 +42,40 @@ class SettingsGUI < Qt::Widget
 
     theme = Settings.instance.theme
 
-    puts theme
-    # Change the background.
-    set_background(theme.color[:background])
+    # Set the background of the window.
+    setStyleSheet("background-color: #{theme.color[:background]};")
 
-    @gameSettingsText = Qt::Label.new
-    @gameSettingsText.objectName = "gameSettingsText"
-    @gameSettingsText.maximumSize = Qt::Size.new(16777215, 75)
+    button_style = "background-color: #{theme.color[:button]}; " +
+                   "color: #{theme.color[:text]}; " +
+                   "border-radius: 5px"
+
+    spin_style = "color: #{theme.color[:text]}; " +
+                   "border-radius: 5px"
+
+    text_style = "color: #{theme.color[:text]}; "
+
+    combo_style = "QComboBox { border: 1px solid gray;
+                               border-radius: 5px;
+                               padding: 1px 18px 1px 3px;
+                               min-width: 6em; }
+                   QComboBox:editable { background-color: #{theme.color[:button]};" +
+                                       "color: #{theme.color[:text]}; }"
+
     @font = Qt::Font.new
     @font.family = "Serif"
     @font.pointSize = 20
     @font.bold = true
     @font.weight = 75
+
+    @font1 = Qt::Font.new
+    @font1.family = "Sans Serif"
+    @font1.pointSize = 16
+
+    @gameSettingsText = Qt::Label.new
+    @gameSettingsText.objectName = "gameSettingsText"
+    @gameSettingsText.maximumSize = Qt::Size.new(16777215, 75)
     @gameSettingsText.font = @font
+    @gameSettingsText.setStyleSheet(text_style)
 
     @verticalLayout.addWidget(@gameSettingsText)
 
@@ -72,11 +84,10 @@ class SettingsGUI < Qt::Widget
     @gameGridLayout.objectName = "gameGridLayout"
     @gameModeComboBox = Qt::ComboBox.new
     @gameModeComboBox.objectName = "gameModeComboBox"
-    @font1 = Qt::Font.new
-    @font1.family = "Sans Serif"
-    @font1.pointSize = 16
+
     @gameModeComboBox.font = @font1
     @gameModeComboBox.autoFillBackground = false
+    @gameModeComboBox.setStyleSheet(combo_style)
 
     @gameGridLayout.addWidget(@gameModeComboBox, 1, 1, 1, 1)
 
@@ -85,6 +96,7 @@ class SettingsGUI < Qt::Widget
     @gameModeText.minimumSize = Qt::Size.new(0, 50)
     @gameModeText.maximumSize = Qt::Size.new(16777215, 35)
     @gameModeText.font = @font1
+    @gameModeText.setStyleSheet(text_style)
 
     @gameGridLayout.addWidget(@gameModeText, 1, 0, 1, 1)
 
@@ -93,17 +105,20 @@ class SettingsGUI < Qt::Widget
     @boardSizeText.minimumSize = Qt::Size.new(0, 50)
     @boardSizeText.maximumSize = Qt::Size.new(16777215, 35)
     @boardSizeText.font = @font1
+    @boardSizeText.setStyleSheet(text_style)
 
     @gameGridLayout.addWidget(@boardSizeText, 2, 0, 1, 1)
 
     @horizontalLayout_2 = Qt::HBoxLayout.new()
     @horizontalLayout_2.spacing = 6
     @horizontalLayout_2.objectName = "horizontalLayout_2"
+
     @rowText = Qt::Label.new
     @rowText.objectName = "rowText"
     @rowText.minimumSize = Qt::Size.new(20, 0)
     @rowText.maximumSize = Qt::Size.new(60, 16777215)
     @rowText.font = @font1
+    @rowText.setStyleSheet(text_style)
 
     @horizontalLayout_2.addWidget(@rowText)
 
@@ -112,12 +127,14 @@ class SettingsGUI < Qt::Widget
     @rowSpinBox.font = @font1
     @rowSpinBox.minimum = 1
     @rowSpinBox.value = 7
+    @rowSpinBox.setStyleSheet(spin_style)
 
     @horizontalLayout_2.addWidget(@rowSpinBox)
 
     @columnText = Qt::Label.new
     @columnText.objectName = "columnText"
     @columnText.font = @font1
+    @columnText.setStyleSheet(text_style)
 
     @horizontalLayout_2.addWidget(@columnText)
 
@@ -126,6 +143,7 @@ class SettingsGUI < Qt::Widget
     @colSpinBox.font = @font1
     @colSpinBox.minimum = 1
     @colSpinBox.value = 6
+    @colSpinBox.setStyleSheet(spin_style)
 
     @horizontalLayout_2.addWidget(@colSpinBox)
 
@@ -139,17 +157,20 @@ class SettingsGUI < Qt::Widget
     @windowSettingsText.objectName = "windowSettingsText"
     @windowSettingsText.maximumSize = Qt::Size.new(16777215, 75)
     @windowSettingsText.font = @font
+    @windowSettingsText.setStyleSheet(text_style)
 
     @verticalLayout.addWidget(@windowSettingsText)
 
     @windowGridLayout = Qt::GridLayout.new()
     @windowGridLayout.spacing = 6
     @windowGridLayout.objectName = "windowGridLayout"
+
     @screenResolutionText = Qt::Label.new
     @screenResolutionText.objectName = "screenResolutionText"
     @screenResolutionText.minimumSize = Qt::Size.new(0, 50)
     @screenResolutionText.maximumSize = Qt::Size.new(16777215, 35)
     @screenResolutionText.font = @font1
+    @screenResolutionText.setStyleSheet(text_style)
 
     @windowGridLayout.addWidget(@screenResolutionText, 1, 0, 1, 1)
 
@@ -158,18 +179,21 @@ class SettingsGUI < Qt::Widget
     @themeText.minimumSize = Qt::Size.new(0, 50)
     @themeText.maximumSize = Qt::Size.new(16777215, 35)
     @themeText.font = @font1
+    @themeText.setStyleSheet(text_style)
 
     @windowGridLayout.addWidget(@themeText, 2, 0, 1, 1)
 
     @themeComboBox = Qt::ComboBox.new
     @themeComboBox.objectName = "themeComboBox"
     @themeComboBox.font = @font1
+    @themeComboBox.setStyleSheet(combo_style)
 
     @windowGridLayout.addWidget(@themeComboBox, 2, 1, 1, 1)
 
     @resolutionComboBox = Qt::ComboBox.new
     @resolutionComboBox.objectName = "resolutionComboBox"
     @resolutionComboBox.font = @font1
+    @resolutionComboBox.setStyleSheet(combo_style)
 
     @windowGridLayout.addWidget(@resolutionComboBox, 1, 1, 1, 1)
 
@@ -178,12 +202,14 @@ class SettingsGUI < Qt::Widget
     @windowModeText.minimumSize = Qt::Size.new(0, 50)
     @windowModeText.maximumSize = Qt::Size.new(16777215, 35)
     @windowModeText.font = @font1
+    @windowModeText.setStyleSheet(text_style)
 
     @windowGridLayout.addWidget(@windowModeText, 0, 0, 1, 1)
 
     @windowModeComboBox = Qt::ComboBox.new
     @windowModeComboBox.objectName = "windowModeComboBox"
     @windowModeComboBox.font = @font1
+    @windowModeComboBox.setStyleSheet(combo_style)
 
     @windowGridLayout.addWidget(@windowModeComboBox, 0, 1, 1, 1)
 
@@ -205,6 +231,7 @@ class SettingsGUI < Qt::Widget
     @applyButton.objectName = "applyButton"
     @applyButton.minimumSize = Qt::Size.new(200, 75)
     @applyButton.font = @font1
+    @applyButton.setStyleSheet(button_style)
 
     @horizontalLayout.addWidget(@applyButton)
 
@@ -212,31 +239,16 @@ class SettingsGUI < Qt::Widget
     @cancelButton.objectName = "cancelButton"
     @cancelButton.minimumSize = Qt::Size.new(175, 75)
     @cancelButton.font = @font1
+    @cancelButton.setStyleSheet(button_style)
 
     @horizontalLayout.addWidget(@cancelButton)
 
 
     @verticalLayout.addLayout(@horizontalLayout)
 
-    # settingsWindow.centralWidget = @centralWidget
-    # @menuBar = Qt::MenuBar.new(settingsWindow)
-    # @menuBar.objectName = "menuBar"
-    # @menuBar.geometry = Qt::Rect.new(0, 0, 854, 25)
-    # settingsWindow.setMenuBar(@menuBar)
-    # @mainToolBar = Qt::ToolBar.new(settingsWindow)
-    # @mainToolBar.objectName = "mainToolBar"
-    # settingsWindow.addToolBar(Qt::TopToolBarArea, @mainToolBar)
-    # @statusBar = Qt::StatusBar.new(settingsWindow)
-    # @statusBar.objectName = "statusBar"
-    # settingsWindow.statusBar = @statusBar
 
     retranslateUi
 
-    # Qt::MetaObject.connectSlotsByName(settingsWindow) # TODO: Might not need this.
-
-    #assert @menuBar.is_a? Qt::MenuBar
-    #assert @mainToolBar.is_a? Qt::ToolBar
-    #assert @statusBar.is_a? Qt::StatusBar
     assert @cancelButton.is_a? Qt::PushButton
     assert @applyButton.is_a? Qt::PushButton
     assert @gameModeComboBox.is_a? Qt::ComboBox
@@ -272,10 +284,6 @@ class SettingsGUI < Qt::Widget
     @applyButton.text = Qt::Application.translate("SettingsWindow", "Apply Changes", nil, Qt::Application::UnicodeUTF8)
     @cancelButton.text = Qt::Application.translate("SettingsWindow", "Cancel", nil, Qt::Application::UnicodeUTF8)
   end # retranslateUi
-
-  # def retranslate_ui(settingsWindow)
-  #   retranslateUi(settingsWindow)
-  # end
 
   # When apply button is clicked, run call back.
   # create a settingsGUI instance and change the variables.
