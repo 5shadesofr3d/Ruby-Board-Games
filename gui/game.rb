@@ -18,7 +18,7 @@ class Game < Qt::Widget
 
     parent != nil ? super(parent) : super()
     resize(width, height)
-    setupUI
+    setupUI(rows, columns)
 
     @players = []
     @machine = GameStateMachine.new(self)
@@ -26,10 +26,10 @@ class Game < Qt::Widget
     assert valid?
   end
 
-  def setupUI()
+  def setupUI(rows, cols)
     setupStack
     setupLobby
-    setupBoard
+    setupBoard(rows, cols)
 
     setFocus(Qt::OtherFocusReason)
     setFocusPolicy(Qt::StrongFocus)
@@ -46,8 +46,8 @@ class Game < Qt::Widget
     setLayout(@stack)
   end
 
-  def setupBoard()
-    @board = Board.new(7, 8, parent: self)
+  def setupBoard(rows, cols)
+    @board = Board.new(rows, cols, parent: self)
     @stack.addWidget(board)
   end
 

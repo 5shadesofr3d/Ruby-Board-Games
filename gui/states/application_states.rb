@@ -112,7 +112,9 @@ class GameScreenState < StatePattern::State
 
     case settings.game_mode
     when :Connect4
-      @game = Connect4.new(height: settings.window_height,
+      @game = Connect4.new(rows: settings.num_rows,
+                           columns: settings.num_cols,
+                           height: settings.window_height,
                            width: settings.window_width,
                            parent: stateful.main_window)
     when :TOOT
