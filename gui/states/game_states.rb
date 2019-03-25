@@ -41,6 +41,11 @@ class GameStateMachine < Qt::StateMachine
     assert move.is_a? GamePlayerMoveState
     assert status.is_a? GameDetermineStatusState
     assert complete.is_a? GameEndState
+    #assert lobby.transition.count > 0 NOTE: unfortunately it seems the qtbindings gem fails with this transitions function
+    #assert start.transition.count > 0  #thse assertions would check that transitions were added
+    #assert move.transition.count > 0
+    #assert status.transition.count > 0
+    #assert complete.transition.count > 0
   end
 
   def valid?()
@@ -88,6 +93,8 @@ class GameLobbyState < GameState
   end
 
   def start_game
+    assert game.lobby.room.playerInfos.count > 0
+
     players = game.lobby.room.playerInfos
     cols = []
     duplicate = false
@@ -101,6 +108,8 @@ class GameLobbyState < GameState
     if !duplicate
       done()
     end
+
+    assert players.count > 0
   end
 
   def exit_lobby
@@ -109,6 +118,7 @@ class GameLobbyState < GameState
 
   def onExit(event)
     assert game.is_a? Game
+    assert game.players.size == 0
     # disconnect the start button so it no longer works
     disconnect(startButton, SIGNAL("clicked()"))
     game.updatePlayers()
@@ -123,11 +133,16 @@ end
 class GamePlayState < GameState
 
   def onEntry(event)
+    assert game.is_a? Game
+
     # show game board
     game.showBoard()
     # game time
     # game score
     done()
+
+    assert game.is_a? Game
+    assert game.board.visible
   end
 
   def onExit(event)
@@ -138,6 +153,7 @@ end
 class GamePlayerMoveState < GameState
 
   def onEntry(event)
+    assert game.players.count > 0
     assert game.players.first.is_a? Player
     # get next player
     player = game.players.first
@@ -145,15 +161,20 @@ class GamePlayerMoveState < GameState
     player.enable
     # after player completes his move, go to the next state
     connect(player, SIGNAL("finished()"), self, SIGNAL("done()"))
+
+    assert player.is_a? Player
   end
 
   def onExit(event)
+    assert game.players.count > 0
     assert game.players.first.is_a? Player
     player = game.players.first
     # disconnect signal for the player that just played his move
     disconnect(player, SIGNAL("finished()"), self, SIGNAL("done()"))
     # no longer acknowledge moves from this player
     player.disable
+
+    assert player.is_a? Player
   end
 
 end
@@ -164,6 +185,8 @@ class GameDetermineStatusState < GameState
 
   def onEntry(event)
     assert game.is_a? Game
+    assert game.players.count > 0
+
     if game.winner?
       win()
     else
@@ -171,6 +194,9 @@ class GameDetermineStatusState < GameState
       game.players.rotate!
       done()
     end
+
+    assert game.is_a? Game
+    assert game.players.count > 0
   end
 
   def onExit(event)
@@ -186,16 +212,18 @@ class GameEndState < GameState
     assert game.players.first.is_a? Player
     assert game.players.each {|p| assert p.is_a? Player}
     # display winner, clear game board, score
+
     if (game.winner?)
-      player = game.players.first
-      player.wins += 1
-      game.players.drop(1).each { |player| player.losses += 1 }
+      win_cond = game.win_goal
+      game.players.each { |player| player.goal.first == game.win_goal ? player.wins += 1 : player.losses += 1 }
     else # we had a tie
       game.players.each { |player| player.ties += 1 }
     end
     game.updatePlayerInfos()
     game.board.clear()
     done()
+
+    assert game.players.count == 0 #game is over
   end
 
   def onExit(event)

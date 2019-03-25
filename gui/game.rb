@@ -23,6 +23,8 @@ class Game < Qt::Widget
     @players = []
     @machine = GameStateMachine.new(self)
 
+    assert width() == width
+    assert height() == height
     assert valid?
   end
 
@@ -59,6 +61,7 @@ class Game < Qt::Widget
     @lobbyWidget.setLayout(hlayout)
     @stack.addWidget(@lobbyWidget)
     @lobby.addPlayer() # we have at least 1 player
+    assert @lobby.room.playerInfos.count > 0
   end
 
   def start()
@@ -76,10 +79,12 @@ class Game < Qt::Widget
   end
 
   def showLobby()
+    assert @lobbyWidget.is_a? Qt::Widget
     @stack.setCurrentWidget(@lobbyWidget)
   end
 
   def showBoard()
+    assert @board.is_a? Qt::Widget
     @stack.setCurrentWidget(@board)
   end
 
@@ -96,24 +101,33 @@ class Game < Qt::Widget
   end
 
   def updatePlayers()
+    assert lobby.is_a? PlayerLobby
+
     @players = lobby.getPlayers()
     players.each { |player| player.game = self }
     setPlayerGoals()
+
+    assert @players.is_a? Array
+    @players.each {|e| assert e.goal.is_a? Array}
+    @players.each {|e| assert e.is_a? Player}
+    assert @players.count > 0
   end
 
   def updatePlayerInfos()
     @lobby.setPlayers(players)
+
+    assert @lobby.getPlayers.count > 0
   end
 
   def addPlayer(player)
     assert Player.is_a?(Player)
     @players << player
+    assert @players.include? player
   end
 
   def valid?()
     return false unless @board == nil or @board.is_a?(Board)
     return false unless @stack.is_a?(Qt::StackedLayout)
-
     return true
   end
 
@@ -121,6 +135,15 @@ end
 
 class Connect4 < Game
   def initialize(rows: 7, columns: 8, width: 800, height: 600, parent: nil)
+    assert rows.is_a? Integer
+    assert columns.is_a? Integer
+    assert width.is_a? Integer
+    assert height.is_a? Integer
+    assert columns > 0
+    assert rows > 0
+    assert width > 0
+    assert height > 0
+
     super(rows: rows, columns: columns, width: width, height: height, parent: parent)
   end
 
@@ -131,12 +154,18 @@ class Connect4 < Game
   end
 
   def consecutive4?(chips)
+    assert chips.is_a? Array
     return false unless chips.size == 4
     return false if chips.include?(nil)
     return chips.uniq { |c| c.secondary.name }.length == 1
   end
 
   def findConsecutive4()
+    assert board.model.is_a? BoardModel
+    assert board.model.columns.max > 0
+    assert board.model.rows.max > 0 #if these are 0, we have an issue
+    assert board.model.diagonals.max > 0
+
     assert valid?
 
     model = board.model
@@ -155,10 +184,10 @@ class Connect4 < Game
 
     # check every diagonal
     model.diagonals.each do |diagonal|
-      upper_diag = model.to_enum(:each_in_diagonal, :chip, diagonal, :up, model.rows.max - 1, model.columns.max - 1)
+      upper_diag = model.to_enum(:each_in_diagonal, :chip, diagonal, :up)
       upper_diag.each_cons(4) { |chips| return chips if consecutive4?(chips) }
 
-      lower_diag = model.to_enum(:each_in_diagonal, :chip, diagonal, :down, model.rows.max - 1, model.columns.max - 1)
+      lower_diag = model.to_enum(:each_in_diagonal, :chip, diagonal, :down)
       lower_diag.each_cons(4) { |chips| return chips if consecutive4?(chips) }
     end
 
@@ -168,13 +197,27 @@ class Connect4 < Game
   end
 
   def setPlayerGoals()
+    assert players.is_a? Array
+    assert players.size > 0
+
     players.each { |player| player.goal = Array.new(4, player.color.name) }
+
+    assert players.is_a? Array
+    assert players.size > 0
+    players.each {|p| assert p.goal.first == p.color.name}
+    players.each {|p| assert p.goal.is_a? Array}
+    players.each {|p| assert p.goal.size == 4}
   end
 
   def winner?()
     chips = findConsecutive4()
     players.each { |player| return true if player.goal.size == chips.size && player.goal == chips.map(&:color) } # we have a winner if the chip sequence matches the player's goal
     return false
+  end
+
+  def win_goal
+    chips = findConsecutive4()
+    players.each { |player| return player.color.name if player.goal.size == chips.size && player.goal == chips.map(&:color) } # we have a winner if the chip sequence matches the player's goal
   end
 
   def valid?
@@ -187,9 +230,12 @@ end
 
 class OTTO < Game
   @@chip_iteration = 0
+  @@otto = [:O, :T, :T, :O]
+  @@toot = [:T, :O, :O, :T]
 
   def initialize(rows: 7, columns: 8, width: 800, height: 600, parent: nil)
     super(rows: rows, columns: columns, width: width, height: height, parent: parent)
+    lobby.addPlayer() # minimum 2 players
   end
 
   def constructChip(c)
@@ -203,8 +249,7 @@ class OTTO < Game
   def consecutiveOTTO?(chips)
     return false unless chips.size == 4
     return false if chips.include?(nil)
-    return false if chips.length != 4
-    return ((chips[0].id == :T and chips[1].id == :O and chips[2].id == :O and chips[3].id == :T) or (chips[0].id == :O and chips[1].id == :T and chips[2].id == :T and chips[3].id == :O))
+    return (chips.map(&:id) == @@otto or chips.map(&:id) == @@toot)
   end
 
   def findConsecutiveOTTO()
@@ -226,10 +271,10 @@ class OTTO < Game
 
     # check every diagonal
     model.diagonals.each do |diagonal|
-      upper_diag = model.to_enum(:each_in_diagonal, :chip, diagonal, :up, model.rows.max - 1, model.columns.max - 1)
+      upper_diag = model.to_enum(:each_in_diagonal, :chip, diagonal, :up)
       upper_diag.each_cons(4) { |chips| return chips if consecutiveOTTO?(chips) }
 
-      lower_diag = model.to_enum(:each_in_diagonal, :chip, diagonal, :down, model.rows.max - 1, model.columns.max - 1)
+      lower_diag = model.to_enum(:each_in_diagonal, :chip, diagonal, :down)
       lower_diag.each_cons(4) { |chips| return chips if consecutiveOTTO?(chips) }
     end
 
@@ -244,9 +289,7 @@ class OTTO < Game
   end
 
   def setPlayerGoals()
-    otto = [:O, :T, :T, :O]
-    toot = [:T, :O, :O, :T]
-    players.each_with_index { |player, index| player.goal = index.even? ? otto : toot }
+    players.each_with_index { |player, index| player.goal = index.even? ? @@otto : @@toot }
   end
 
   def valid?
