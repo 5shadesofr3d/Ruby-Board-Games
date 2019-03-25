@@ -192,6 +192,11 @@ class Connect4 < Game
     return false
   end
 
+  def win_goal
+    chips = findConsecutive4()
+    players.each { |player| return player.color.name if player.goal.size == chips.size && player.goal == chips.map(&:color) } # we have a winner if the chip sequence matches the player's goal
+  end
+
   def valid?
     return false unless super
 
