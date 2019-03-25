@@ -88,6 +88,7 @@ class GameLobbyState < GameState
   end
 
   def start_game
+    assert game.lobby.room.playerInfos.count > 0
     players = game.lobby.room.playerInfos
     cols = []
     duplicate = false
@@ -101,6 +102,8 @@ class GameLobbyState < GameState
     if !duplicate
       done()
     end
+
+    assert players.count > 0
   end
 
   def exit_lobby
@@ -128,6 +131,8 @@ class GamePlayState < GameState
     # game time
     # game score
     done()
+
+    assert game.board.visible
   end
 
   def onExit(event)
@@ -138,6 +143,7 @@ end
 class GamePlayerMoveState < GameState
 
   def onEntry(event)
+    assert game.players.count > 0
     assert game.players.first.is_a? Player
     # get next player
     player = game.players.first
@@ -148,6 +154,7 @@ class GamePlayerMoveState < GameState
   end
 
   def onExit(event)
+    assert game.players.count > 0
     assert game.players.first.is_a? Player
     player = game.players.first
     # disconnect signal for the player that just played his move
@@ -164,6 +171,8 @@ class GameDetermineStatusState < GameState
 
   def onEntry(event)
     assert game.is_a? Game
+    assert game.players.count > 0
+
     if game.winner?
       win()
     else
@@ -171,6 +180,9 @@ class GameDetermineStatusState < GameState
       game.players.rotate!
       done()
     end
+
+    assert game.is_a? Game
+    assert game.players.count > 0
   end
 
   def onExit(event)
@@ -186,10 +198,12 @@ class GameEndState < GameState
     assert game.players.first.is_a? Player
     assert game.players.each {|p| assert p.is_a? Player}
     # display winner, clear game board, score
+
     if (game.winner?)
-      # game.players.each { |player| player.goal == game.last_win_condition? (player.wins += 1) : (player.losses += 1) }
+      win_cond = game.win_goal
+      game.players.each { |player| player.goal.first == game.win_goal ? player.wins += 1 : player.losses += 1 }
     else # we had a tie
-      # game.players.each { |player| player.ties += 1 }
+      game.players.each { |player| player.ties += 1 }
     end
     game.updatePlayerInfos()
     game.board.clear()

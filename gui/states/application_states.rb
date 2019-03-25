@@ -257,7 +257,7 @@ class ApplicationStateMachine < Qt::Widget
     @window = QTApplication.instance
     @main_window = Qt::MainWindow.new
     @main_window.setFixedSize(800,600) #TODO: Set to a dynamic size
-
+    @main_window.setWindowTitle("Ruby-Board-Games")
     open_title_screen #init title screen
 
     @main_window.show #show title

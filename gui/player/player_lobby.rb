@@ -296,8 +296,8 @@ class PlayerInfo < Qt::Widget
     @type = PlayerInfoTypeBox.new(self)
     @color = PlayerInfoColorBox.new(self)
     @wins = PlayerInfoLabel.new(wins.to_s, self)
-    @loss = PlayerInfoLabel.new(ties.to_s, self)
-    @ties = PlayerInfoLabel.new(loss.to_s, self)
+    @loss = PlayerInfoLabel.new(loss.to_s, self)
+    @ties = PlayerInfoLabel.new(ties.to_s, self)
     setStyleSheet("background-color:#{LobbyColor::BLUE};")
 
     @name.setMaximumWidth(100)
@@ -370,7 +370,7 @@ class PlayerInfo < Qt::Widget
   end
 
   def ties
-    return @wins.text.to_i
+    return @ties.text.to_i
   end
 
   def ties=(t)
