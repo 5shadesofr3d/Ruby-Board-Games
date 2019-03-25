@@ -268,8 +268,7 @@ class ApplicationStateMachine < Qt::Widget
     @main_window = Qt::MainWindow.new
 
     settings = Settings.instance
-    @main_window.resize(settings.window_width,
-                        settings.window_height)
+    @main_window.setFixedSize(settings.window_width, settings.window_height)
     @main_window.setWindowTitle("Ruby-Board-Games")
 
     open_title_screen #init title screen
