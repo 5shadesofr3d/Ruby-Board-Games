@@ -187,7 +187,7 @@ class GameDetermineStatusState < GameState
     assert game.is_a? Game
     assert game.players.count > 0
 
-    if game.winner?
+    if game.winner? or game.tie?
       win()
     else
       # cycle to next player and get his move

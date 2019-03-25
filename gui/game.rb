@@ -129,6 +129,13 @@ class Game < Qt::Widget
     return winnersGoal != nil
   end
 
+  def tie?()
+    model = board.model
+    topRow = model.to_enum(:each_in_row, :chip,	0)
+    return (!topRow.include?(nil) and !winner?)
+  end
+
+
   def winnersGoal()
     raise NotImplementedError
   end
