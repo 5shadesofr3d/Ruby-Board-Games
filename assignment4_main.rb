@@ -14,7 +14,7 @@ require_relative 'application'
 # gem install qtbindings
 
 
-Debug::on
+# Debug::on
 app = GameApplication.new
 
 # app = Qt::Application.new ARGV

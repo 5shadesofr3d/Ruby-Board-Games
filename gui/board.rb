@@ -97,6 +97,7 @@ class Board < Qt::Widget
 		to.attach(item)
 
 		return if from == to
+		return if time == 0
 
 		animation.targetObject = item
 		animation.propertyName = "geometry"

@@ -4,30 +4,48 @@
 require 'test/unit'
 require 'Qt'
 require_relative 'abstract_player'
-require_relative '../AI/ai_abstract'
+# require_relative '../AI'
+require_relative '../ai/ai_connect4'
 
 class AIPlayer < Player
+	# slots "play(const QKeyEvent*)"
+
+	# attr_accessor :ai_object
+	# def initialize(player_name, player_color, parent: nil, ai_type)
+	# 	super(player_name, player_color, parent)
+	# 	if ai_type == "Connect4"
+	# 		@ai_object = AI_Connect4.new(self.game, 2, @current_chip)
+	# 	elsif ai_type == "OTTO"
+	# 		# make it that otto object
+	# 	end
+	# end
+
+	def enable()
+		# TODO: change this if not correct.
+		super()
+		puts "We are about to play"
+		self.play("something")
+		
+	end
 
 	def play(ai_type)
 		# This will return the move that the player will take. This will come
 		# from a move generator for the AI
-		ai_test = AI_Connect4.new(self.game, 1)
+		ai_test = AI_Connect4.new(self.game, 2, @current_chip)
 		# The ai player will require the ai_type to be passed through
 		# TODO: To be changed possibly based off of the main gameplay code. Look
 		# 		into the player_lobby code
 
 		#pre
 		assert game.is_a?(Game)
-		assert event.is_a?(Qt::KeyEvent) or event.is_a?(Qt::MouseEvent)
 
 		# AI will get the next position, will be determined based on the difficulty setting
-		new_position = ai_test.getBestScore(current_chip)
-		puts new_position
+		puts "Getting Score"
+		@current_column = ai_test.getBestScore()
+		puts @current_column
 		drop()
 
 		#post
-		assert current_column.is_a?(Numeric)
-
-		return new_position
+		assert @current_column.is_a?(Numeric)
 	end
 end
