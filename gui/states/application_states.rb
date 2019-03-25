@@ -105,7 +105,7 @@ class GameScreenState < StatePattern::State
   def enter
     # Add the assertions from the game as before.
     assert stateful.main_window.is_a? Qt::MainWindow
-    assert Settings.instance.game_mode == :Connect4 or Settings.instance.game_mode == :TOOT
+    assert Settings.instance.valid?
 
     @game = nil
     case Settings.instance.game_mode
@@ -115,10 +115,9 @@ class GameScreenState < StatePattern::State
 
     end
 
-    assert @game.is_a?(Game)
-
     @game.start
     @game.show
+    @game.set_state(self)
 
     assert @game.is_a? Game
     assert @game.visible
@@ -128,6 +127,7 @@ class GameScreenState < StatePattern::State
   def open_title_screen
     assert valid?
 
+    @game.close
     transition_to(TitleScreenState)
 
     assert valid?
@@ -159,8 +159,11 @@ class SettingsController < Qt::Widget
   def apply_settings
     assert @settings.is_a? Settings
 
-    # @settings.number_of_players = @gui.numberPlayersComboBox.currentText
     @settings.theme_setting =  @gui.themeComboBox.currentText.to_sym
+    @settings.window_mode = @gui.windowModeComboBox.currentText.to_sym
+
+    @settings.num_cols = @gui.colSpinBox.value
+    @settings.num_rows = @gui.rowSpinBox.value
 
     if @gui.gameModeComboBox.currentText == "Connect 4"
       @settings.game_mode = :Connect4
@@ -168,10 +171,12 @@ class SettingsController < Qt::Widget
       @settings.game_mode = :TOOT
     end
 
-    if @gui.resolutionComboBox.currentText == "400x600"
-      @settings.window_height = 400
+    if @gui.resolutionComboBox.currentText == "600x800"
+      @settings.window_height = 800
       @settings.window_width = 600
     end
+
+    puts @settings.to_s
 
     @gui.close
     @state.open_title
