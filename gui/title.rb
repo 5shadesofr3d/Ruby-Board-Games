@@ -21,16 +21,9 @@ class Title < Qt::Widget
     setLayout(@layout)
     setScreenSize(width,height)
     setWindowTitle("Ruby-Board-Games")
-
+    show
     drawMenu
     draw_color
-
-    settings = Settings.instance
-    if settings.window_mode == :Windowed
-      show
-    elsif settings.window_mode == :Fullscreen
-      showFullScreen
-    end
 
     # @parent.showFullScreen
     assert @layout.is_a? Qt::VBoxLayout

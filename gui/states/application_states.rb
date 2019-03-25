@@ -275,7 +275,7 @@ class ApplicationStateMachine < Qt::Widget
                         settings.window_height)
     @main_window.setWindowTitle("Ruby-Board-Games")
 
-    @main_window.showFullScreen #show title
+    @main_window.show#show title
     open_title_screen #init title screen
 
     assert @window.is_a? QTApplication
