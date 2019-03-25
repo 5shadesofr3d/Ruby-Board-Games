@@ -6,8 +6,9 @@ class Theme
   def initialize(name)
 
     @name = name
-    @color = {:text => Qt::Color.fromRgb(0, 0, 0),
-              :background => Qt::Color.fromRgb(255, 255, 0)}
+    @color = {:text => "rgb(255, 255, 255)",
+              :background => "rgb(0, 128, 128)",
+              :button => "rgb(66, 134, 244)"}
 
   end
 
