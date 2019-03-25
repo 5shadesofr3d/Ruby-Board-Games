@@ -176,6 +176,7 @@ class OTTOChip < BoardChip
 		@id = id
 
 		super(color: color, parent: parent)
+		setStyleSheet("color: white; text-outline: 1px 1px black;")
 		assert @id.is_a?(Symbol) and (id == :T or id == :O)
 		assert valid?
 	end
