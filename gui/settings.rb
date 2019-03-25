@@ -19,9 +19,8 @@ class Settings
     @valid_game_mode = [:Connect4, :TOOT]
     @valid_themes = [:Default, :Colorblind]
     @valid_window_mode = [:Windowed, :Fullscreen]
-    @valid_resolutions = ["800x700"]
+    @valid_resolutions = ["800x700", "1200x1050", "1920x1080"]
 
-    # TODO: Load the settings into the GUI
     if File.file?("settings.json")
       tempHash = JSON.parse(IO.read("settings.json"))
       @game_mode = tempHash["game_mode"].to_sym

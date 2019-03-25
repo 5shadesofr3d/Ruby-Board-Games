@@ -47,7 +47,6 @@ class TitleScreenState < StatePattern::State
 
 end
 
-#TODO: Get rid of this
 class TitleController < Qt::Widget
   include Test::Unit::Assertions
 
@@ -181,9 +180,15 @@ class SettingsController < Qt::Widget
       @settings.game_mode = :TOOT
     end
 
-    if @gui.resolutionComboBox.currentText == "600x800"
-      @settings.window_width = 600
-      @settings.window_height = 800
+    if @gui.resolutionComboBox.currentText == "800x700"
+      @settings.window_width = 800
+      @settings.window_height = 700
+    elsif @gui.resolutionComboBox.currentText == "1200x1050"
+      @settings.window_width = 1200
+      @settings.window_height = 1050
+    elsif @gui.resolutionComboBox.currentText == "1920x1080"
+      @settings.window_width = 1920
+      @settings.window_height = 1080
     end
 
     puts @settings.to_s
@@ -204,7 +209,6 @@ class SettingsController < Qt::Widget
     @gui.close
     @state.open_title
 
-
     assert self.visible == false
   end
 
@@ -219,7 +223,6 @@ class SettingsScreenState < StatePattern::State
   end
 
   def enter
-    #assert stateful.settings_gui.is_a? SettingsGUI
     assert stateful.main_window.is_a? Qt::MainWindow
 
     settings = Settings.instance
@@ -228,9 +231,9 @@ class SettingsScreenState < StatePattern::State
                                     settings.window_height,
                                     stateful.main_window)
     @settings_gui.show
-    @controller = SettingsController.new(self, @settings_gui)
+    @controller = SettingsController.new(self,
+                                         @settings_gui)
 
-    # assert settings_gui.is_a? SettingsGUI
     assert @controller.is_a? SettingsController
     assert valid?
   end
@@ -272,9 +275,8 @@ class ApplicationStateMachine < Qt::Widget
                         settings.window_height)
     @main_window.setWindowTitle("Ruby-Board-Games")
 
+    @main_window.showFullScreen #show title
     open_title_screen #init title screen
-
-    @main_window.show #show title
 
     assert @window.is_a? QTApplication
     assert @main_window.is_a? Qt::MainWindow
@@ -285,7 +287,7 @@ class ApplicationStateMachine < Qt::Widget
   end
 
   # Callback:
-  def open_title_screen # TODO...
+  def open_title_screen
     assert valid?
 
     transition_to(TitleScreenState)

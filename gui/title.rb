@@ -15,24 +15,34 @@ class Title < Qt::Widget
     assert height > 0
     parent != nil ? super(parent) : super()
 
+    @parent = parent
     @layout = Qt::VBoxLayout.new(self)
-		@layout.setSpacing(height/6) #This value seems to use the screen space well
+    @layout.setSpacing(height/6) #This value seems to use the screen spae well
     setLayout(@layout)
     setScreenSize(width,height)
     setWindowTitle("Ruby-Board-Games")
 
     drawMenu
     draw_color
-    show
 
+    settings = Settings.instance
+    if settings.window_mode == :Windowed
+      show
+    elsif settings.window_mode == :Fullscreen
+      showFullScreen
+    end
+
+    # @parent.showFullScreen
     assert @layout.is_a? Qt::VBoxLayout
   end
 
+  # Sets the size of the main window and the title screen
   def setScreenSize(width, height)
     assert width.is_a?(Integer) and width.between?(100, 1920)
 		assert height.is_a?(Integer) and height.between?(100, 1080)
 
 		resize(width, height)
+    @parent.setFixedSize(width, height)
 
 		assert width() == width
 		assert height() == height
