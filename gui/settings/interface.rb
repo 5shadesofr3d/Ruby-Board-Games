@@ -247,6 +247,7 @@ class SettingsGUI < Qt::Widget
 
 
     retranslateUi
+    initialize_ui
 
     assert @cancelButton.is_a? Qt::PushButton
     assert @applyButton.is_a? Qt::PushButton
@@ -258,6 +259,39 @@ class SettingsGUI < Qt::Widget
 
   def setup_ui
     setupUi
+  end
+
+  def valid_settings?
+    return false if Settings.instance.valid_game_mode.index(Settings.instance.game_mode).nil?
+    return false if Settings.instance.valid_themes.index(Settings.instance.theme_setting).nil?
+    return false if Settings.instance.valid_window_mode.index(Settings.instance.window_mode).nil?
+    resolution = "#{Settings.instance.window_width}x#{Settings.instance.window_height}"
+    return false if Settings.instance.valid_resolutions.index(resolution).nil?
+    return true
+  end
+
+  def initialize_ui
+    assert Settings.instance.valid?
+    assert valid_settings?
+
+    settings = Settings.instance
+
+    @rowSpinBox.value = settings.num_rows
+    @colSpinBox.value = settings.num_cols
+
+    @gameModeComboBox.currentIndex = settings.valid_game_mode
+                                             .index(settings.game_mode)
+    @themeComboBox.currentIndex = settings.valid_themes
+                                          .index(settings.theme_setting)
+    @windowModeComboBox.currentIndex = settings.valid_window_mode
+                                               .index(settings.window_mode)
+
+    resolution = "#{settings.window_width}x#{settings.window_height}"
+    @resolutionComboBox.currentIndex = settings.valid_resolutions
+                                               .index(resolution)
+
+
+
   end
 
   def retranslateUi
@@ -276,7 +310,7 @@ class SettingsGUI < Qt::Widget
     @themeText.text = Qt::Application.translate("SettingsWindow", "Theme:", nil, Qt::Application::UnicodeUTF8)
     @themeComboBox.insertItems(0, [Qt::Application.translate("SettingsWindow", "Default", nil, Qt::Application::UnicodeUTF8),
                                    Qt::Application.translate("SettingsWindow", "Some colour blind ones...", nil, Qt::Application::UnicodeUTF8)])
-    @resolutionComboBox.insertItems(0, [Qt::Application.translate("SettingsWindow", "600x800", nil, Qt::Application::UnicodeUTF8)])
+    @resolutionComboBox.insertItems(0, [Qt::Application.translate("SettingsWindow", "800x600", nil, Qt::Application::UnicodeUTF8)])
     @windowModeText.text = Qt::Application.translate("SettingsWindow", "Window Mode:", nil, Qt::Application::UnicodeUTF8)
     @windowModeComboBox.insertItems(0, [Qt::Application.translate("SettingsWindow", "Windowed", nil, Qt::Application::UnicodeUTF8),
                                         Qt::Application.translate("SettingsWindow", "Fullscreen", nil, Qt::Application::UnicodeUTF8)])

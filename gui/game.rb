@@ -226,10 +226,10 @@ class OTTO < Game
 
     # check every diagonal
     model.diagonals.each do |diagonal|
-      upper_diag = model.to_enum(:each_in_diagonal, :chip, diagonal, :up)
+      upper_diag = model.to_enum(:each_in_diagonal, :chip, diagonal, :up, model.rows.max - 1, model.columns.max - 1)
       upper_diag.each_cons(4) { |chips| return chips if consecutiveOTTO?(chips) }
 
-      lower_diag = model.to_enum(:each_in_diagonal, :chip, diagonal, :down)
+      lower_diag = model.to_enum(:each_in_diagonal, :chip, diagonal, :down, model.rows.max - 1, model.columns.max - 1)
       lower_diag.each_cons(4) { |chips| return chips if consecutiveOTTO?(chips) }
     end
 
