@@ -7,24 +7,16 @@ require_relative 'abstract_player'
 # require_relative '../ai'
 require_relative '../ai/ai_connect4'
 require_relative '../ai/ai_otto'
+require_relative '../settings'
 
 class AIPlayer < Player
 	# slots "play(const QKeyEvent*)"
 
-	# attr_accessor :ai_object
-	# def initialize(player_name, player_color, parent: nil, ai_type)
-	# 	super(player_name, player_color, parent)
-	# 	if ai_type == "Connect4"
-	# 		@ai_object = AI_Connect4.new(self.game, 2, @current_chip)
-	# 	elsif ai_type == "OTTO"
-	# 		# make it that otto object
-	# 	end
-	# end
+	attr_accessor :ai_object
 
 	def enable()
-		# TODO: change this if not correct.
 		super()
-		self.play("something")
+		self.play()
 		
 	end
 
@@ -33,22 +25,41 @@ class AIPlayer < Player
 	# 	super()
 	# end
 
-	def play(ai_type)
+	def play
 		# This will return the move that the player will take. This will come
 		# from a move generator for the AI
-		ai_test = AI_OTTO.new(self.game, 2, @current_chip)
 		# The ai player will require the ai_type to be passed through
 		# TODO: To be changed possibly based off of the main gameplay code. Look
 		# 		into the player_lobby code
+
+		ai_type = Settings.instance.game_mode
+		if ai_type == :Connect4
+			@ai_object = AI_Connect4.new(@game, 2, @current_chip)
+		elsif ai_type == :TOOT
+			# make it that otto object
+			@ai_object = AI_OTTO.new(@game, 1, @current_chip)
+			@ai_object.player_goal = @goal
+		end
 
 		#pre
 		assert game.is_a?(Game)
 
 		# AI will get the next position, will be determined based on the difficulty setting
-		@current_column = ai_test.getBestScore()
-		puts @current_column
-		drop()
-		finished()
+		tried_col = []
+		begin
+			@current_column = @ai_object.getBestScore()
+			if @ai_object.is_a?(AI_OTTO)
+				# random value
+				temp_num = rand(2)
+				if temp_num == 0
+					up()
+				end
+			end
+			drop()
+			finished()
+		rescue BoardIterator::ColumnFullError
+			tried_col << @current_column
+			retry
 
 		#post
 		assert @current_column.is_a?(Numeric)

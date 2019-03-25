@@ -51,10 +51,10 @@ class AI
 		elsif @ai_difficulty == NORMAL
 			# Get the first scoring layer from the current game and return the max of that
 			self.get_score()
-			puts @scoring_matrix
 			bestColumn = @scoring_matrix.each_with_index.max[1]
 		elsif @ai_difficulty == HARD
 			# Get the max scoring based off of the minimax algorithm
+			# NOTE: This part of the code is not implemented
 			self.minimax_alg()
 			bestColumn = @scoring_matrix.each_with_index.max[1]
 		end
