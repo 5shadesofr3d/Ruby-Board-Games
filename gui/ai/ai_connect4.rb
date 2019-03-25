@@ -32,10 +32,10 @@ class AI_Connect4 < AI
 
 	    # check every diagonal
 	    model.diagonals.each do |diagonal|
-	      upper_diag = model.to_enum(:each_in_diagonal, :chip, diagonal, :up, model.rows.max - 1, model.columns.max - 1)
+	      upper_diag = model.to_enum(:each_in_diagonal, :chip, diagonal, :up)
 	      score += self.enum_score(upper_diag)
 
-	      lower_diag = model.to_enum(:each_in_diagonal, :chip, diagonal, :down, model.rows.max - 1, model.columns.max - 1)
+	      lower_diag = model.to_enum(:each_in_diagonal, :chip, diagonal, :down)
 	      score += self.enum_score(lower_diag)
 	    end
 

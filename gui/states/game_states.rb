@@ -148,9 +148,9 @@ class GamePlayerMoveState < GameState
     # get next player
     player = game.players.first
     # acknowledge moves from this player
+    connect(player, SIGNAL("finished()"), self, SIGNAL("done()"))
     player.enable
     # after player completes his move, go to the next state
-    connect(player, SIGNAL("finished()"), self, SIGNAL("done()"))
   end
 
   def onExit(event)

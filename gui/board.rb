@@ -111,7 +111,9 @@ class Board < Qt::Widget
 
 	def onDrop()
 		dropped
+		puts "We have dropped"
 		disconnect(self, SIGNAL("translateCompleted()"), self, SLOT("onDrop()"))
+		puts "disconnected"
 	end
 
 	def translate(item: nil, from: nil, to: nil, time: 0)

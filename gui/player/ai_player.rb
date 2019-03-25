@@ -31,7 +31,7 @@ class AIPlayer < Player
 	def play(ai_type)
 		# This will return the move that the player will take. This will come
 		# from a move generator for the AI
-		ai_test = AI_Connect4.new(self.game, 2, @current_chip)
+		ai_test = AI_Connect4.new(self.game, 1, @current_chip)
 		# The ai player will require the ai_type to be passed through
 		# TODO: To be changed possibly based off of the main gameplay code. Look
 		# 		into the player_lobby code
@@ -44,6 +44,7 @@ class AIPlayer < Player
 		@current_column = ai_test.getBestScore()
 		puts @current_column
 		drop()
+		puts "finish drop"
 
 		#post
 		assert @current_column.is_a?(Numeric)
