@@ -69,7 +69,7 @@ end
 
 class GameLobbyState < GameState
 
-  slots 'exit_lobby()'
+  slots 'exit_lobby()','start_game()'
 
   def startButton()
     assert game.is_a? Game
@@ -83,8 +83,24 @@ class GameLobbyState < GameState
     game.showLobby()
 
     # when start button is clicked, go to the next state
-    connect(startButton, SIGNAL("clicked()"), self, SIGNAL("done()"))
+    connect(startButton, SIGNAL("clicked()"), self, SLOT("start_game()"))
     connect(game.lobby.buttons.exit, SIGNAL("clicked()"), self, SLOT("exit_lobby()"))
+  end
+
+  def start_game
+    players = game.lobby.room.playerInfos
+    cols = []
+    duplicate = false
+    for i in 0...players.count do
+      pCol = players[i].color
+      if cols.include? pCol
+        duplicate = true
+      end
+      cols << pCol
+    end
+    if !duplicate
+      done()
+    end
   end
 
   def exit_lobby
