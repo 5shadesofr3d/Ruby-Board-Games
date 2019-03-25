@@ -67,6 +67,10 @@ class LocalPlayer < Player
 
 
 		case key_event.key
+		when Qt::Key_Up.value
+			up()
+		when Qt::Key_Down.value
+			down()
 		when Qt::Key_Left.value
 			left()
 		when Qt::Key_Right.value

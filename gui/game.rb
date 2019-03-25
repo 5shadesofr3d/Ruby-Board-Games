@@ -90,12 +90,62 @@ class Game < Qt::Widget
     raise NotImplementedError
   end
 
+  def findGoal()
+    # if a goal was found, we have a winner!
+    assert board.model.is_a? BoardModel
+    assert valid?
+
+    model = board.model
+
+    # check every column first for a "4 in a row"
+    model.columns.each do |col|
+      cols = model.to_enum(:each_in_column, :chip, col)
+      cols.each_cons(4) { |chips| return chips if matchesGoal?(chips) }
+    end
+
+    # check every row
+    model.rows.each do |row|
+      rows = model.to_enum(:each_in_row, :chip, row)
+      rows.each_cons(4) { |chips| return chips if matchesGoal?(chips) }
+    end
+
+    # check every diagonal
+    model.diagonals.each do |diagonal|
+      upper_diag = model.to_enum(:each_in_diagonal, :chip, diagonal, :up)
+      upper_diag.each_cons(4) { |chips| return chips if matchesGoal?(chips) }
+
+      lower_diag = model.to_enum(:each_in_diagonal, :chip, diagonal, :down)
+      lower_diag.each_cons(4) { |chips| return chips if matchesGoal?(chips) }
+    end
+
+    assert valid?
+
+    return []
+  end
+
   def winner?()
+    return winnersGoal != nil
+  end
+
+  def winnersGoal()
+    raise NotImplementedError
+  end
+
+  def matchesGoal?(chips)
     raise NotImplementedError
   end
 
   def setPlayerGoals()
     raise NotImplementedError
+  end
+
+  def updatePlayerScores()
+    goal = winnersGoal
+    if (goal != nil) # a winner was found
+      players.each { |player| player.goal == goal ? player.wins += 1 : player.losses += 1 }
+    else # we had a tie
+      players.each { |player| player.ties += 1 }
+    end
   end
 
   def updatePlayers()
@@ -143,58 +193,21 @@ class Connect4 < Game
     return chip
   end
 
-  def consecutive4?(chips)
+  def matchesGoal?(chips)
     assert chips.is_a? Array
     return false unless chips.size == 4
     return false if chips.include?(nil)
     return chips.uniq { |c| c.secondary.name }.length == 1
   end
 
-  def findConsecutive4()
-    assert board.model.is_a? BoardModel
-    assert valid?
-
-    model = board.model
-
-    # check every column first for a "4 in a row"
-    model.columns.each do |col|
-      cols = model.to_enum(:each_in_column, :chip, col)
-      cols.each_cons(4) { |chips| return chips if consecutive4?(chips) }
-    end
-
-    # check every row
-    model.rows.each do |row|
-      rows = model.to_enum(:each_in_row, :chip, row)
-      rows.each_cons(4) { |chips| return chips if consecutive4?(chips) }
-    end
-
-    # check every diagonal
-    model.diagonals.each do |diagonal|
-      upper_diag = model.to_enum(:each_in_diagonal, :chip, diagonal, :up)
-      upper_diag.each_cons(4) { |chips| return chips if consecutive4?(chips) }
-
-      lower_diag = model.to_enum(:each_in_diagonal, :chip, diagonal, :down)
-      lower_diag.each_cons(4) { |chips| return chips if consecutive4?(chips) }
-    end
-
-    assert valid?
-
-    return []
-  end
-
   def setPlayerGoals()
     players.each { |player| player.goal = Array.new(4, player.color.name) }
   end
 
-  def winner?()
-    chips = findConsecutive4()
-    players.each { |player| return true if player.goal.size == chips.size && player.goal == chips.map(&:color) } # we have a winner if the chip sequence matches the player's goal
-    return false
-  end
-
-  def win_goal
-    chips = findConsecutive4()
-    players.each { |player| return player.color.name if player.goal.size == chips.size && player.goal == chips.map(&:color) } # we have a winner if the chip sequence matches the player's goal
+  def winnersGoal()
+    chips = findGoal()
+    players.each { |player| return player.goal if player.goal.size == chips.size && player.goal == chips.map(&:color) } # we have a winner if the chip sequence matches the player's goal
+    return nil
   end
 
   def valid?
@@ -215,54 +228,24 @@ class OTTO < Game
     lobby.addPlayer() # minimum 2 players
   end
 
-  def constructChip(c)
+  def constructChip(c, column: 0)
     symbol = @@chip_iteration.even?() ? :T : :O
     chip = OTTOChip.new(symbol, color: c, parent: board)
-    chip.geometry = board.model.head(0).geometry # place new chip on the first slot at the top of the board
+    chip.geometry = board.model.head(column).geometry # place new chip on the first slot at the top of the board
     @@chip_iteration += 1
     return chip
   end
 
-  def consecutiveOTTO?(chips)
+  def matchesGoal?(chips)
     return false unless chips.size == 4
     return false if chips.include?(nil)
     return (chips.map(&:id) == @@otto or chips.map(&:id) == @@toot)
   end
 
-  def findConsecutiveOTTO()
-    assert valid?
-
-    model = board.model
-
-    # check every column first for a "4 in a row"
-    model.columns.each do |col|
-      cols = model.to_enum(:each_in_column, :chip, col)
-      cols.each_cons(4) { |chips| return chips if consecutiveOTTO?(chips) }
-    end
-
-    # check every row
-    model.rows.each do |row|
-      rows = model.to_enum(:each_in_row, :chip, row)
-      rows.each_cons(4) { |chips| return chips if consecutiveOTTO?(chips) }
-    end
-
-    # check every diagonal
-    model.diagonals.each do |diagonal|
-      upper_diag = model.to_enum(:each_in_diagonal, :chip, diagonal, :up)
-      upper_diag.each_cons(4) { |chips| return chips if consecutiveOTTO?(chips) }
-
-      lower_diag = model.to_enum(:each_in_diagonal, :chip, diagonal, :down)
-      lower_diag.each_cons(4) { |chips| return chips if consecutiveOTTO?(chips) }
-    end
-
-    assert valid?
-    return []
-  end
-
-  def winner?
-    chips = findConsecutiveOTTO()
-    players.each { |player| return true if player.goal.size == chips.size && player.goal == chips.map(&:id) }
-    return false
+  def winnersGoal()
+    chips = findGoal()
+    players.each { |player| return player.goal if player.goal.size == chips.size && player.goal == chips.map(&:id) }
+    return nil
   end
 
   def setPlayerGoals()
