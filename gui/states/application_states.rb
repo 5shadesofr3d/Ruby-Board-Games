@@ -176,8 +176,8 @@ class SettingsController < Qt::Widget
     end
 
     if @gui.resolutionComboBox.currentText == "600x800"
-      @settings.window_height = 800
       @settings.window_width = 600
+      @settings.window_height = 800
     end
 
     puts @settings.to_s

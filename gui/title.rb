@@ -50,6 +50,8 @@ class Title < Qt::Widget
                     color: #{theme.color[:text]};
                     border-radius: 5px;"
 
+    text_style = "color: #{theme.color[:text]}; "
+
     fontT = Qt::Font.new
     fontT.family = "Sans Serif"
     fontT.pointSize = 36
@@ -62,6 +64,7 @@ class Title < Qt::Widget
     title.maximumSize = Qt::Size.new(16777215, 46)
     title.font = fontT
     title.text = "Connect N"
+    title.setStyleSheet(text_style)
 
     @bPlay = Qt::PushButton.new("Play")
     @bPlay.font = fontB

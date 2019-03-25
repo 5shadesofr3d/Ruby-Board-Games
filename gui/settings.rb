@@ -10,7 +10,7 @@ class Settings
   attr_accessor :game_mode, :num_cols, :num_rows
   attr_accessor :theme, :theme_setting
   attr_accessor :window_height, :window_width, :window_mode
-  attr_reader   :valid_game_mode, :valid_themes, :valid_window_mode
+  attr_reader   :valid_game_mode, :valid_themes, :valid_window_mode, :valid_resolutions
 
   def initialize
 
@@ -19,6 +19,7 @@ class Settings
     @valid_game_mode = [:Connect4, :TOOT]
     @valid_themes = [:Default]
     @valid_window_mode = [:Windowed, :Fullscreen]
+    @valid_resolutions = ["600x800"]
 
     # TODO: Load the settings into the GUI
     if File.file?("settings.json")

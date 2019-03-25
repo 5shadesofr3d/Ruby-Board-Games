@@ -265,6 +265,8 @@ class SettingsGUI < Qt::Widget
     return false if Settings.instance.valid_game_mode.index(Settings.instance.game_mode).nil?
     return false if Settings.instance.valid_themes.index(Settings.instance.theme_setting).nil?
     return false if Settings.instance.valid_window_mode.index(Settings.instance.window_mode).nil?
+    resolution = "#{Settings.instance.window_width}x#{Settings.instance.window_height}"
+    return false if Settings.instance.valid_resolutions.index(resolution).nil?
     return true
   end
 
@@ -284,7 +286,10 @@ class SettingsGUI < Qt::Widget
     @windowModeComboBox.currentIndex = settings.valid_window_mode
                                                .index(settings.window_mode)
 
-    # attr_reader :resolutionComboBox
+    resolution = "#{settings.window_width}x#{settings.window_height}"
+    @resolutionComboBox.currentIndex = settings.valid_resolutions
+                                               .index(resolution)
+
 
 
   end
