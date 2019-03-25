@@ -14,6 +14,8 @@ class BoardView < Qt::Widget
 
 		show()
 
+		assert primary != nil
+		assert secondary != nil
 		assert valid?
 	end
 
@@ -46,7 +48,7 @@ class BoardView < Qt::Widget
 		painter.drawPath(path)
 		painter.setBrush brush_circle
 		painter.drawEllipse(circle_boundary)
-		
+
 		painter.end
 
 		assert valid?
@@ -57,6 +59,8 @@ class BoardTile < BoardView
 	attr_reader :attached
 
 	def initialize(color: Qt::blue, parent: nil)
+		assert color != nil
+
 		@attached = nil
 
 		super(primary: color, secondary: Qt::transparent, parent: parent)
@@ -118,6 +122,7 @@ end
 
 class BoardChip < BoardView
 	def initialize(color: Qt::red, parent: nil)
+		assert color != nil
 		super(primary: Qt::transparent, secondary: color, parent: parent)
 
 		lower() # place chip behind tiles
@@ -141,6 +146,8 @@ end
 
 class Connect4Chip < BoardChip
 	def initialize(color: Qt::red, parent: nil)
+		assert color != nil
+
 		super(color: color, parent: parent)
 
 		assert valid?
@@ -158,10 +165,12 @@ class OTTOChip < BoardChip
 
 	def initialize(id, color: Qt::gray, parent: nil)
 		assert id.is_a?(Symbol) and (id == :T or id == :O)
+		assert color != nil
 
 		@id = id
 
-		super(color: color, parent: parent)		
+		super(color: color, parent: parent)
+		assert @id.is_a?(Symbol) and (id == :T or id == :O)
 		assert valid?
 	end
 
@@ -174,12 +183,14 @@ class OTTOChip < BoardChip
 
 	def ==(chip)
 		assert chip.is_a?(OTTOChip)
-		
+
 		# chips are equivalent if they have the same text (id):
 		return self.id == chip.id
 	end
 
 	def paintEvent(event)
+		assert width > 0
+		assert height > 0
 		super(event)
 
 		rect = Qt::Rect.new(0, 0, width, height)

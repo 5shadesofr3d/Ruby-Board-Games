@@ -2,6 +2,10 @@ module BoardIterator
 
 	def [](type, row, col)
 		assert valid?
+		assert row.is_a? Integer
+		assert col.is_a? Integer
+		assert row >= 0
+		assert col >= 0
 		assert valid_type?(type)
 
 		case type
@@ -23,7 +27,7 @@ module BoardIterator
 	end
 
 	def diagonals
-		return (0..([@rows, @cols].min - 1))
+		return (0..(([@rows, @cols].max) * 2) - 2)
 	end
 
 	def each(type)
@@ -49,16 +53,20 @@ module BoardIterator
 		assert valid?
 	end
 
-	def each_in_diagonal(type, diagonal, direction)
+	def each_in_diagonal(type, diagonal, direction, maxX, maxY)
 		assert diagonals.include?(diagonal)
 		assert direction.is_a?(Symbol) and (direction == :up or direction == :down)
 		assert valid_type?(type)
 
 		(0..diagonal).each do |i|
 			if direction == :up
-				yield self[type, i, diagonal - i]
+				if i <= maxX and diagonal - i <= maxY
+					yield self[type, i, diagonal - i]
+				end
 			elsif direction == :down
-				yield self[type, diagonal - i, i]
+				if i <= maxX and maxY - diagonal + i >= 0
+					yield self[type, i, maxY - diagonal + i]
+				end
 			end
 		end
 
@@ -68,6 +76,8 @@ module BoardIterator
 	def each_in_row(type, row)
 		assert valid?
 		assert valid_type?(type)
+		assert row.is_a? Integer
+		assert row >= 0
 
 		columns.each do |col|
 			yield self[type, row, col]
@@ -88,6 +98,8 @@ module BoardIterator
 	end
 
 	def next_empty(col)
+		assert col.is_a? Integer
+		assert col >= 0
 		# iterates from bottom to top and returns the tile if its empty
 		# returns nil if the selected col is full
 

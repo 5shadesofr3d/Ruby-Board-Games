@@ -11,6 +11,11 @@ class BoardModel
 	attr_reader :parent
 
 	def initialize(rows, cols, parent: nil)
+		assert rows.is_a? Integer
+		assert cols.is_a? Integer
+		assert rows > 0
+		assert cols > 0
+
 		@parent = parent
 
 		@tile = []
@@ -33,7 +38,7 @@ class BoardModel
 		assert rows.is_a?(Integer) and rows.between?(1, 100)
 		assert cols.is_a?(Integer) and cols.between?(1, 100)
 
-		@rows = rows 
+		@rows = rows
 		@cols = cols
 
 		generateHead()
@@ -52,7 +57,7 @@ class BoardModel
 	def tile(row, col)
 		assert row.is_a?(Integer) and rows.include?(row)
 		assert col.is_a?(Integer) and columns.include?(col)
-		
+
 		return @tile[row][col]
 	end
 
@@ -81,6 +86,7 @@ private
 			@tile << row
 		end
 
+		assert @tile.size > 0
 		assert @tile.size == @rows
 		assert @tile.first.size == @cols
 	end

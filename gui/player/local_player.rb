@@ -9,6 +9,8 @@ class LocalPlayer < Player
 
 	def enable()
 		super()
+		assert game.is_a? Game
+		assert game.board.is_a? Board
 
 		connect(game.board, SIGNAL("translateStarted()"), self, SLOT("ignore_keyboard()"))
 		connect(game.board, SIGNAL("translateCompleted()"), self, SLOT("acknowledge_keyboard()"))
@@ -17,6 +19,9 @@ class LocalPlayer < Player
 	end
 
 	def disable()
+		assert game.is_a? Game
+		assert game.board.is_a? Board
+
 		super()
 
 		disconnect(game.board, SIGNAL("translateStarted()"), self, SLOT("ignore_keyboard()"))
@@ -26,10 +31,12 @@ class LocalPlayer < Player
 	end
 
 	def acknowledge_keyboard()
+		assert game.is_a? Game
 		connect(game, SIGNAL("keyPressed(const QKeyEvent*)"), self, SLOT("play(const QKeyEvent*)"))
 	end
 
 	def ignore_keyboard()
+		assert game.is_a? Game
 		disconnect(game, SIGNAL("keyPressed(const QKeyEvent*)"), self, SLOT("play(const QKeyEvent*)"))
 	end
 
@@ -56,6 +63,8 @@ class LocalPlayer < Player
 
 		#pre
 		assert current_column.is_a?(Numeric) and current_column >= 0
+		assert key_event.is_a?(Qt::KeyEvent)
+
 
 		case key_event.key
 		when Qt::Key_Left.value
@@ -63,7 +72,17 @@ class LocalPlayer < Player
 		when Qt::Key_Right.value
 			right()
 		when Qt::Key_Space.value
-			drop()
+			tile = nil
+			begin
+				tile = game.board.model.next_empty(current_column)
+			rescue BoardIterator::ColumnFullError
+				tile = nil
+				puts "Column full, try again"
+			end
+
+			if tile != nil
+				drop()
+			end
 		end
 
 		#post

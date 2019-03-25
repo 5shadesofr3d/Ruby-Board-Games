@@ -9,8 +9,8 @@ class Title < Qt::Widget
   attr_reader :bQuit
 
   def initialize(width = 800, height = 600, parent = nil)
-    assert width.is_a? Numeric
-    assert height.is_a? Numeric
+    assert width.is_a? Integer
+    assert height.is_a? Integer
     assert width > 0
     assert height > 0
     parent != nil ? super(parent) : super()
@@ -23,6 +23,8 @@ class Title < Qt::Widget
     setBackground(Qt::darkCyan)
     drawMenu()
     show()
+
+    assert @layout.is_a? Qt::VBoxLayout
   end
 
   def setScreenSize(width, height)
@@ -62,17 +64,17 @@ class Title < Qt::Widget
     @bPlay = Qt::PushButton.new("Play")
     @bPlay.font = fontB
     @bPlay.setAutoFillBackground(true)
-    @bPlay.setStyleSheet("background-color: rgb(66, 134, 244); color: rgb(255, 255, 255)")
+    @bPlay.setStyleSheet("background-color: rgb(66, 134, 244); color: rgb(255, 255, 255); border-radius: 5px")
     @bPlay.maximumSize = Qt::Size.new(300, 50)
     @bSettings = Qt::PushButton.new("Settings")
     @bSettings.font = fontB
     @bSettings.setAutoFillBackground(true)
-    @bSettings.setStyleSheet("background-color: rgb(66, 134, 244); color: rgb(255, 255, 255)")
+    @bSettings.setStyleSheet("background-color: rgb(66, 134, 244); color: rgb(255, 255, 255); border-radius: 5px")
     @bSettings.maximumSize = Qt::Size.new(300, 50)
     @bQuit = Qt::PushButton.new("Exit")
     @bQuit.font = fontB
     @bQuit.setAutoFillBackground(true)
-    @bQuit.setStyleSheet("background-color: rgb(66, 134, 244); color: rgb(255, 255, 255)")
+    @bQuit.setStyleSheet("background-color: rgb(66, 134, 244); color: rgb(255, 255, 255); border-radius: 5px")
     @bQuit.maximumSize = Qt::Size.new(300, 50)
 
 
@@ -83,7 +85,9 @@ class Title < Qt::Widget
     @layout.addWidget(@bSettings)
     @layout.addWidget(@bQuit)
 
-
+    assert @bPlay.is_a? Qt::PushButton
+    assert @bSettings.is_a? Qt::PushButton
+    assert @bQuit.is_a? Qt::PushButton
     assert valid?
   end
 
