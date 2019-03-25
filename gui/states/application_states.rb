@@ -119,7 +119,11 @@ class GameScreenState < StatePattern::State
                            width: settings.window_width,
                            parent: stateful.main_window)
     when :TOOT
-      @game = OTTO.new(parent: stateful.main_window)
+      @game = OTTO.new(rows: settings.num_rows,
+                       columns: settings.num_cols,
+                       height: settings.window_height,
+                       width: settings.window_width,
+                       parent: stateful.main_window)
     end
 
     @game.start
