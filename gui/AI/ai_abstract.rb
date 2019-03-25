@@ -35,7 +35,7 @@ class AI
 		assert @scoring_matrix.is_a? Array
 	end
 
-	def getBestScore(self)
+	def getBestScore(player_chip)
 		# returns the columm that has the best score in terms of the difficulty
 
 		# assert difficulty is valid
@@ -50,11 +50,11 @@ class AI
 			bestColumn = rand(self.playing_game.board.model.cols.max)
 		elsif @ai_difficulty == MEDIUM
 			# Get the first scoring layer from the current game and return the max of that
-			self.scoring
+			self.get_score(player_chip)
 			bestColumn = @scoring_matrix.each_with_index.max[1]
 		elsif @ai_difficulty == HARD
 			# Get the max scoring based off of the minimax algorithm
-			self.minimax_alg
+			self.minimax_alg(player_chip)
 			bestColumn = @scoring_matrix.each_with_index.max[1]
 		end
 
@@ -64,13 +64,33 @@ class AI
 
 
 	private
-	def scoring
+	def scoring(temp_board, player_chip)
 		# This is where the rules of the "scoring" of the game should go. This will be different
 		# for every type of game that is created
 		raise AbstractClassError
 	end
 
-	def minimax_alg
+	def get_score(player_chip)
+		# This will be the general loop that will give the scoring matrix
+		current_model = self.playing_game.board.model
+		current_model.columns.each do |col|
+			# get the next empty row num
+			empty_row = 0
+			# TODO: verify that this works
+			e = current_model.to_enum(:each_in_column, :tile, col)
+			e.reverse_each do |tile|
+				if not tile.empty?
+					empty_row += 1
+				end
+			end
+			temp_board = self.playing_game.board.dup
+			temp_board.drop(player_chip, col)
+			score = scoring(temp_board, player_chip)
+			self.scoring_matrix << score
+		end
+	end
+
+	def minimax_alg(player_chip)
 		# This is the main body of the algorithm that will be useful for if the difficulty is set to hard
 		# assert difficulty is hard
 
