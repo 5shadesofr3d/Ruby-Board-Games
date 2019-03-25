@@ -112,7 +112,7 @@ class GameScreenState < StatePattern::State
     when :Connect4
       @game = Connect4.new(parent: stateful.main_window)
     when :TOOT
-
+      @game = OTTO.new(parent: stateful.main_window)
     end
 
     @game.start
