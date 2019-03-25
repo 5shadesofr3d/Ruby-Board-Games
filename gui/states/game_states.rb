@@ -69,6 +69,8 @@ end
 
 class GameLobbyState < GameState
 
+  slots 'exit_lobby()'
+
   def startButton()
     assert game.is_a? Game
     return game.lobby.buttons.start
@@ -82,6 +84,11 @@ class GameLobbyState < GameState
 
     # when start button is clicked, go to the next state
     connect(startButton, SIGNAL("clicked()"), self, SIGNAL("done()"))
+    connect(game.lobby.buttons.exit, SIGNAL("clicked()"), self, SLOT("exit_lobby()"))
+  end
+
+  def exit_lobby
+    game.stop
   end
 
   def onExit(event)

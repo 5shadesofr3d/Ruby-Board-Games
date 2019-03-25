@@ -115,10 +115,9 @@ class GameScreenState < StatePattern::State
 
     end
 
-    assert @game.is_a?(Game)
-
     @game.start
     @game.show
+    @game.set_state(self)
 
     assert @game.is_a? Game
     assert @game.visible
@@ -128,6 +127,7 @@ class GameScreenState < StatePattern::State
   def open_title_screen
     assert valid?
 
+    @game.close
     transition_to(TitleScreenState)
 
     assert valid?

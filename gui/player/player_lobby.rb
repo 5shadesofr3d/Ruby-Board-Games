@@ -68,7 +68,7 @@ class PlayerLobby < Qt::Frame
 end
 
 class PlayerLobbyButtons < Qt::Widget
-  attr_reader :add, :start
+  attr_reader :add, :start, :exit
 
     def initialize(parent: nil)
     parent != nil ? super(parent) : super()
@@ -76,6 +76,8 @@ class PlayerLobbyButtons < Qt::Widget
     buttonLayout = Qt::HBoxLayout.new(self)
     @add = PlayerLobbyButton.new("Add", self)
     @start = PlayerLobbyButton.new("Start", self)
+    @exit = PlayerLobbyButton.new("Exit",self)
+    buttonLayout.addWidget(exit)
     buttonLayout.addWidget(add)
     buttonLayout.addWidget(start)
     setLayout(buttonLayout)
@@ -89,7 +91,7 @@ class PlayerLobbyButton < Qt::PushButton
     super(str, parent)
 
     setStyleSheet("color:white; background-color:#{LobbyColor::BLUE}; border: 1px; border-radius: 10px")
-    
+
     setMaximumSize(75, 50)
     setMinimumSize(75, 50)
 
