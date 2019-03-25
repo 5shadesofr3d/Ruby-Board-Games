@@ -142,7 +142,7 @@ class SettingsController < Qt::Widget
   def initialize(state, gui, parent=nil)
     assert gui.is_a? SettingsGUI
     assert state.is_a? SettingsScreenState
-    parent != nil ? super(parent) : super()
+    super()
 
     @state = state
     @gui = gui
@@ -172,7 +172,7 @@ class SettingsController < Qt::Widget
       @settings.window_width = 600
     end
 
-    self.close
+    @gui.close
     @state.open_title
 
     assert [:TOOT, :Connect4].include? @settings.game_mode
@@ -185,7 +185,7 @@ class SettingsController < Qt::Widget
     assert @state.is_a? SettingsScreenState
 
     @gui.close
-    # @state.open_title
+    @state.open_title
 
     assert self.visible == false
   end
@@ -204,8 +204,6 @@ class SettingsScreenState < StatePattern::State
     assert stateful.settings_gui.is_a? SettingsGUI
     assert stateful.main_window.is_a? Qt::MainWindow
 
-    # stateful.settings_gui.setupUi(stateful.main_window)
-    stateful.settings_gui.setupUi
     stateful.settings_gui.show
     @controller = SettingsController.new(self, stateful.settings_gui)
 
@@ -243,8 +241,11 @@ class ApplicationStateMachine < Qt::Widget
     super
 
     @window = QTApplication.instance
-    @settings_gui = SettingsGUI.new
     @main_window = Qt::MainWindow.new
+
+    # ***** Stopped here.... *****
+    @settings_gui = SettingsGUI.new(800, 600, @main_window)
+
     @main_window.setFixedSize(800,600) #TODO: Set to a dynamic size
 
     open_title_screen #init title screen
