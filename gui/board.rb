@@ -25,6 +25,7 @@ class Board < Qt::Widget
 		setupLayout()
 		setupWindow(width, height)
 		setupAnimation()
+		setupBackground()
 
 		assert @model.is_a? BoardModel
 		assert valid?
@@ -75,6 +76,12 @@ class Board < Qt::Widget
 		palette = Qt::Palette.new(c)
 		setAutoFillBackground(true)
 		setPalette(palette)
+	end
+
+	# TODO: Might not be worth fixing. Set the background of the window.
+	def setupBackground
+		#theme = Settings.instance.theme
+		#setStyleSheet("background-color: #{theme.color[:board_background]};")
 	end
 
 	def clear()

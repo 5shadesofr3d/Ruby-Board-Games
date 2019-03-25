@@ -172,14 +172,13 @@ class GameDetermineStatusState < GameState
   def onEntry(event)
     assert game.is_a? Game
     assert game.players.count > 0
-    Thread.new do
-      if game.winner?
-        win()
-      else
-        # cycle to next player and get his move
-        game.players.rotate!
-        done()
-      end
+
+    if game.winner?
+      win()
+    else
+      # cycle to next player and get his move
+      game.players.rotate!
+      done()
     end
 
     assert game.is_a? Game
