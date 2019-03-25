@@ -88,6 +88,7 @@ class GameLobbyState < GameState
   end
 
   def start_game
+    assert game.lobby.room.playerInfos.count > 0
     players = game.lobby.room.playerInfos
     cols = []
     duplicate = false
@@ -101,6 +102,8 @@ class GameLobbyState < GameState
     if !duplicate
       done()
     end
+
+    assert players.count > 0
   end
 
   def exit_lobby
@@ -128,6 +131,8 @@ class GamePlayState < GameState
     # game time
     # game score
     done()
+
+    assert game.board.visible
   end
 
   def onExit(event)
@@ -138,6 +143,7 @@ end
 class GamePlayerMoveState < GameState
 
   def onEntry(event)
+    assert game.players.count > 0
     assert game.players.first.is_a? Player
     # get next player
     player = game.players.first
@@ -148,6 +154,7 @@ class GamePlayerMoveState < GameState
   end
 
   def onExit(event)
+    assert game.players.count > 0
     assert game.players.first.is_a? Player
     player = game.players.first
     # disconnect signal for the player that just played his move
@@ -164,6 +171,7 @@ class GameDetermineStatusState < GameState
 
   def onEntry(event)
     assert game.is_a? Game
+    assert game.players.count > 0
     Thread.new do
       if game.winner?
         win()
@@ -173,6 +181,9 @@ class GameDetermineStatusState < GameState
         done()
       end
     end
+
+    assert game.is_a? Game
+    assert game.players.count > 0
   end
 
   def onExit(event)

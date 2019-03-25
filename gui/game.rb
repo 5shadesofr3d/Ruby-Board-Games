@@ -59,6 +59,7 @@ class Game < Qt::Widget
     @lobbyWidget.setLayout(hlayout)
     @stack.addWidget(@lobbyWidget)
     @lobby.addPlayer() # we have at least 1 player
+    assert @lobby.room.playerInfos.count > 0
   end
 
   def start()
@@ -76,10 +77,12 @@ class Game < Qt::Widget
   end
 
   def showLobby()
+    assert @lobbyWidget.is_a? Qt::Widget
     @stack.setCurrentWidget(@lobbyWidget)
   end
 
   def showBoard()
+    assert @board.is_a? Qt::Widget
     @stack.setCurrentWidget(@board)
   end
 
@@ -90,6 +93,7 @@ class Game < Qt::Widget
   def updatePlayers()
     @players = lobby.getPlayers()
     @players.each { |player| player.game = self }
+    assert @players.count > 0
   end
 
   def updatePlayerInfos()
@@ -103,12 +107,12 @@ class Game < Qt::Widget
   def addPlayer(player)
     assert Player.is_a?(Player)
     @players << player
+    assert @players.include? player
   end
 
   def valid?()
     return false unless @board == nil or @board.is_a?(Board)
     return false unless @stack.is_a?(Qt::StackedLayout)
-
     return true
   end
 
@@ -116,6 +120,15 @@ end
 
 class Connect4 < Game
   def initialize(rows: 7, columns: 8, width: 800, height: 600, parent: nil)
+    assert rows.is_a? Integer
+    assert columns.is_a? Integer
+    assert width.is_a? Integer
+    assert height.is_a? Integer
+    assert columns > 0
+    assert rows > 0
+    assert width > 0
+    assert height > 0
+
     super(rows: rows, columns: columns, width: width, height: height, parent: parent)
   end
 
@@ -126,12 +139,14 @@ class Connect4 < Game
   end
 
   def consecutive4?(chips)
+    assert chips.is_a? Array
     return false unless chips.size == 4
     return false if chips.include?(nil)
     return chips.uniq { |c| c.secondary }.length == 1
   end
 
   def findConsecutive4()
+    assert board.model.is_a? BoardModel
     assert valid?
 
     model = board.model
