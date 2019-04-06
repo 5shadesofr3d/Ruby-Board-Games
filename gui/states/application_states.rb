@@ -6,6 +6,7 @@ require 'Qt'
 require_relative '../settings'
 require_relative '../settings/interface'
 require_relative '../title'
+require_relative '../multiplayer/lobby_ui'
 
 require_relative '../game'
 
@@ -89,35 +90,42 @@ class TitleController < Qt::Widget
 
     client = XMLRPC::Client.new( "localhost", "/", 1234 )
 
-    #result, s = client.call2("sample.sum_and_difference", 5, 3)
-    #puts s, result
-
     # Connect to the lobby as user1.
     puts client.call('sample.lobby_connect','user1')
 
     #client.call("sample.lobby")
 
-    # Join a lobby,
-    # busy wait for additional players for our game.
-    while client.call("sample.players") < 2
-      sleep(2) # Try not to spam the server.
-    end
+    @lobby_window = Qt::Dialog.new
+    @lobby_ui = LobbyGUI.new(@lobby_window)
 
-    # Random start times, they should still be synchronized
-    # since we busy wait on the server. Successful synchronization!
+    @lobby_window.setFixedSize(500, 500)
+    @lobby_window.setWindowTitle("Lobby")
+    @lobby_window.setModal(true)
+    @lobby_window.show
+
+    puts "blocking..."
+
+    # # Join a lobby,
+    # # busy wait for additional players for our game.
+    # while client.call("sample.players") < 2
+    #   sleep(2) # Try not to spam the server.
+    # end
     #
-    # This can be replaced with a button to say start instead.
-    sleep(rand(10))
-    client.call2("sample.ready")
-
-    while not client.call("sample.is_ready")
-      sleep(0.5)
-    end
-
-    # Print our current lobby.
-    puts client.call2("sample.lobby")
-    puts client.call2("sample.super_int")
-    puts "Game...start!"
+    # # Random start times, they should still be synchronized
+    # # since we busy wait on the server. Successful synchronization!
+    # #
+    # # This can be replaced with a button to say start instead.
+    # sleep(rand(10))
+    # client.call2("sample.ready")
+    #
+    # while not client.call("sample.is_ready")
+    #   sleep(0.5)
+    # end
+    #
+    # # Print our current lobby.
+    # puts client.call2("sample.lobby")
+    # puts client.call2("sample.super_int")
+    # puts "Game...start!"
 
     # Launch the game.
 

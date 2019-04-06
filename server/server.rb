@@ -22,7 +22,7 @@ class MyHandler
 
 
   def lobby_connect(user)
-    @super_int += 1
+    @num_players += 1
     @lobby.push user
     "#{user} has logged in #{@num_players} times!"
   end

@@ -80,7 +80,7 @@ class Player < Qt::Object
 		assert game.board.model.is_a? BoardModel
 	end
 
-	def right()
+	def right
 		assert game.is_a? Game
 		assert game.board.model.is_a? BoardModel
 
@@ -100,7 +100,7 @@ class Player < Qt::Object
 		assert game.board.model.is_a? BoardModel
 	end
 
-	def drop()
+	def drop
 		assert game.is_a? Game
 		assert current_column.is_a? Integer
 		assert current_column >= 0
@@ -113,7 +113,7 @@ class Player < Qt::Object
 		assert @current_chip == nil
 	end
 
-	def enable()
+	def enable
 		assert game.is_a? Game
 		assert game.board.is_a? Board
 
@@ -125,7 +125,7 @@ class Player < Qt::Object
 		assert current_column.is_a? Integer and current_column >= 0
 	end
 
-	def disable()
+	def disable
 		assert game.board.is_a? Board
 
 		disconnect(game.board, SIGNAL("dropped()"), self, SIGNAL("finished()"))
