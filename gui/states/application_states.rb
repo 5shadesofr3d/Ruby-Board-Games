@@ -1,3 +1,4 @@
+require "xmlrpc/client"
 require "test/unit"
 require 'state_pattern'
 require 'Qt'
@@ -50,7 +51,7 @@ end
 class TitleController < Qt::Widget
   include Test::Unit::Assertions
 
-  slots 'play_game()','open_settings()','quit_game()'
+  slots 'play_game()', 'multiplayer()', 'open_settings()','quit_game()'
 
   def initialize(state, window)
     assert state.is_a? TitleScreenState
@@ -65,6 +66,7 @@ class TitleController < Qt::Widget
                        settings.window_height, window)
 
     connect(@title.bPlay,  SIGNAL('clicked()'), self, SLOT('play_game()'))
+    connect(@title.bMultiplayer, SIGNAL('clicked()'), self, SLOT('multiplayer()'))
     connect(@title.bSettings,  SIGNAL('clicked()'), self, SLOT('open_settings()'))
     connect(@title.bQuit,  SIGNAL('clicked()'), $qApp, SLOT('quit()'))
 
@@ -81,6 +83,44 @@ class TitleController < Qt::Widget
     @state.open_settings
 
     assert @title.visible == false
+  end
+
+  def multiplayer
+
+    client = XMLRPC::Client.new( "localhost", "/", 1234 )
+
+    #result, s = client.call2("sample.sum_and_difference", 5, 3)
+    #puts s, result
+
+    # Connect to the lobby as user1.
+    puts client.call('sample.lobby_connect','user1')
+
+    #client.call("sample.lobby")
+
+    # Join a lobby,
+    # busy wait for additional players for our game.
+    while client.call("sample.players") < 2
+      sleep(2) # Try not to spam the server.
+    end
+
+    # Random start times, they should still be synchronized
+    # since we busy wait on the server. Successful synchronization!
+    #
+    # This can be replaced with a button to say start instead.
+    sleep(rand(10))
+    client.call2("sample.ready")
+
+    while not client.call("sample.is_ready")
+      sleep(0.5)
+    end
+
+    # Print our current lobby.
+    puts client.call2("sample.lobby")
+    puts client.call2("sample.super_int")
+    puts "Game...start!"
+
+    # Launch the game.
+
   end
 
   def play_game
