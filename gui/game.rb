@@ -190,6 +190,49 @@ class Game < Qt::Widget
 
 end
 
+# Needs to handle lobby differently.
+class OnlineGame < Game
+
+  def initialize(rows: 7, columns: 8, width: 800, height: 600, parent: nil)
+    assert rows.is_a? Integer
+    assert columns.is_a? Integer
+    assert width.is_a? Integer
+    assert height.is_a? Integer
+    assert columns > 0
+    assert rows > 0
+    assert width > 0
+    assert height > 0
+
+    super(rows: rows, columns: columns, width: width, height: height, parent: parent)
+  end
+
+  def setupUI(rows, cols)
+    setupStack
+    setupLobby
+    setupBoard(rows, cols)
+
+    setFocus(Qt::OtherFocusReason)
+    setFocusPolicy(Qt::StrongFocus)
+  end
+
+  def setupLobby()
+    @lobby = PlayerLobby.new(parent: self)
+
+    # Insert our online players
+    @lobby.addPlayer("nerd1")
+
+
+    @lobbyWidget = Qt::Widget.new(self)
+    hlayout = Qt::HBoxLayout.new(@lobbyWidget)
+    hlayout.addWidget(lobby)
+    @lobbyWidget.setLayout(hlayout)
+    @stack.addWidget(@lobbyWidget)
+    @lobby.addPlayer() # we have at least 1 player
+    assert @lobby.room.playerInfos.count > 0
+  end
+
+end
+
 class Connect4 < Game
   def initialize(rows: 7, columns: 8, width: 800, height: 600, parent: nil)
     assert rows.is_a? Integer

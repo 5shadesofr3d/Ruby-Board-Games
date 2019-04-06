@@ -28,10 +28,12 @@ class MyHandler
   def is_ready
     assert is_valid?
 
-    if @num_ready == 2
-      return true
-    end
-    return false
+    # if @num_ready == 2
+    #   return true
+    # end
+    # return false
+
+    return true
 
   end
 

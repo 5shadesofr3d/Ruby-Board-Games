@@ -48,7 +48,7 @@ class GameStateMachine < Qt::StateMachine
     #assert complete.transition.count > 0
   end
 
-  def valid?()
+  def valid?
     return false unless @game.is_a?(Game)
     return true
   end

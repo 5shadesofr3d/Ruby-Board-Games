@@ -42,9 +42,9 @@ class PlayerLobby < Qt::Frame
     setStyleSheet("background-color:#{LobbyColor::DARK_BLUE}; border: 1px; border-radius: 10px")
   end
 
-  def addPlayer()
+  def addPlayer(username = nil)
     if @player_count < @@MAX_PLAYER_COUNT
-      @room.addPlayer()
+      @room.addPlayer(username)
       @player_count += 1
     end
   end
@@ -139,10 +139,15 @@ class PlayerRoom < Qt::Frame
     assert valid?
   end
 
-  def addPlayer()
+  def addPlayer(username)
     assert valid?
 
-    playerInfo = PlayerInfo.new(parent: self)
+    if username.nil?
+      playerInfo = PlayerInfo.new(parent: self)
+    else
+      playerInfo = PlayerInfo.new(name: username, parent: self)
+    end
+
     @playerInfos << playerInfo
     @layout.addWidget(playerInfo)
     assert valid?
@@ -296,8 +301,6 @@ class PlayerInfo < Qt::Widget
     assert wins >= 0
     assert loss >= 0
     assert ties >= 0
-
-
 
     setMaximumHeight(50)
     setMinimumHeight(50)

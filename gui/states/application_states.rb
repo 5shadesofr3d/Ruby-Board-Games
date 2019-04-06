@@ -62,7 +62,7 @@ class TitleController < Qt::Widget
   include Test::Unit::Assertions
 
   slots 'play_game()', 'multiplayer()', 'open_settings()','quit_game()',
-        'show_lobby()'
+        'show_lobby()', 'ready_pressed()'
 
   def initialize(state, window)
     assert state.is_a? TitleScreenState
@@ -100,14 +100,32 @@ class TitleController < Qt::Widget
     @lobby_window = Qt::Dialog.new
     @lobby_ui = LobbyGUI.new(@lobby_window)
 
-    connect(@lobby_ui.quickMatchButton, SIGNAL('clicked()'), self, SLOT('multiplayer()'))
+    connect(@lobby_ui.quickMatchButton, SIGNAL('clicked()'), self, SLOT('ready_pressed()'))
 
     @lobby_window.setFixedSize(500, 500)
     @lobby_window.setWindowTitle("Lobby")
     @lobby_window.setModal(true)
     @lobby_window.show
+    multiplayer
 
     assert @lobby_window.visible
+  end
+
+  def ready_pressed
+    client = Client.instance.conn
+    client.call("lobby.ready")
+
+    while not client.call("lobby.is_ready")
+      sleep(0.5)
+    end
+
+    # Launch the game.
+    @title.close
+    @lobby_window.close
+    @state.open_online_game
+
+    assert @title.visible == false
+
   end
 
   def multiplayer
@@ -122,31 +140,14 @@ class TitleController < Qt::Widget
 
     # Join a lobby,
     # busy wait for additional players for our game.
-    while client.call("lobby.players") < 2
+    while client.call("lobby.players") < 1
       sleep(2) # Try not to spam the server.
     end
 
-    # Random start times, they should still be synchronized
-    # since we busy wait on the server. Successful synchronization!
-    #
-    # This can be replaced with a button to say start instead.
-    sleep(rand(4))
-    client.call("lobby.ready")
-
-    while not client.call("lobby.is_ready")
-      sleep(0.5)
-    end
-
     # Print our current lobby.
-    puts client.call2("lobby.lobby")
-    puts client.call2("lobby.num_players")
-    puts "Game...start!"
+    # puts client.call2("lobby.lobby")
+    # puts client.call2("lobby.num_players")
 
-    # Launch the game.
-    @title.close
-    @state.open_online_game
-
-    assert @title.visible == false
   end
 
   def play_game
@@ -170,22 +171,28 @@ class OnlineGameScreenState < StatePattern::State
   end
 
   def enter
-    game_mode = :Connect4
+    # game_mode = :Connect4
 
-    case game_mode
-    when :Connect4
-      @game = Connect4.new(rows: 10,
+    @game = OnlineGame.new(rows: 10,
                            columns: 10,
                            height: 600,
                            width: 800,
                            parent: stateful.main_window)
-    when :TOOT
-      @game = OTTO.new(rows: 10,
-                       columns: 10,
-                       height: 600,
-                       width: 800,
-                       parent: stateful.main_window)
-    end
+
+    # case game_mode
+    # when :Connect4
+    #   @game = Connect4.new(rows: 10,
+    #                        columns: 10,
+    #                        height: 600,
+    #                        width: 800,
+    #                        parent: stateful.main_window)
+    # when :TOOT
+    #   @game = OTTO.new(rows: 10,
+    #                    columns: 10,
+    #                    height: 600,
+    #                    width: 800,
+    #                    parent: stateful.main_window)
+    # end
 
     @game.start
     @game.show
