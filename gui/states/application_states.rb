@@ -7,9 +7,9 @@ require_relative '../settings'
 require_relative '../settings/interface'
 require_relative '../title'
 require_relative '../multiplayer/lobby_ui'
+require_relative '../../server/client'
 
 require_relative '../game'
-
 
 class TitleScreenState < StatePattern::State
   include Test::Unit::Assertions
@@ -47,12 +47,22 @@ class TitleScreenState < StatePattern::State
     assert valid?
   end
 
+  def open_online_game
+    assert valid?
+
+    stateful.main_window.centralWidget.close if stateful.main_window.centralWidget != nil
+    transition_to(OnlineGameScreenState)
+
+    assert valid?
+  end
+
 end
 
 class TitleController < Qt::Widget
   include Test::Unit::Assertions
 
-  slots 'play_game()', 'multiplayer()', 'open_settings()','quit_game()'
+  slots 'play_game()', 'multiplayer()', 'open_settings()','quit_game()',
+        'show_lobby()'
 
   def initialize(state, window)
     assert state.is_a? TitleScreenState
@@ -67,7 +77,7 @@ class TitleController < Qt::Widget
                        settings.window_height, window)
 
     connect(@title.bPlay,  SIGNAL('clicked()'), self, SLOT('play_game()'))
-    connect(@title.bMultiplayer, SIGNAL('clicked()'), self, SLOT('multiplayer()'))
+    connect(@title.bMultiplayer, SIGNAL('clicked()'), self, SLOT('show_lobby()'))
     connect(@title.bSettings,  SIGNAL('clicked()'), self, SLOT('open_settings()'))
     connect(@title.bQuit,  SIGNAL('clicked()'), $qApp, SLOT('quit()'))
 
@@ -86,49 +96,57 @@ class TitleController < Qt::Widget
     assert @title.visible == false
   end
 
-  def multiplayer
-
-    client = XMLRPC::Client.new( "localhost", "/", 1234 )
-
-    # Connect to the lobby as user1.
-    puts client.call('sample.lobby_connect','user1')
-
-    #client.call("sample.lobby")
-
+  def show_lobby
     @lobby_window = Qt::Dialog.new
     @lobby_ui = LobbyGUI.new(@lobby_window)
+
+    connect(@lobby_ui.quickMatchButton, SIGNAL('clicked()'), self, SLOT('multiplayer()'))
 
     @lobby_window.setFixedSize(500, 500)
     @lobby_window.setWindowTitle("Lobby")
     @lobby_window.setModal(true)
     @lobby_window.show
 
-    puts "blocking..."
+    assert @lobby_window.visible
+  end
 
-    # # Join a lobby,
-    # # busy wait for additional players for our game.
-    # while client.call("sample.players") < 2
-    #   sleep(2) # Try not to spam the server.
-    # end
+  def multiplayer
+    assert @lobby_window.is_a? Qt::Dialog
+    assert @lobby_ui.is_a? LobbyGUI
+    assert @lobby_window.visible
+
+    client = Client.instance.conn
+
+    # Connect to the lobby as user1.
+    puts client.call2('lobby.connect', @lobby_ui.usernameText.text)
+
+    # Join a lobby,
+    # busy wait for additional players for our game.
+    while client.call("lobby.players") < 2
+      sleep(2) # Try not to spam the server.
+    end
+
+    # Random start times, they should still be synchronized
+    # since we busy wait on the server. Successful synchronization!
     #
-    # # Random start times, they should still be synchronized
-    # # since we busy wait on the server. Successful synchronization!
-    # #
-    # # This can be replaced with a button to say start instead.
-    # sleep(rand(10))
-    # client.call2("sample.ready")
-    #
-    # while not client.call("sample.is_ready")
-    #   sleep(0.5)
-    # end
-    #
-    # # Print our current lobby.
-    # puts client.call2("sample.lobby")
-    # puts client.call2("sample.super_int")
-    # puts "Game...start!"
+    # This can be replaced with a button to say start instead.
+    sleep(rand(4))
+    client.call("lobby.ready")
+
+    while not client.call("lobby.is_ready")
+      sleep(0.5)
+    end
+
+    # Print our current lobby.
+    puts client.call2("lobby.lobby")
+    puts client.call2("lobby.num_players")
+    puts "Game...start!"
 
     # Launch the game.
+    @title.close
+    @state.open_online_game
 
+    assert @title.visible == false
   end
 
   def play_game
@@ -139,6 +157,43 @@ class TitleController < Qt::Widget
     @state.open_game
 
     assert @title.visible == false
+  end
+
+end
+
+class OnlineGameScreenState < StatePattern::State
+  include Test::Unit::Assertions
+
+  def valid?
+    return false unless @game.is_a? Game
+    return true
+  end
+
+  def enter
+    game_mode = :Connect4
+
+    case game_mode
+    when :Connect4
+      @game = Connect4.new(rows: 10,
+                           columns: 10,
+                           height: 600,
+                           width: 800,
+                           parent: stateful.main_window)
+    when :TOOT
+      @game = OTTO.new(rows: 10,
+                       columns: 10,
+                       height: 600,
+                       width: 800,
+                       parent: stateful.main_window)
+    end
+
+    @game.start
+    @game.show
+    @game.set_state(self)
+
+    assert @game.is_a? Game
+    assert @game.visible
+    assert valid?
   end
 
 end

@@ -46,7 +46,7 @@ class LobbyGUI < Qt::Widget
         @usernameLabel.objectName = "usernameLabel"
         @horizontalLayout.addWidget(@usernameLabel)
 
-        @usernameText = Qt::TextEdit.new
+        @usernameText = Qt::LineEdit.new
         @usernameText.objectName = "usernameText"
         @horizontalLayout.addWidget(@usernameText)
 
