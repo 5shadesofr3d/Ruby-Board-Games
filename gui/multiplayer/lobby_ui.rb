@@ -7,7 +7,7 @@
 ** WARNING! All changes made in this file will be lost when recompiling ui file!
 =end
 
-require 'Qt4'
+require 'Qt'
 
 class LobbyGUI < Qt::Widget
 

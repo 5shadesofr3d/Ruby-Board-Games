@@ -1,0 +1,2 @@
+class OnlinePlayer
+end

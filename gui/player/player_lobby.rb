@@ -401,6 +401,8 @@ class PlayerInfo < Qt::Widget
       player = LocalPlayer.new(self.name, self.color, parent: parent)
     when "Computer"
       player = AIPlayer.new(self.name, self.color, parent: parent)
+    when "Online"
+      player = OnlinePlayer.new(self.name, self.color, parent: parent)
     end
 
     return if player == nil

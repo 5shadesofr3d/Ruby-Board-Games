@@ -12,8 +12,9 @@ class MyHandler
   end
 
   def is_valid?
-    return false unless num_players >= 0
-    return false unless num_ready >= 0
+    return false unless @num_players >= 0
+    return false unless @num_ready >= 0
+    return false unless @lobby.is_a? Array
     return true
   end
 

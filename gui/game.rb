@@ -182,7 +182,7 @@ class Game < Qt::Widget
     assert @players.include? player
   end
 
-  def valid?()
+  def valid?
     return false unless @board == nil or @board.is_a?(Board)
     return false unless @stack.is_a?(Qt::StackedLayout)
     return true
@@ -193,7 +193,8 @@ end
 # Needs to handle lobby differently.
 class OnlineGame < Game
 
-  def initialize(rows: 7, columns: 8, width: 800, height: 600, parent: nil)
+  def initialize(rows: 7, columns: 8, width: 800,
+                 height: 600, players: [], parent: nil)
     assert rows.is_a? Integer
     assert columns.is_a? Integer
     assert width.is_a? Integer
@@ -202,6 +203,14 @@ class OnlineGame < Game
     assert rows > 0
     assert width > 0
     assert height > 0
+    assert players.is_a? Array
+
+    # Is there a smarter way to do this?
+    players.each do |i|
+      assert i.is_a? String
+    end
+
+    @players = players
 
     super(rows: rows, columns: columns, width: width, height: height, parent: parent)
   end
@@ -215,19 +224,20 @@ class OnlineGame < Game
     setFocusPolicy(Qt::StrongFocus)
   end
 
-  def setupLobby()
+  def setupLobby
     @lobby = PlayerLobby.new(parent: self)
 
     # Insert our online players
-    @lobby.addPlayer("nerd1")
-
+    @players.each do |player|
+      @lobby.addPlayer(player)
+    end
 
     @lobbyWidget = Qt::Widget.new(self)
     hlayout = Qt::HBoxLayout.new(@lobbyWidget)
     hlayout.addWidget(lobby)
     @lobbyWidget.setLayout(hlayout)
     @stack.addWidget(@lobbyWidget)
-    @lobby.addPlayer() # we have at least 1 player
+
     assert @lobby.room.playerInfos.count > 0
   end
 

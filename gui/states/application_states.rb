@@ -106,29 +106,11 @@ class TitleController < Qt::Widget
     @lobby_window.setWindowTitle("Lobby")
     @lobby_window.setModal(true)
     @lobby_window.show
-    multiplayer
 
     assert @lobby_window.visible
   end
 
   def ready_pressed
-    client = Client.instance.conn
-    client.call("lobby.ready")
-
-    while not client.call("lobby.is_ready")
-      sleep(0.5)
-    end
-
-    # Launch the game.
-    @title.close
-    @lobby_window.close
-    @state.open_online_game
-
-    assert @title.visible == false
-
-  end
-
-  def multiplayer
     assert @lobby_window.is_a? Qt::Dialog
     assert @lobby_ui.is_a? LobbyGUI
     assert @lobby_window.visible
@@ -136,6 +118,7 @@ class TitleController < Qt::Widget
     client = Client.instance.conn
 
     # Connect to the lobby as user1.
+    # puts @lobby_ui.usernameText.text
     puts client.call2('lobby.connect', @lobby_ui.usernameText.text)
 
     # Join a lobby,
@@ -143,6 +126,21 @@ class TitleController < Qt::Widget
     while client.call("lobby.players") < 1
       sleep(2) # Try not to spam the server.
     end
+
+    client.call("lobby.ready")
+
+    while not client.call("lobby.is_ready")
+      sleep(0.5)
+    end
+
+    puts @lobby_ui.usernameText.text
+
+    # Launch the game.
+    @title.close
+    @lobby_window.close
+    @state.open_online_game
+
+    assert @title.visible == false
 
     # Print our current lobby.
     # puts client.call2("lobby.lobby")
@@ -173,10 +171,14 @@ class OnlineGameScreenState < StatePattern::State
   def enter
     # game_mode = :Connect4
 
+    client = Client.instance.conn
+    players = client.call2("lobby.lobby")[1]
+
     @game = OnlineGame.new(rows: 10,
                            columns: 10,
                            height: 600,
                            width: 800,
+                           players: players,
                            parent: stateful.main_window)
 
     # case game_mode
