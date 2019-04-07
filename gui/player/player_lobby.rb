@@ -1,6 +1,7 @@
 require 'Qt'
 require 'test/unit'
 
+require_relative 'online_player'
 require_relative 'abstract_player'
 require_relative 'local_player'
 require_relative 'ai_player'
@@ -42,9 +43,9 @@ class PlayerLobby < Qt::Frame
     setStyleSheet("background-color:#{LobbyColor::DARK_BLUE}; border: 1px; border-radius: 10px")
   end
 
-  def addPlayer(username = nil)
+  def addPlayer(username = nil, type = nil)
     if @player_count < @@MAX_PLAYER_COUNT
-      @room.addPlayer(username)
+      @room.addPlayer(username, type)
       @player_count += 1
     end
   end
@@ -139,8 +140,10 @@ class PlayerRoom < Qt::Frame
     assert valid?
   end
 
-  def addPlayer(username)
+  def addPlayer(username, type)
     assert valid?
+
+    puts username.is_a? String
 
     if username.nil?
       playerInfo = PlayerInfo.new(parent: self)
@@ -148,8 +151,16 @@ class PlayerRoom < Qt::Frame
       playerInfo = PlayerInfo.new(name: username, parent: self)
     end
 
+    if type.nil?
+      playerInfo.type = "Local"
+    else
+      playerInfo.type = type
+    end
+
     @playerInfos << playerInfo
     @layout.addWidget(playerInfo)
+
+    assert playerInfo.is_a? PlayerInfo
     assert valid?
   end
 
@@ -209,7 +220,7 @@ class PlayerInfoTypeBox < Qt::ComboBox
     font = self.font()
     font.setPixelSize(15)
     self.setFont(font)
-    addItems(["Local", "Computer"])
+    addItems(["Local", "Computer", "Online", "OnlineLocal"])
     setStyleSheet("color:#{LobbyColor::GREY};")
   end
 end
@@ -358,13 +369,16 @@ class PlayerInfo < Qt::Widget
   end
 
   def type=(t)
+
     case t
     when LocalPlayer
-      @type.currentText = "Local"
+      @type.currentIndex = 0
     when AIPlayer
-      @type.currentText = "Computer"
-    when OnlinePlayer
-      @type.currentText = "Online"
+      @type.currentIndex = 1
+    when :MultiplayerOnlinePlayer
+      @type.currentIndex = 2
+    when :MultiplayerLocalPlayer
+      @type.currentIndex = 3
     end
   end
 
@@ -403,8 +417,10 @@ class PlayerInfo < Qt::Widget
       player = LocalPlayer.new(self.name, self.color, parent: parent)
     when "Computer"
       player = AIPlayer.new(self.name, self.color, parent: parent)
+    when "OnlineLocal"
+      player = MultiplayerLocalPlayer.new(self.name, self.color, parent: parent)
     when "Online"
-      player = OnlinePlayer.new(self.name, self.color, parent: parent)
+      player = MultiplayerOnlinePlayer.new(self.name, self.color, parent: parent)
     end
 
     return if player == nil

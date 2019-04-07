@@ -115,15 +115,16 @@ class TitleController < Qt::Widget
     assert @lobby_ui.is_a? LobbyGUI
     assert @lobby_window.visible
 
-    client = Client.instance.conn
+    client = Client.instance
 
     # Connect to the lobby as user1.
     # puts @lobby_ui.usernameText.text
-    puts client.call2('lobby.connect', @lobby_ui.usernameText.text)
+    puts client.conn.call2('lobby.connect', @lobby_ui.usernameText.text)
+    client.username = @lobby_ui.usernameText.text
 
     # Join a lobby,
     # busy wait for additional players for our game.
-    while client.call("lobby.players") < 1
+    while client.conn.call("lobby.players") < 1
       sleep(2) # Try not to spam the server.
     end
 
@@ -165,16 +166,27 @@ class OnlineGameScreenState < StatePattern::State
   def enter
     # game_mode = :Connect4
 
-    client = Client.instance.conn
-    players = client.call2("lobby.lobby")[1]
+    client = Client.instance
+    players = client.conn.call2("lobby.lobby")[1]
+
+    players_and_types = {}
+
+    # Add users to the hash
+    players.each do |user|
+      if user == client.username
+        players_and_types[user] = :MultiplayerLocalPlayer
+      else
+        players_and_types[user] = :MultiplayerOnlinePlayer
+      end
+    end
 
     @game = Connect4.new(rows: 10,
-                           columns: 10,
-                           height: 600,
-                           width: 800,
-                           players: players,
-                           lobby_type: OnlineGameLobbyState,
-                           parent: stateful.main_window)
+                         columns: 10,
+                         height: 600,
+                         width: 800,
+                         players: players_and_types,
+                         lobby_type: OnlineGameLobbyState,
+                         parent: stateful.main_window)
 
     # case game_mode
     # when :Connect4

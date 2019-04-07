@@ -12,18 +12,18 @@ class Game < Qt::Widget
 
   def initialize(rows: 7, columns: 8,
                  width: 800, height: 600,
-                 players: ["Player"], lobby_type: GameLobbyState,
+                 players: {"Player": :Local}, lobby_type: GameLobbyState,
                  parent: nil)
 
     assert rows.is_a?(Integer) and rows > 0
     assert columns.is_a?(Integer) and columns > 0
     assert width.is_a?(Integer) and width >= 300
     assert height.is_a?(Integer) and  height >= 300
-    assert players.is_a? Array
+    assert players.is_a? Hash
 
-    players.each do |i|
-      assert i.is_a? String
-    end
+    # players.each do |i|
+    #   assert i.is_a? String
+    # end
 
     parent != nil ? super(parent) : super()
     resize(width, height)
@@ -70,9 +70,12 @@ class Game < Qt::Widget
     @lobby = PlayerLobby.new(parent: self)
 
     # Insert our online players
-    @players.each do |player|
-      @lobby.addPlayer(player)
+    @players.each do |player, type|
+
+      @lobby.addPlayer(player.to_s, type)
     end
+
+    puts "BestPlayers: " + @players.to_s
 
     @lobbyWidget = Qt::Widget.new(self)
     hlayout = Qt::HBoxLayout.new(@lobbyWidget)
@@ -209,66 +212,10 @@ class Game < Qt::Widget
 
 end
 
-# # Needs to handle lobby differently.
-# class OnlineGame < Game
-#
-#   # Bug: This constructor gets called twice.
-#   def initialize(rows: 7, columns: 8, width: 800,
-#                  height: 600, players: [], parent: nil)
-#
-#     assert rows.is_a?(Integer) and rows > 0
-#     assert columns.is_a?(Integer) and columns > 0
-#     assert width.is_a?(Integer) and width >= 300
-#     assert height.is_a?(Integer) and  height >= 300
-#     assert columns > 0
-#     assert rows > 0
-#     assert width > 0
-#     assert height > 0
-#     assert players.is_a? Array
-#
-#     puts "Before: " + players.to_s
-#
-#     # Is there a smarter way to do this?
-#     players.each do |i|
-#       assert i.is_a? String
-#     end
-#
-#     @players = players
-#
-#     super(rows: rows, columns: columns, width: width, height: height, parent: parent)
-#     assert valid?
-#   end
-#
-#   def start
-#     machine.setup(OnlineGameLobbyState)
-#     machine.start()
-#   end
-#
-#   def setupLobby
-#     assert true unless @players.nil?
-#
-#     @lobby = PlayerLobby.new(parent: self)
-#
-#     # Insert our online players
-#     @players.each do |player|
-#       @lobby.addPlayer(player)
-#     end
-#
-#     @lobbyWidget = Qt::Widget.new(self)
-#     hlayout = Qt::HBoxLayout.new(@lobbyWidget)
-#     hlayout.addWidget(lobby)
-#     @lobbyWidget.setLayout(hlayout)
-#     @stack.addWidget(@lobbyWidget)
-#
-#     assert @lobby.room.playerInfos.count > 0
-#   end
-#
-# end
-
 class Connect4 < Game
   def initialize(rows: 7, columns: 8,
                  width: 800, height: 600,
-                 players: ["Player"], lobby_type: GameLobbyState,
+                 players: {"Player": :Local}, lobby_type: GameLobbyState,
                  parent: nil)
 
     assert rows.is_a? Integer
@@ -299,7 +246,7 @@ class Connect4 < Game
     return chips.uniq { |c| c.secondary.name }.length == 1
   end
 
-  def setPlayerGoals()
+  def setPlayerGoals
     assert players.is_a? Array
     assert players.size > 0
 
@@ -312,7 +259,7 @@ class Connect4 < Game
     players.each {|p| assert p.goal.size == 4}
   end
 
-  def winnersGoal()
+  def winnersGoal
     chips = findGoal()
     players.each { |player| return player.goal if player.goal.size == chips.size && player.goal == chips.map(&:color) } # we have a winner if the chip sequence matches the player's goal
     return nil

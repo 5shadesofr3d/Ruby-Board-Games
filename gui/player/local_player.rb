@@ -7,7 +7,7 @@ class LocalPlayer < Player
 
 	slots "play(const QKeyEvent*)", :acknowledge_keyboard, :ignore_keyboard
 
-	def enable()
+	def enable
 		super()
 		assert game.is_a? Game
 		assert game.board.is_a? Board
@@ -18,7 +18,7 @@ class LocalPlayer < Player
 		acknowledge_keyboard
 	end
 
-	def disable()
+	def disable
 		assert game.is_a? Game
 		assert game.board.is_a? Board
 
