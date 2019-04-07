@@ -127,12 +127,6 @@ class TitleController < Qt::Widget
       sleep(2) # Try not to spam the server.
     end
 
-    client.call("lobby.ready")
-
-    while not client.call("lobby.is_ready")
-      sleep(0.5)
-    end
-
     puts @lobby_ui.usernameText.text
 
     # Launch the game.
@@ -174,11 +168,12 @@ class OnlineGameScreenState < StatePattern::State
     client = Client.instance.conn
     players = client.call2("lobby.lobby")[1]
 
-    @game = OnlineGame.new(rows: 10,
+    @game = Connect4.new(rows: 10,
                            columns: 10,
                            height: 600,
                            width: 800,
                            players: players,
+                           lobby_type: OnlineGameLobbyState,
                            parent: stateful.main_window)
 
     # case game_mode

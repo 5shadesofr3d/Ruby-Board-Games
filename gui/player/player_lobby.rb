@@ -363,6 +363,8 @@ class PlayerInfo < Qt::Widget
       @type.currentText = "Local"
     when AIPlayer
       @type.currentText = "Computer"
+    when OnlinePlayer
+      @type.currentText = "Online"
     end
   end
 
@@ -411,7 +413,6 @@ class PlayerInfo < Qt::Widget
     player.losses = self.losses
     player.ties = self.ties
 
-
     assert player.is_a? Player
     assert player.ties >= 0
     assert player.losses >= 0
@@ -420,7 +421,7 @@ class PlayerInfo < Qt::Widget
     return player
   end
 
-  def valid?()
+  def valid?
     # return false unless @name.is_a?(String)
     # return false unless @wins.is_a?(Integer) and @wins >= 0
     # return false unless @loss.is_a?(Integer) and @loss >= 0

@@ -10,18 +10,29 @@ class Game < Qt::Widget
 
   signals "keyPressed(const QKeyEvent*)"
 
-  def initialize(rows: 7, columns: 8, width: 800, height: 600, parent: nil)
+  def initialize(rows: 7, columns: 8,
+                 width: 800, height: 600,
+                 players: ["Player"], lobby_type: GameLobbyState,
+                 parent: nil)
+
     assert rows.is_a?(Integer) and rows > 0
     assert columns.is_a?(Integer) and columns > 0
     assert width.is_a?(Integer) and width >= 300
     assert height.is_a?(Integer) and  height >= 300
+    assert players.is_a? Array
+
+    players.each do |i|
+      assert i.is_a? String
+    end
 
     parent != nil ? super(parent) : super()
     resize(width, height)
-    setupUI(rows, columns)
 
-    @players = []
+    @players = players
+    @lobby_type = lobby_type
     @machine = GameStateMachine.new(self)
+
+    setupUI(rows, columns)
 
     assert width() == width
     assert height() == height
@@ -53,19 +64,27 @@ class Game < Qt::Widget
     @stack.addWidget(board)
   end
 
-  def setupLobby()
+  def setupLobby
+    assert true unless @players.nil?
+
     @lobby = PlayerLobby.new(parent: self)
+
+    # Insert our online players
+    @players.each do |player|
+      @lobby.addPlayer(player)
+    end
+
     @lobbyWidget = Qt::Widget.new(self)
     hlayout = Qt::HBoxLayout.new(@lobbyWidget)
     hlayout.addWidget(lobby)
     @lobbyWidget.setLayout(hlayout)
     @stack.addWidget(@lobbyWidget)
-    @lobby.addPlayer() # we have at least 1 player
+
     assert @lobby.room.playerInfos.count > 0
   end
 
-  def start()
-    machine.setup()
+  def start
+    machine.setup(@lobby_type)
     machine.start()
   end
 
@@ -190,61 +209,68 @@ class Game < Qt::Widget
 
 end
 
-# Needs to handle lobby differently.
-class OnlineGame < Game
-
-  def initialize(rows: 7, columns: 8, width: 800,
-                 height: 600, players: [], parent: nil)
-    assert rows.is_a? Integer
-    assert columns.is_a? Integer
-    assert width.is_a? Integer
-    assert height.is_a? Integer
-    assert columns > 0
-    assert rows > 0
-    assert width > 0
-    assert height > 0
-    assert players.is_a? Array
-
-    # Is there a smarter way to do this?
-    players.each do |i|
-      assert i.is_a? String
-    end
-
-    @players = players
-
-    super(rows: rows, columns: columns, width: width, height: height, parent: parent)
-  end
-
-  def setupUI(rows, cols)
-    setupStack
-    setupLobby
-    setupBoard(rows, cols)
-
-    setFocus(Qt::OtherFocusReason)
-    setFocusPolicy(Qt::StrongFocus)
-  end
-
-  def setupLobby
-    @lobby = PlayerLobby.new(parent: self)
-
-    # Insert our online players
-    @players.each do |player|
-      @lobby.addPlayer(player)
-    end
-
-    @lobbyWidget = Qt::Widget.new(self)
-    hlayout = Qt::HBoxLayout.new(@lobbyWidget)
-    hlayout.addWidget(lobby)
-    @lobbyWidget.setLayout(hlayout)
-    @stack.addWidget(@lobbyWidget)
-
-    assert @lobby.room.playerInfos.count > 0
-  end
-
-end
+# # Needs to handle lobby differently.
+# class OnlineGame < Game
+#
+#   # Bug: This constructor gets called twice.
+#   def initialize(rows: 7, columns: 8, width: 800,
+#                  height: 600, players: [], parent: nil)
+#
+#     assert rows.is_a?(Integer) and rows > 0
+#     assert columns.is_a?(Integer) and columns > 0
+#     assert width.is_a?(Integer) and width >= 300
+#     assert height.is_a?(Integer) and  height >= 300
+#     assert columns > 0
+#     assert rows > 0
+#     assert width > 0
+#     assert height > 0
+#     assert players.is_a? Array
+#
+#     puts "Before: " + players.to_s
+#
+#     # Is there a smarter way to do this?
+#     players.each do |i|
+#       assert i.is_a? String
+#     end
+#
+#     @players = players
+#
+#     super(rows: rows, columns: columns, width: width, height: height, parent: parent)
+#     assert valid?
+#   end
+#
+#   def start
+#     machine.setup(OnlineGameLobbyState)
+#     machine.start()
+#   end
+#
+#   def setupLobby
+#     assert true unless @players.nil?
+#
+#     @lobby = PlayerLobby.new(parent: self)
+#
+#     # Insert our online players
+#     @players.each do |player|
+#       @lobby.addPlayer(player)
+#     end
+#
+#     @lobbyWidget = Qt::Widget.new(self)
+#     hlayout = Qt::HBoxLayout.new(@lobbyWidget)
+#     hlayout.addWidget(lobby)
+#     @lobbyWidget.setLayout(hlayout)
+#     @stack.addWidget(@lobbyWidget)
+#
+#     assert @lobby.room.playerInfos.count > 0
+#   end
+#
+# end
 
 class Connect4 < Game
-  def initialize(rows: 7, columns: 8, width: 800, height: 600, parent: nil)
+  def initialize(rows: 7, columns: 8,
+                 width: 800, height: 600,
+                 players: ["Player"], lobby_type: GameLobbyState,
+                 parent: nil)
+
     assert rows.is_a? Integer
     assert columns.is_a? Integer
     assert width.is_a? Integer
@@ -254,7 +280,10 @@ class Connect4 < Game
     assert width > 0
     assert height > 0
 
-    super(rows: rows, columns: columns, width: width, height: height, parent: parent)
+    super(rows: rows, columns: columns,
+          width: width, height: height,
+          players: players, lobby_type: lobby_type,
+          parent: parent)
   end
 
   def constructChip(c, column: 0)
@@ -302,9 +331,17 @@ class OTTO < Game
   @@otto = [:O, :T, :T, :O]
   @@toot = [:T, :O, :O, :T]
 
-  def initialize(rows: 7, columns: 8, width: 800, height: 600, parent: nil)
-    super(rows: rows, columns: columns, width: width, height: height, parent: parent)
-    lobby.addPlayer() # minimum 2 players
+  def initialize(rows: 7, columns: 8,
+                 width: 800, height: 600,
+                 players: ["Player"], lobby_type: GameLobbyState,
+                 parent: nil)
+
+    super(rows: rows, columns: columns,
+          width: width, height: height,
+          players: players, lobby_type: lobby_type,
+          parent: parent)
+
+    lobby.addPlayer # minimum 2 players
   end
 
   def constructChip(c, column: 0)
