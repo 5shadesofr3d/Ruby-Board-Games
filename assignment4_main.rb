@@ -11,6 +11,13 @@ require_relative 'gui/board'
 require_relative 'gui/debug'
 require_relative 'application'
 
+# Bugs:
+# - Need to fix those animation bugs with the AI player,
+# the bugs also exist for the online player.
+#
+# - The board fails to load before the user takes a turn.
+
+
 # To run assignment4_main.rb, ensure you have the following
 # dependancies:
 #

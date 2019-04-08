@@ -135,6 +135,7 @@ class OnlineGameLobbyState < GameLobbyState
   def start_game
     assert game.lobby.room.playerInfos.count > 0
 
+    puts "start game"
     players = game.lobby.room.playerInfos
     cols = []
     duplicate = false
@@ -145,16 +146,19 @@ class OnlineGameLobbyState < GameLobbyState
       end
       cols << pCol
     end
-    if !duplicate
-      done()
-    end
 
     # Wait until all players are ready.
     client = Client.instance.conn
+    puts client.call("lobby.server_status")
     client.call("lobby.ready")
 
     while not client.call("lobby.is_ready")
+      puts client.call("lobby.server_status")
       sleep(0.5)
+    end
+
+    if !duplicate
+      done()
     end
 
     assert players.count > 0

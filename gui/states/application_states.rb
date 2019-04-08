@@ -124,7 +124,7 @@ class TitleController < Qt::Widget
 
     # Join a lobby,
     # busy wait for additional players for our game.
-    while client.conn.call("lobby.players") < 1
+    while client.conn.call("lobby.players") < 2
       sleep(2) # Try not to spam the server.
     end
 
@@ -173,10 +173,11 @@ class OnlineGameScreenState < StatePattern::State
 
     # Add users to the hash
     players.each do |user|
-      if user == client.username
-        players_and_types[user] = :MultiplayerLocalPlayer
+      if user["username"] == client.username
+        players_and_types[user["username"]] = :MultiplayerLocalPlayer
+        client.player_number = user["player_num"]
       else
-        players_and_types[user] = :MultiplayerOnlinePlayer
+        players_and_types[user["username"]] = :MultiplayerOnlinePlayer
       end
     end
 

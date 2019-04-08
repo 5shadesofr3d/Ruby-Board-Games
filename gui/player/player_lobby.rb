@@ -403,6 +403,9 @@ class PlayerInfo < Qt::Widget
   end
 
   def ties=(t)
+    assert t.is_a? Integer
+    assert t >= 0
+
     @ties.text = t
   end
 

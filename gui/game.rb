@@ -75,8 +75,6 @@ class Game < Qt::Widget
       @lobby.addPlayer(player.to_s, type)
     end
 
-    puts "BestPlayers: " + @players.to_s
-
     @lobbyWidget = Qt::Widget.new(self)
     hlayout = Qt::HBoxLayout.new(@lobbyWidget)
     hlayout.addWidget(lobby)
