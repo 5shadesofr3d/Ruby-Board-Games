@@ -3,12 +3,16 @@ require "xmlrpc/server"
 
 class MyHandler
   include Test::Unit::Assertions
-  attr_accessor :num_players, :lobby, :num_ready
+  attr_accessor :num_players, :lobby, :num_ready,
+                :current_turn
 
   def initialize
     @num_players = 0
     @num_ready = 0
     @lobby = []
+
+    @current_turn = 0
+    @current_move = {}
   end
 
   def is_valid?
@@ -49,6 +53,23 @@ class MyHandler
     assert is_valid?
 
     @lobby.length
+  end
+
+  def make_move(current_chip_color, current_column)
+    assert @current_move.is_a? Hash
+    assert @current_turn.is_a? Integer
+
+    @current_move = {"chip_color": current_chip_color,
+                     "column": current_column}
+    @current_turn += 1
+  end
+
+  # Adjust mod to the number of players.
+  # Returns the number for whose turn it is.
+  def get_turn
+    assert @current_turn.is_a? Integer
+
+    @current_turn % 2
   end
 
 end

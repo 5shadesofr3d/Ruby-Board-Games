@@ -65,7 +65,6 @@ class LocalPlayer < Player
 		assert current_column.is_a?(Numeric) and current_column >= 0
 		assert key_event.is_a?(Qt::KeyEvent)
 
-
 		case key_event.key
 		when Qt::Key_Up.value
 			up()

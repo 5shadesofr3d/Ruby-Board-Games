@@ -22,7 +22,6 @@ class Player < Qt::Object
 		assert player_name.is_a? String
 		#TODO: Player color
 
-
 		@name = player_name
 		@wins = 0
 		@losses = 0
@@ -105,7 +104,6 @@ class Player < Qt::Object
 		assert current_column.is_a? Integer
 		assert current_column >= 0
 		assert current_chip.is_a? BoardChip
-
 
 		game.board.drop(current_chip, current_column)
 		@current_chip = nil
