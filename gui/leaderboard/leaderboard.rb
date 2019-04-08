@@ -127,6 +127,7 @@ class Leaderboard < Qt::Widget
   def initialize_ui
     # assert GameData.instance.valid?
     assert valid?
+    # assert LeaderboardTable.exists? <= Need this to put data in
 
     # Get the instance of the game data that has been saved
     # TODO: this is the SQL query controller getting all the data from the server
@@ -140,7 +141,7 @@ class Leaderboard < Qt::Widget
   end
 
   def retranslateUi
-    # assert settingsWindow.is_a? Qt::MainWindow
+    # assert leaderboardWindow.is_a? Qt::MainWindow
 
     # TODO: change this to include all of the necessary items for the leaderboard
     windowTitle = Qt::Application.translate("LeaderboardWindow", "Leaderboard", nil, Qt::Application::UnicodeUTF8)
