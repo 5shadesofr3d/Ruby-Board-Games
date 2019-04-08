@@ -208,6 +208,42 @@ class Game < Qt::Widget
     return true
   end
 
+  def getNumberOfPlayers()
+    assert valid?
+  end
+
+  def getRows()
+    assert valid?
+  end
+
+  def getCols()
+    assert valid?
+  end
+
+  def getHeight()
+    assert valid?
+  end
+
+  def getWidth()
+    assert valid?
+  end
+
+  def getType()
+    assert valid?
+  end
+
+  def getColors()
+    assert valid?
+  end
+
+  def getTurn()
+    assert valid?
+  end
+
+  def getChips()
+    assert valid?
+  end
+
 end
 
 class Connect4 < Game
