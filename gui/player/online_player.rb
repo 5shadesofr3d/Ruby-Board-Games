@@ -12,6 +12,8 @@ class MultiplayerOnlinePlayer < Player
   end
 
   def play
+    assert game.is_a? Game
+
     @current_column = 1
 
     client = Client.instance
@@ -62,6 +64,8 @@ end
 class MultiplayerLocalPlayer < LocalPlayer
 
   def play(event)
+    assert game.is_a? Game
+    assert event.is_a?(Qt::KeyEvent) or event.is_a?(Qt::MouseEvent)
 
     client = Client.instance
 

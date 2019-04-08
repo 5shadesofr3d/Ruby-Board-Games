@@ -72,10 +72,15 @@ class MyHandler
   end
 
   def get_move
+    assert is_valid?
+
     @current_move
   end
 
   def ack_move(username)
+    assert is_valid?
+    assert username.is_a? String
+
     # If we received all acknowledgements, increment
     # the turn and reset the moves.
 
@@ -97,6 +102,7 @@ class MyHandler
   # Adjust mod to the number of players.
   # Returns the number for whose turn it is.
   def get_turn
+    assert is_valid?
     assert @current_turn.is_a? Integer
 
     @current_turn % 2
@@ -105,6 +111,7 @@ class MyHandler
   # Processes acknowledgement for a user, returns true
   # if all acknowledgements have been received.
   def acknowledge(user)
+    assert is_valid?
     assert user.is_a? String
 
     num_acks = 0

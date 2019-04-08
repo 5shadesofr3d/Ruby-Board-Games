@@ -71,7 +71,6 @@ class Game < Qt::Widget
 
     # Insert our online players
     @players.each do |player, type|
-
       @lobby.addPlayer(player.to_s, type)
     end
 
@@ -98,12 +97,12 @@ class Game < Qt::Widget
     @statem.open_title_screen
   end
 
-  def showLobby()
+  def showLobby
     assert @lobbyWidget.is_a? Qt::Widget
     @stack.setCurrentWidget(@lobbyWidget)
   end
 
-  def showBoard()
+  def showBoard
     assert @board.is_a? Qt::Widget
     @stack.setCurrentWidget(@board)
   end

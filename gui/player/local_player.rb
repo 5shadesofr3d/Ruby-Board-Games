@@ -30,12 +30,12 @@ class LocalPlayer < Player
 		ignore_keyboard
 	end
 
-	def acknowledge_keyboard()
+	def acknowledge_keyboard
 		assert game.is_a? Game
 		connect(game, SIGNAL("keyPressed(const QKeyEvent*)"), self, SLOT("play(const QKeyEvent*)"))
 	end
 
-	def ignore_keyboard()
+	def ignore_keyboard
 		assert game.is_a? Game
 		disconnect(game, SIGNAL("keyPressed(const QKeyEvent*)"), self, SLOT("play(const QKeyEvent*)"))
 	end
