@@ -2,6 +2,7 @@
 # players who have made it to the leaderboard
 require 'Qt'
 require 'test/unit'
+# require_relative '../GameData'
 
 class Leaderboard < Qt::Widget
   include Test::Unit::Assertions
@@ -37,17 +38,19 @@ class Leaderboard < Qt::Widget
   # Sets the size of the main window and the title screen
   def setScreenSize(width, height)
     assert width.is_a?(Integer) and width.between?(100, 1920)
-		assert height.is_a?(Integer) and height.between?(100, 1080)
+	assert height.is_a?(Integer) and height.between?(100, 1080)
 
-		resize(width, height)
+	resize(width, height)
     @parent.setFixedSize(width, height)
 
-		assert width() == width
-		assert height() == height
+	assert width() == width
+	assert height() == height
   end
 
   def setupUI()
   	# TODO: need to verify that these asserts are valid
+
+  	# NOTE: might need to look into the QtTableWidget for more inspiration
   	# assert leaderboardWindow.is_a? Qt::MainWindow
     # assert GameData.leaderboard.instance.valid?
 
@@ -64,6 +67,10 @@ class Leaderboard < Qt::Widget
 
   	draw_color
 
+  	# assert leaderboardTable.visible = true
+  	# assert GameData.checkData = already checked
+  	# assert leaderboardTable.width = tableWidth (for all of the column names)
+  	# assert leaderboardTable.rows <= maxVisible rows
   	assert @bBack.is_a? Qt::PushButton
     assert @bSearch.is_a? Qt::PushButton
     assert @bSort.is_a? Qt::PushButton
@@ -124,7 +131,7 @@ class Leaderboard < Qt::Widget
     # Get the instance of the game data that has been saved
     # TODO: this is the SQL query controller getting all the data from the server
  
- 	# leaderBoardData = Gamedata.Leaderboard.instance?
+ 	# leaderBoardData = GameData.Leaderboard.instance?
 
  	# set the values to the leaderboard table
  	# tableCells.content = leaderBoardData.tabular
