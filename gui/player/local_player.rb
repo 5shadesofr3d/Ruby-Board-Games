@@ -7,7 +7,7 @@ class LocalPlayer < Player
 
 	slots "play(const QKeyEvent*)", :acknowledge_keyboard, :ignore_keyboard
 
-	def enable()
+	def enable
 		super()
 		assert game.is_a? Game
 		assert game.board.is_a? Board
@@ -18,7 +18,7 @@ class LocalPlayer < Player
 		acknowledge_keyboard
 	end
 
-	def disable()
+	def disable
 		assert game.is_a? Game
 		assert game.board.is_a? Board
 
@@ -30,12 +30,12 @@ class LocalPlayer < Player
 		ignore_keyboard
 	end
 
-	def acknowledge_keyboard()
+	def acknowledge_keyboard
 		assert game.is_a? Game
 		connect(game, SIGNAL("keyPressed(const QKeyEvent*)"), self, SLOT("play(const QKeyEvent*)"))
 	end
 
-	def ignore_keyboard()
+	def ignore_keyboard
 		assert game.is_a? Game
 		disconnect(game, SIGNAL("keyPressed(const QKeyEvent*)"), self, SLOT("play(const QKeyEvent*)"))
 	end
@@ -64,7 +64,6 @@ class LocalPlayer < Player
 		#pre
 		assert current_column.is_a?(Numeric) and current_column >= 0
 		assert key_event.is_a?(Qt::KeyEvent)
-
 
 		case key_event.key
 		when Qt::Key_Up.value

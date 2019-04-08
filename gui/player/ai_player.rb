@@ -14,7 +14,7 @@ class AIPlayer < Player
 
 	attr_accessor :ai_object
 
-	def enable()
+	def enable
 		super()
 		self.play()
 		

@@ -10,18 +10,29 @@ class Game < Qt::Widget
 
   signals "keyPressed(const QKeyEvent*)"
 
-  def initialize(rows: 7, columns: 8, width: 800, height: 600, parent: nil)
+  def initialize(rows: 7, columns: 8,
+                 width: 800, height: 600,
+                 players: {"Player": :Local}, lobby_type: GameLobbyState,
+                 parent: nil)
+
     assert rows.is_a?(Integer) and rows > 0
     assert columns.is_a?(Integer) and columns > 0
     assert width.is_a?(Integer) and width >= 300
     assert height.is_a?(Integer) and  height >= 300
+    assert players.is_a? Hash
+
+    # players.each do |i|
+    #   assert i.is_a? String
+    # end
 
     parent != nil ? super(parent) : super()
     resize(width, height)
-    setupUI(rows, columns)
 
-    @players = []
+    @players = players
+    @lobby_type = lobby_type
     @machine = GameStateMachine.new(self)
+
+    setupUI(rows, columns)
 
     assert width() == width
     assert height() == height
@@ -53,19 +64,27 @@ class Game < Qt::Widget
     @stack.addWidget(board)
   end
 
-  def setupLobby()
+  def setupLobby
+    assert true unless @players.nil?
+
     @lobby = PlayerLobby.new(parent: self)
+
+    # Insert our online players
+    @players.each do |player, type|
+      @lobby.addPlayer(player.to_s, type)
+    end
+
     @lobbyWidget = Qt::Widget.new(self)
     hlayout = Qt::HBoxLayout.new(@lobbyWidget)
     hlayout.addWidget(lobby)
     @lobbyWidget.setLayout(hlayout)
     @stack.addWidget(@lobbyWidget)
-    @lobby.addPlayer() # we have at least 1 player
+
     assert @lobby.room.playerInfos.count > 0
   end
 
-  def start()
-    machine.setup()
+  def start
+    machine.setup(@lobby_type)
     machine.start()
   end
 
@@ -78,12 +97,12 @@ class Game < Qt::Widget
     @statem.open_title_screen
   end
 
-  def showLobby()
+  def showLobby
     assert @lobbyWidget.is_a? Qt::Widget
     @stack.setCurrentWidget(@lobbyWidget)
   end
 
-  def showBoard()
+  def showBoard
     assert @board.is_a? Qt::Widget
     @stack.setCurrentWidget(@board)
   end
@@ -182,7 +201,7 @@ class Game < Qt::Widget
     assert @players.include? player
   end
 
-  def valid?()
+  def valid?
     return false unless @board == nil or @board.is_a?(Board)
     return false unless @stack.is_a?(Qt::StackedLayout)
     return true
@@ -227,7 +246,11 @@ class Game < Qt::Widget
 end
 
 class Connect4 < Game
-  def initialize(rows: 7, columns: 8, width: 800, height: 600, parent: nil)
+  def initialize(rows: 7, columns: 8,
+                 width: 800, height: 600,
+                 players: {"Player": :Local}, lobby_type: GameLobbyState,
+                 parent: nil)
+
     assert rows.is_a? Integer
     assert columns.is_a? Integer
     assert width.is_a? Integer
@@ -237,7 +260,10 @@ class Connect4 < Game
     assert width > 0
     assert height > 0
 
-    super(rows: rows, columns: columns, width: width, height: height, parent: parent)
+    super(rows: rows, columns: columns,
+          width: width, height: height,
+          players: players, lobby_type: lobby_type,
+          parent: parent)
   end
 
   def constructChip(c, column: 0)
@@ -253,7 +279,7 @@ class Connect4 < Game
     return chips.uniq { |c| c.secondary.name }.length == 1
   end
 
-  def setPlayerGoals()
+  def setPlayerGoals
     assert players.is_a? Array
     assert players.size > 0
 
@@ -266,7 +292,7 @@ class Connect4 < Game
     players.each {|p| assert p.goal.size == 4}
   end
 
-  def winnersGoal()
+  def winnersGoal
     chips = findGoal()
     players.each { |player| return player.goal if player.goal.size == chips.size && player.goal == chips.map(&:color) } # we have a winner if the chip sequence matches the player's goal
     return nil
@@ -285,9 +311,17 @@ class OTTO < Game
   @@otto = [:O, :T, :T, :O]
   @@toot = [:T, :O, :O, :T]
 
-  def initialize(rows: 7, columns: 8, width: 800, height: 600, parent: nil)
-    super(rows: rows, columns: columns, width: width, height: height, parent: parent)
-    lobby.addPlayer() # minimum 2 players
+  def initialize(rows: 7, columns: 8,
+                 width: 800, height: 600,
+                 players: ["Player"], lobby_type: GameLobbyState,
+                 parent: nil)
+
+    super(rows: rows, columns: columns,
+          width: width, height: height,
+          players: players, lobby_type: lobby_type,
+          parent: parent)
+
+    lobby.addPlayer # minimum 2 players
   end
 
   def constructChip(c, column: 0)
