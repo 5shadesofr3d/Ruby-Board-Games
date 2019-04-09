@@ -1,20 +1,15 @@
 require 'test/unit'
 require "xmlrpc/server"
 
-class MyHandler
+class LobbyHandler
   include Test::Unit::Assertions
-  attr_accessor :num_players, :lobby, :num_ready,
-                :current_turn, :current_move
+  attr_accessor :num_players, :lobby, :num_ready
 
   def initialize
+    @game_server = GameServerStateMachine.new
     @num_players = 0
     @num_ready = 0
     @lobby = []
-    # each lobby element is:
-    # {username: ..., player_num: ...., ack: false}
-
-    @current_turn = 0
-    @current_move = {}
   end
 
   def is_valid?
@@ -63,91 +58,70 @@ class MyHandler
     @lobby.length
   end
 
+  def server_status
+    "Num players: #{@num_players} \n" +
+    "Num ready: #{@num_ready} \n" +
+    "Current Move: #{@game_server.current_move} \n" +
+    "Current Turn: #{@game_server.current_turn} \n" +
+    "Lobby: #{@lobby.to_s} \n"
+  end
+
+end
+
+def GameHandler
+
   def make_move(current_chip_color, current_column)
     assert @current_move.is_a? Hash
     assert @current_turn.is_a? Integer
 
-    @current_move = {"chip_color": current_chip_color,
-                     "column": current_column}
+    @game_server.current_move =  {"chip_color": current_chip_color,
+                                  "column": current_column}
+    @game_server.next
   end
 
   def get_move
     assert is_valid?
 
-    @current_move
+    @game_server.current_move
   end
 
   def ack_move(username)
     assert is_valid?
     assert username.is_a? String
 
-    # If we received all acknowledgements, increment
-    # the turn and reset the moves.
-
-    if acknowledge(username)
-      @current_turn += 1
-      @current_move = {}
-
-      # Reset the acknowledgements
-      @lobby.each do |user_info|
-        user_info["ack"] = false
-      end
-
-    end
+    @game_server.ack(username)
 
     return true
-
   end
 
   # Adjust mod to the number of players.
   # Returns the number for whose turn it is.
   def get_turn
     assert is_valid?
-    assert @current_turn.is_a? Integer
+    assert @game_server.current_turn.is_a? Integer
 
-    @current_turn % 2
-  end
-
-  # Processes acknowledgement for a user, returns true
-  # if all acknowledgements have been received.
-  def acknowledge(user)
-    assert is_valid?
-    assert user.is_a? String
-
-    num_acks = 0
-
-    @lobby.each do |user_info|
-      if user == user_info["username"]
-        user_info["ack"] = true
-      end
-
-      if user_info["ack"]
-        num_acks += 1
-      end
-    end
-
-    if num_acks == @lobby.size
-      return true
-    end
-
-    return false
-  end
-
-  def server_status
-    "Num players: #{@num_players}
-     Num ready: #{@num_ready}
-     Current: #{@current_move}
-     Lobby: #{@lobby.to_s}"
+    @game_server.current_turn % 2
   end
 
 end
 
 
 server = XMLRPC::Server.new(1234)
-server.add_handler("lobby", MyHandler.new)
+server.add_handler("hello", GameHandler.new)
+server.add_handler("lobby", LobbyHandler.new)
 server.serve
 
 
 # server_test = MyHandler.new
 # server_test.connect("user2")
+# server_test.connect("user3")
+#
+# puts "Acknowledge: #{server_test.acknowledge("user2")}"
+# puts "Acknowledge: #{server_test.acknowledge("user3")}"
+#
+# # server_test.ack_move("user2")
+# # puts "All ack #{server_test.all_ack}"
+# # server_test.ack_move("user3")
+# # puts "All ack #{server_test.all_ack}"
+#
 # puts server_test.ready

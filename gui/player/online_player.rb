@@ -30,9 +30,16 @@ class MultiplayerOnlinePlayer < Player
 
     @current_column = turn["column"]
     client.conn.call2("lobby.ack_move",
-                 Client.instance.username)
+                       Client.instance.username)
 
     puts client.conn.call("lobby.server_status")
+
+    # Loop as long as we don't have all acknowledgements.
+    while not(client.conn.call("lobby.all_ack"))
+      sleep 1
+    end
+
+    client.conn.call("lobby.update_moving_on")
 
     drop
     finished
@@ -63,17 +70,31 @@ end
 
 class MultiplayerLocalPlayer < LocalPlayer
 
-  def play(event)
-    assert game.is_a? Game
-    assert event.is_a?(Qt::KeyEvent) or event.is_a?(Qt::MouseEvent)
+  def enable
 
     client = Client.instance
 
+    puts "Reached: MultiplayerLocalPlayer"
+
     # Wait until its our turn to make a move.
     while not(client.conn.call("lobby.current_turn") ==
-              client.player_number)
+        client.player_number)
+      puts "stuck here1"
       sleep(1)
     end
+
+    # By now the current move should have been reset.
+    # Wait until all online players have passed the
+    # waiting state
+    while client.conn.call("lobby.moving_on") < 1
+      puts "stuck here2"
+      sleep(1)
+    end
+
+    client.conn.call("lobby.reset_moving_on")
+
+    # This can be done via state machine
+    client.conn.call("lobby.set_all_ack", false)
 
     super
   end
