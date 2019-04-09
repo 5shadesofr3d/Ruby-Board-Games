@@ -6,10 +6,10 @@ class LobbyHandler
   attr_accessor :num_players, :lobby, :num_ready
 
   def initialize
-    @game_server = GameServerStateMachine.new
     @num_players = 0
     @num_ready = 0
     @lobby = []
+    @game_server = GameServerStateMachine.new (@lobby)
   end
 
   def is_valid?
@@ -29,6 +29,7 @@ class LobbyHandler
                  "ack": false}
 
     @lobby.push user_info
+    @game_server.lobby = @lobby
     @num_players += 1
 
     "#{user} has logged in #{@num_players} times!"
@@ -107,7 +108,7 @@ end
 
 
 server = XMLRPC::Server.new(1234)
-server.add_handler("hello", GameHandler.new)
+server.add_handler("game", GameHandler.new)
 server.add_handler("lobby", LobbyHandler.new)
 server.serve
 

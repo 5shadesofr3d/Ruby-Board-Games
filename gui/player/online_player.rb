@@ -22,7 +22,7 @@ class MultiplayerOnlinePlayer < Player
     # to allow other clients to catch up.
     sleep(2)
 
-    while client.conn.call2("lobby.get_move")[1].empty?
+    while client.conn.call2("game.stateful")[1].empty?
       sleep 1
     end
 
