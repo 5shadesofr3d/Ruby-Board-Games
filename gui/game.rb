@@ -208,7 +208,7 @@ class Connect4 < Game
     assert chips.is_a? Array
     return false unless chips.size == 4
     return false if chips.include?(nil)
-    return chips.uniq { |c| c.secondary.name }.length == 1
+    return chips.uniq { |c| c.id }.length == 1
   end
 
   def setPlayerGoals()
@@ -226,7 +226,7 @@ class Connect4 < Game
 
   def winnersGoal()
     chips = findGoal()
-    players.each { |player| return player.goal if player.goal.size == chips.size && player.goal == chips.map(&:color) } # we have a winner if the chip sequence matches the player's goal
+    players.each { |player| return player.goal if player.goal.size == chips.size && player.goal == chips.map(&:id) } # we have a winner if the chip sequence matches the player's goal
     return nil
   end
 

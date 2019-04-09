@@ -118,7 +118,7 @@ class Player < Qt::Object
 
 		@current_chip = game.constructChip(color)
 		@current_column = 0
-		connect(game.board, SIGNAL("dropped()"), self, SIGNAL("finished()"))
+		connect(game.board.controller, SIGNAL("dropped()"), self, SIGNAL("finished()"))
 
 		assert @current_chip.is_a? Board::Model::Chip
 		assert current_column.is_a? Integer and current_column >= 0
@@ -127,7 +127,7 @@ class Player < Qt::Object
 	def disable()
 		assert game.board.is_a? Board::Widget
 
-		disconnect(game.board, SIGNAL("dropped()"), self, SIGNAL("finished()"))
+		disconnect(game.board.controller, SIGNAL("dropped()"), self, SIGNAL("finished()"))
 	end
 
 	def total_score

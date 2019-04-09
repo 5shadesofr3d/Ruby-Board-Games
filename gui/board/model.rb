@@ -162,12 +162,12 @@ module Board
 
 	class Model::Chip
 		include Test::Unit::Assertions
-		attr_reader :view
-		attr_accessor :id, :color
+		attr_reader :view, :color
+		attr_accessor :id
 
 		def initialize(id: nil, color: Qt::red, view: nil)
 			self.id = id
-			self.color = color
+			self.color = Qt::Color.new(color)
 			self.view = view
 		end
 
@@ -182,6 +182,11 @@ module Board
 			update()
 		end
 
+		def color=(value)
+			assert value.is_a?(Qt::Color)
+			@color = value
+		end
+
 		def update()
 			return if view == nil
 			view.primary = Qt::transparent
@@ -192,6 +197,12 @@ module Board
 	class Model::Connect4Chip < Board::Model::Chip
 		def initialize(color: Qt::red, view: nil)
 			super(id: color, color: color, view: view)
+			@id = color.name
+		end
+
+		def color=(value)
+			super(value)
+			@id = color.name
 		end
 	end
 

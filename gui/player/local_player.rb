@@ -12,8 +12,8 @@ class LocalPlayer < Player
 		assert game.is_a? Game
 		assert game.board.is_a? Board::Widget
 
-		connect(game.board, SIGNAL("translateStarted()"), self, SLOT("ignore_keyboard()"))
-		connect(game.board, SIGNAL("translateCompleted()"), self, SLOT("acknowledge_keyboard()"))
+		connect(game.board.controller, SIGNAL("translateStarted()"), self, SLOT("ignore_keyboard()"))
+		connect(game.board.controller, SIGNAL("translateCompleted()"), self, SLOT("acknowledge_keyboard()"))
 
 		acknowledge_keyboard
 	end
@@ -24,8 +24,8 @@ class LocalPlayer < Player
 
 		super()
 
-		disconnect(game.board, SIGNAL("translateStarted()"), self, SLOT("ignore_keyboard()"))
-		disconnect(game.board, SIGNAL("translateCompleted()"), self, SLOT("acknowledge_keyboard()"))
+		disconnect(game.board.controller, SIGNAL("translateStarted()"), self, SLOT("ignore_keyboard()"))
+		disconnect(game.board.controller, SIGNAL("translateCompleted()"), self, SLOT("acknowledge_keyboard()"))
 
 		ignore_keyboard
 	end
