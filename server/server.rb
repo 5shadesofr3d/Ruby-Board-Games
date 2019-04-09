@@ -1,6 +1,8 @@
 require 'test/unit'
 require "xmlrpc/server"
 
+require_relative 'game_server_state_machine'
+
 class LobbyHandler
   include Test::Unit::Assertions
   attr_accessor :num_players, :lobby, :num_ready
@@ -59,6 +61,10 @@ class LobbyHandler
     @lobby.length
   end
 
+  def current_state
+    @game_server.current_state_instance
+  end
+
   def server_status
     "Num players: #{@num_players} \n" +
     "Num ready: #{@num_ready} \n" +
@@ -67,13 +73,9 @@ class LobbyHandler
     "Lobby: #{@lobby.to_s} \n"
   end
 
-end
-
-def GameHandler
-
   def make_move(current_chip_color, current_column)
-    assert @current_move.is_a? Hash
-    assert @current_turn.is_a? Integer
+    assert @game_server.current_move.is_a? Hash
+    assert @game_server.current_turn.is_a? Integer
 
     @game_server.current_move =  {"chip_color": current_chip_color,
                                   "column": current_column}
@@ -107,22 +109,17 @@ def GameHandler
 end
 
 
-server = XMLRPC::Server.new(1234)
-server.add_handler("game", GameHandler.new)
+server = XMLRPC::Server.new(1235)
+# server.add_handler("game", GameHandler.new)
 server.add_handler("lobby", LobbyHandler.new)
 server.serve
 
-
-# server_test = MyHandler.new
+# server_test = LobbyHandler.new
 # server_test.connect("user2")
 # server_test.connect("user3")
-#
-# puts "Acknowledge: #{server_test.acknowledge("user2")}"
-# puts "Acknowledge: #{server_test.acknowledge("user3")}"
-#
-# # server_test.ack_move("user2")
-# # puts "All ack #{server_test.all_ack}"
-# # server_test.ack_move("user3")
-# # puts "All ack #{server_test.all_ack}"
-#
-# puts server_test.ready
+# puts server_test.current_state
+# server_test.make_move("Aka", 3)
+# puts server_test.current_state
+# server_test.ack_move("user2")
+# server_test.ack_move("user3")
+# puts server_test.current_state

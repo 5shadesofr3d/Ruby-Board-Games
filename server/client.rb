@@ -7,7 +7,7 @@ class Client
   def initialize
     @username = ""
     @player_number = 0
-    @conn = XMLRPC::Client.new( "localhost", "/", 1234 )
+    @conn = XMLRPC::Client.new( "localhost", "/", 1235 )
   end
 
 end

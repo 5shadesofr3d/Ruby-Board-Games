@@ -2,7 +2,7 @@ require 'test/unit'
 
 require_relative 'abstract_player'
 require_relative 'local_player'
-
+require_relative '../../server/game_server_state_machine'
 # Todo: Need error handling for bad opponent moves.
 class MultiplayerOnlinePlayer < Player
 
@@ -18,11 +18,7 @@ class MultiplayerOnlinePlayer < Player
 
     client = Client.instance
 
-    # TODO: Remove, replace with alternate waiting method
-    # to allow other clients to catch up.
-    sleep(2)
-
-    while client.conn.call2("game.stateful")[1].empty?
+    while client.conn.call2("lobby.current_state")[1].is_a? WaitingOnTurnState
       sleep 1
     end
 
@@ -35,11 +31,9 @@ class MultiplayerOnlinePlayer < Player
     puts client.conn.call("lobby.server_status")
 
     # Loop as long as we don't have all acknowledgements.
-    while not(client.conn.call("lobby.all_ack"))
+    while client.conn.call2("lobby.current_state")[1].is_a? WaitingOnAllAcksState
       sleep 1
     end
-
-    client.conn.call("lobby.update_moving_on")
 
     drop
     finished
@@ -74,27 +68,15 @@ class MultiplayerLocalPlayer < LocalPlayer
 
     client = Client.instance
 
-    puts "Reached: MultiplayerLocalPlayer"
-
     # Wait until its our turn to make a move.
-    while not(client.conn.call("lobby.current_turn") ==
-        client.player_number)
-      puts "stuck here1"
-      sleep(1)
-    end
-
-    # By now the current move should have been reset.
-    # Wait until all online players have passed the
-    # waiting state
-    while client.conn.call("lobby.moving_on") < 1
-      puts "stuck here2"
-      sleep(1)
-    end
-
-    client.conn.call("lobby.reset_moving_on")
+    # while not(client.conn.call("lobby.current_turn") ==
+    #     client.player_number)
+    #   puts "stuck here1"
+    #   sleep(1)
+    # end
 
     # This can be done via state machine
-    client.conn.call("lobby.set_all_ack", false)
+    # client.conn.call("lobby.set_all_ack", false)
 
     super
   end
@@ -116,7 +98,11 @@ class MultiplayerLocalPlayer < LocalPlayer
     client.call2("lobby.ack_move",
                  Client.instance.username)
 
-    puts client.call("lobby.server_status")
+    # Loop as long as we don't have all acknowledgements.
+    while client.conn.call2("lobby.current_state")[1].is_a? WaitingOnAllAcksState
+      sleep 1
+      puts client.call("lobby.server_status")
+    end
 
     @current_chip = nil
     assert @current_chip == nil

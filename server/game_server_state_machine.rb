@@ -13,7 +13,7 @@ class WaitingOnAllAcksState < StatePattern::State
   include Test::Unit::Assertions
 
   def next
-    transition_to(WaitingOnAllPassState)
+    transition_to(WaitingOnTurnState)
   end
 
 end
@@ -97,18 +97,18 @@ class GameServerStateMachine
 
 end
 
-game = GameServerStateMachine.new([{"username": "user1",
-                                         "player_num": 0,
-                                         "ack": false},
-                                        {"username": "user2",
-                                         "player_num": 1,
-                                         "ack": false}])
-puts game.current_state_instance
-game.current_move = {"chip_color": "Red",
-                     "column": 3}
-game.next
-puts game.current_state_instance
-game.ack("user1")
-puts game.current_state_instance
-game.ack("user2")
-puts game.current_state_instance
+# game = GameServerStateMachine.new([{"username": "user1",
+#                                          "player_num": 0,
+#                                          "ack": false},
+#                                         {"username": "user2",
+#                                          "player_num": 1,
+#                                          "ack": false}])
+# puts game.current_state_instance
+# game.current_move = {"chip_color": "Red",
+#                      "column": 3}
+# game.next
+# puts game.current_state_instance
+# game.ack("user1")
+# puts game.current_state_instance
+# game.ack("user2")
+# puts game.current_state_instance
