@@ -2,141 +2,104 @@ require 'Qt'
 require 'test/unit'
 require_relative 'board/model'
 require_relative 'board/view'
+require_relative 'board/controller'
 require_relative 'debug'
 
-class Board < Qt::Widget
-	include Test::Unit::Assertions
-	include Debug
+module Board
+	class Widget < Qt::Widget
+		include Test::Unit::Assertions
+		include Debug
 
-	attr_reader :model, :animation
+		attr_reader :model, :controller
 
-	slots :onDrop
-	signals :translateStarted, :translateCompleted, :dropped
+		def initialize(rows, cols, width: 800, height: 600, parent: nil)
+			assert rows.is_a? Integer
+			assert cols.is_a? Integer
+			assert rows > 0
+			assert cols > 0
+			parent != nil ? super(parent) : super()
 
-	def initialize(rows, cols, width: 800, height: 600, parent: nil)
-		assert rows.is_a? Integer
-		assert cols.is_a? Integer
-		assert rows > 0
-		assert cols > 0
-		parent != nil ? super(parent) : super()
+			@model = Board::Model.new(rows, cols)
+			@controller = Board::Controller.new(parent: self)
 
-		@model = BoardModel.new(rows, cols, parent: self)
+			setupViews()
+			setupLayout()
+			setupWindow(width, height)
+			setupBackground()
 
-		setupLayout()
-		setupWindow(width, height)
-		setupAnimation()
-		setupBackground()
+			assert @model.is_a? Board::Model
+			assert valid?
+		end
 
-		assert @model.is_a? BoardModel
-		assert valid?
-	end
+		def valid?
+			return false unless @layout.is_a?(Qt::GridLayout)
+			return false unless @model.is_a?(Board::Model)
+			return false unless @controller.is_a?(Board::Controller)
 
-	def valid?
-		return false unless @layout.is_a?(Qt::GridLayout)
-		return false unless @model.is_a?(BoardModel)
+			return true
+		end
 
-		return true
-	end
+		def setupViews()
+			@model.each(:head) { |head| head.view = Board::View.new(parent: self) }
+			@model.each(:tile) { |tile| tile.view = Board::View.new(parent: self) }
+		end
 
-	def setupAnimation()
-		@animation = Qt::PropertyAnimation.new(self)
-		connect(animation, SIGNAL("finished()"), self, SIGNAL("translateCompleted()"))
-	end
+		def setupLayout()
+			@layout = Qt::GridLayout.new(self)
+			@layout.setSpacing(0)
+			setLayout(@layout)
 
-	def setupLayout()
-		@layout = Qt::GridLayout.new(self)
-		@layout.setSpacing(0)
-		setLayout(@layout)
+			@model.each_with_index(:head) { |head, row, col| @layout.addWidget(head.view, row, col) if head.view != nil }
+			@model.each_with_index(:tile) { |tile, row, col| @layout.addWidget(tile.view, row + 1, col) if tile.view != nil }
+		end
 
-		@model.each_with_index(:head) {|head, row, col| @layout.addWidget(head, row, col) }
-		@model.each_with_index(:tile) {|tile, row, col| @layout.addWidget(tile, row + 1, col) }
-	end
+		def setupWindow(width, height)
+			setWindowSize(width, height)
+			setWindowTitle("Ruby-Board-Games")
+			move(100, 100)
+			show()
 
-	def setupWindow(width, height)
-		setWindowSize(width, height)
-		setWindowTitle("Ruby-Board-Games")
-		move(100, 100)
-		show()
+			assert width() == width
+			assert height() == height
+		end
 
-		assert width() == width
-		assert height() == height
-	end
+		def setWindowSize(width, height)
+			assert width.is_a?(Integer) and width.between?(100, 1920)
+			assert height.is_a?(Integer) and height.between?(100, 1080)
 
-	def setWindowSize(width, height)
-		assert width.is_a?(Integer) and width.between?(100, 1920)
-		assert height.is_a?(Integer) and height.between?(100, 1080)
+			resize(width, height)
 
-		resize(width, height)
+			assert width() == width
+			assert height() == height
+		end
 
-		assert width() == width
-		assert height() == height
-	end
+		def background=(c)
+			palette = Qt::Palette.new(c)
+			setAutoFillBackground(true)
+			setPalette(palette)
+		end
 
-	def background=(c)
-		palette = Qt::Palette.new(c)
-		setAutoFillBackground(true)
-		setPalette(palette)
-	end
+		# TODO: Might not be worth fixing. Set the background of the window.
+		def setupBackground
+			#theme = Settings.instance.theme
+			#setStyleSheet("background-color: #{theme.color[:board_background]};")
+		end
 
-	# TODO: Might not be worth fixing. Set the background of the window.
-	def setupBackground
-		#theme = Settings.instance.theme
-		#setStyleSheet("background-color: #{theme.color[:board_background]};")
-	end
+    def clear()
+			@model.each(:tile) {|tile| tile.detach }
+			@model.update()
+    end
 
-	def clear()
-		@model.each(:chip) {|chip| chip.deleteLater unless chip == nil }
-		@model.each(:tile) {|tile| tile.detach }
-	end
+		def color=(c)
+			@model.color = c
+		end
 
-	def color=(c)
-		@model.color = c
-	end
+		def drop(chip, col, time: 750)
+			@controller.drop(chip, col, @model, time: time)
+		end
 
-	def drop(chip, col, time: 750)
-		assert chip.is_a? BoardChip
-		assert col.is_a? Integer
-		assert col >= 0
-		r = model.next_empty(col)
-		connect(self, SIGNAL("translateCompleted()"), self, SLOT("onDrop()"))
-		translate(item: chip, from: model.head(col), to: model.next_empty(col), time: time)
-
-		begin
-			assert r != model.next_empty(col) #this confirms the piece was added to the array
-		rescue BoardIterator::ColumnFullError
-			#This happens when the column is full after we place it, we just ignore this case
-			#but in this sense the assertion still passes as r != the next row
+		def translate(item: nil, from: nil, to: nil, time: 0)
+			@controller.translate(item: item, from: from, to: to, time: time)
 		end
 	end
-
-	def onDrop()
-		dropped
-		disconnect(self, SIGNAL("translateCompleted()"), self, SLOT("onDrop()"))
-	end
-
-	def translate(item: nil, from: nil, to: nil, time: 0)
-		assert from.is_a?(BoardView)
-		assert to.is_a?(BoardView)
-		assert time.is_a?(Integer) and time >= 0
-
-		from.detach()
-		to.attach(item)
-
-		return if from == to
-		return if time == 0
-
-		animation.targetObject = item
-		animation.propertyName = "geometry"
-		animation.duration = time
-		animation.startValue = from.geometry
-		animation.endValue = to.geometry
-
-		translateStarted
-
-		animation.start
-	end
-
-private
-
-
 end

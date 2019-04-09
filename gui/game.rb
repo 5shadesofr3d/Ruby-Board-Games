@@ -60,7 +60,7 @@ class Game < Qt::Widget
   end
 
   def setupBoard(rows, cols)
-    @board = Board.new(rows, cols, parent: self)
+    @board = Board::Widget.new(rows, cols, parent: self)
     @stack.addWidget(board)
   end
 
@@ -113,7 +113,7 @@ class Game < Qt::Widget
 
   def findGoal()
     # if a goal was found, we have a winner!
-    assert board.model.is_a? BoardModel
+    assert board.model.is_a? Board::Model
     assert valid?
 
     model = board.model
@@ -201,8 +201,8 @@ class Game < Qt::Widget
     assert @players.include? player
   end
 
-  def valid?
-    return false unless @board == nil or @board.is_a?(Board)
+  def valid?()
+    return false unless @board == nil or @board.is_a?(Board::Widget)
     return false unless @stack.is_a?(Qt::StackedLayout)
     return true
   end
@@ -267,8 +267,9 @@ class Connect4 < Game
   end
 
   def constructChip(c, column: 0)
-    chip = Connect4Chip.new(color: c, parent: board)
-    chip.geometry = board.model.head(0).geometry # place new chip on the first slot at the top of the board
+    chip = Board::Model::Connect4Chip.new(color: c)
+    chip.view = Board::View.new(parent: board)
+    chip.view.geometry = board.model.head(column).view.geometry # place new chip on the first slot at the top of the board
     return chip
   end
 
@@ -276,7 +277,7 @@ class Connect4 < Game
     assert chips.is_a? Array
     return false unless chips.size == 4
     return false if chips.include?(nil)
-    return chips.uniq { |c| c.secondary.name }.length == 1
+    return chips.uniq { |c| c.id }.length == 1
   end
 
   def setPlayerGoals
@@ -294,7 +295,7 @@ class Connect4 < Game
 
   def winnersGoal
     chips = findGoal()
-    players.each { |player| return player.goal if player.goal.size == chips.size && player.goal == chips.map(&:color) } # we have a winner if the chip sequence matches the player's goal
+    players.each { |player| return player.goal if player.goal.size == chips.size && player.goal == chips.map(&:id) } # we have a winner if the chip sequence matches the player's goal
     return nil
   end
 
@@ -326,8 +327,9 @@ class OTTO < Game
 
   def constructChip(c, column: 0)
     symbol = @@chip_iteration.even?() ? :T : :O
-    chip = OTTOChip.new(symbol, color: c, parent: board)
-    chip.geometry = board.model.head(column).geometry # place new chip on the first slot at the top of the board
+    chip = Board::Model::OTTOChip.new(id: symbol, color: c)
+    chip.view = Board::View.new(parent: board)
+    chip.view.geometry = board.model.head(column).view.geometry # place new chip on the first slot at the top of the board
     @@chip_iteration += 1
     return chip
   end
