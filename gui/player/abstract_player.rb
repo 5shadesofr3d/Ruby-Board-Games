@@ -51,8 +51,7 @@ class Player < Qt::Object
 
 	def up()
 		return if @current_chip == nil
-		
-		@current_chip.deleteLater 
+		@current_chip.view = nil # deletes current view
 		@current_chip = game.constructChip(color, column: @current_column)
 	end
 
@@ -62,7 +61,7 @@ class Player < Qt::Object
 
 	def left()
 		assert game.is_a? Game
-		assert game.board.model.is_a? BoardModel
+		assert game.board.model.is_a? Board::Model
 
 		return if current_column == 0
 
@@ -77,12 +76,12 @@ class Player < Qt::Object
 
 		assert @current_column.is_a? Integer
 		assert game.is_a? Game
-		assert game.board.model.is_a? BoardModel
+		assert game.board.model.is_a? Board::Model
 	end
 
 	def right()
 		assert game.is_a? Game
-		assert game.board.model.is_a? BoardModel
+		assert game.board.model.is_a? Board::Model
 
 		return if current_column == game.board.model.columns.max
 
@@ -97,14 +96,14 @@ class Player < Qt::Object
 
 		assert @current_column.is_a? Integer
 		assert game.is_a? Game
-		assert game.board.model.is_a? BoardModel
+		assert game.board.model.is_a? Board::Model
 	end
 
 	def drop()
 		assert game.is_a? Game
 		assert current_column.is_a? Integer
 		assert current_column >= 0
-		assert current_chip.is_a? BoardChip
+		assert current_chip.is_a? Board::Model::Chip
 
 
 		game.board.drop(current_chip, current_column)
@@ -115,18 +114,18 @@ class Player < Qt::Object
 
 	def enable()
 		assert game.is_a? Game
-		assert game.board.is_a? Board
+		assert game.board.is_a? Board::Widget
 
 		@current_chip = game.constructChip(color)
 		@current_column = 0
 		connect(game.board, SIGNAL("dropped()"), self, SIGNAL("finished()"))
 
-		assert @current_chip.is_a? BoardChip
+		assert @current_chip.is_a? Board::Model::Chip
 		assert current_column.is_a? Integer and current_column >= 0
 	end
 
 	def disable()
-		assert game.board.is_a? Board
+		assert game.board.is_a? Board::Widget
 
 		disconnect(game.board, SIGNAL("dropped()"), self, SIGNAL("finished()"))
 	end

@@ -10,7 +10,7 @@ class LocalPlayer < Player
 	def enable()
 		super()
 		assert game.is_a? Game
-		assert game.board.is_a? Board
+		assert game.board.is_a? Board::Widget
 
 		connect(game.board, SIGNAL("translateStarted()"), self, SLOT("ignore_keyboard()"))
 		connect(game.board, SIGNAL("translateCompleted()"), self, SLOT("acknowledge_keyboard()"))
@@ -20,7 +20,7 @@ class LocalPlayer < Player
 
 	def disable()
 		assert game.is_a? Game
-		assert game.board.is_a? Board
+		assert game.board.is_a? Board::Widget
 
 		super()
 
@@ -79,7 +79,7 @@ class LocalPlayer < Player
 			tile = nil
 			begin
 				tile = game.board.model.next_empty(current_column)
-			rescue BoardIterator::ColumnFullError
+			rescue Board::Iterator::ColumnFullError
 				tile = nil
 				puts "Column full, try again"
 			end
