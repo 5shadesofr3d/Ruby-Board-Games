@@ -1,3 +1,4 @@
+require "xmlrpc/client"
 require "test/unit"
 require 'state_pattern'
 require 'Qt'
@@ -5,9 +6,10 @@ require 'Qt'
 require_relative '../settings'
 require_relative '../settings/interface'
 require_relative '../title'
+require_relative '../multiplayer/lobby_ui'
+require_relative '../../server/client'
 
 require_relative '../game'
-
 
 class TitleScreenState < StatePattern::State
   include Test::Unit::Assertions
@@ -45,13 +47,22 @@ class TitleScreenState < StatePattern::State
     assert valid?
   end
 
+  def open_online_game
+    assert valid?
+
+    stateful.main_window.centralWidget.close if stateful.main_window.centralWidget != nil
+    transition_to(OnlineGameScreenState)
+
+    assert valid?
+  end
+
 end
 
-#TODO: Get rid of this
 class TitleController < Qt::Widget
   include Test::Unit::Assertions
 
-  slots 'play_game()','open_settings()','quit_game()'
+  slots 'play_game()', 'multiplayer()', 'open_settings()','quit_game()',
+        'show_lobby()', 'ready_pressed()'
 
   def initialize(state, window)
     assert state.is_a? TitleScreenState
@@ -66,6 +77,7 @@ class TitleController < Qt::Widget
                        settings.window_height, window)
 
     connect(@title.bPlay,  SIGNAL('clicked()'), self, SLOT('play_game()'))
+    connect(@title.bMultiplayer, SIGNAL('clicked()'), self, SLOT('show_lobby()'))
     connect(@title.bSettings,  SIGNAL('clicked()'), self, SLOT('open_settings()'))
     connect(@title.bQuit,  SIGNAL('clicked()'), $qApp, SLOT('quit()'))
 
@@ -84,6 +96,53 @@ class TitleController < Qt::Widget
     assert @title.visible == false
   end
 
+  def show_lobby
+    @lobby_window = Qt::Dialog.new
+    @lobby_ui = LobbyGUI.new(@lobby_window)
+
+    connect(@lobby_ui.quickMatchButton, SIGNAL('clicked()'), self, SLOT('ready_pressed()'))
+
+    @lobby_window.setFixedSize(500, 500)
+    @lobby_window.setWindowTitle("Lobby")
+    @lobby_window.setModal(true)
+    @lobby_window.show
+
+    assert @lobby_window.visible
+  end
+
+  def ready_pressed
+    assert @lobby_window.is_a? Qt::Dialog
+    assert @lobby_ui.is_a? LobbyGUI
+    assert @lobby_window.visible
+
+    client = Client.instance
+
+    # Connect to the lobby as user1.
+    # puts @lobby_ui.usernameText.text
+    puts client.conn.call2('lobby.connect', @lobby_ui.usernameText.text)
+    client.username = @lobby_ui.usernameText.text
+
+    # Join a lobby,
+    # busy wait for additional players for our game.
+    while client.conn.call("lobby.players") < 2
+      sleep(2) # Try not to spam the server.
+    end
+
+    puts @lobby_ui.usernameText.text
+
+    # Launch the game.
+    @title.close
+    @lobby_window.close
+    @state.open_online_game
+
+    assert @title.visible == false
+
+    # Print our current lobby.
+    # puts client.call2("lobby.lobby")
+    # puts client.call2("lobby.num_players")
+
+  end
+
   def play_game
     assert @state.is_a? TitleScreenState
     assert @title.is_a? Title
@@ -92,6 +151,66 @@ class TitleController < Qt::Widget
     @state.open_game
 
     assert @title.visible == false
+  end
+
+end
+
+class OnlineGameScreenState < StatePattern::State
+  include Test::Unit::Assertions
+
+  def valid?
+    return false unless @game.is_a? Game
+    return true
+  end
+
+  def enter
+    # game_mode = :Connect4
+
+    client = Client.instance
+    players = client.conn.call2("lobby.lobby")[1]
+
+    players_and_types = {}
+
+    # Add users to the hash
+    players.each do |user|
+      if user["username"] == client.username
+        players_and_types[user["username"]] = :MultiplayerLocalPlayer
+        client.player_number = user["player_num"]
+      else
+        players_and_types[user["username"]] = :MultiplayerOnlinePlayer
+      end
+    end
+
+    @game = Connect4.new(rows: 10,
+                         columns: 10,
+                         height: 600,
+                         width: 800,
+                         players: players_and_types,
+                         lobby_type: OnlineGameLobbyState,
+                         parent: stateful.main_window)
+
+    # case game_mode
+    # when :Connect4
+    #   @game = Connect4.new(rows: 10,
+    #                        columns: 10,
+    #                        height: 600,
+    #                        width: 800,
+    #                        parent: stateful.main_window)
+    # when :TOOT
+    #   @game = OTTO.new(rows: 10,
+    #                    columns: 10,
+    #                    height: 600,
+    #                    width: 800,
+    #                    parent: stateful.main_window)
+    # end
+
+    @game.start
+    @game.show
+    @game.set_state(self)
+
+    assert @game.is_a? Game
+    assert @game.visible
+    assert valid?
   end
 
 end
@@ -120,7 +239,11 @@ class GameScreenState < StatePattern::State
                            width: settings.window_width,
                            parent: stateful.main_window)
     when :TOOT
-      @game = OTTO.new(parent: stateful.main_window)
+      @game = OTTO.new(rows: settings.num_rows,
+                       columns: settings.num_cols,
+                       height: settings.window_height,
+                       width: settings.window_width,
+                       parent: stateful.main_window)
     end
 
     @game.start
@@ -181,9 +304,15 @@ class SettingsController < Qt::Widget
       @settings.game_mode = :TOOT
     end
 
-    if @gui.resolutionComboBox.currentText == "600x800"
-      @settings.window_width = 600
-      @settings.window_height = 800
+    if @gui.resolutionComboBox.currentText == "800x700"
+      @settings.window_width = 800
+      @settings.window_height = 700
+    elsif @gui.resolutionComboBox.currentText == "1200x1050"
+      @settings.window_width = 1200
+      @settings.window_height = 1050
+    elsif @gui.resolutionComboBox.currentText == "1920x1080"
+      @settings.window_width = 1920
+      @settings.window_height = 1080
     end
 
     puts @settings.to_s
@@ -204,7 +333,6 @@ class SettingsController < Qt::Widget
     @gui.close
     @state.open_title
 
-
     assert self.visible == false
   end
 
@@ -219,7 +347,6 @@ class SettingsScreenState < StatePattern::State
   end
 
   def enter
-    #assert stateful.settings_gui.is_a? SettingsGUI
     assert stateful.main_window.is_a? Qt::MainWindow
 
     settings = Settings.instance
@@ -228,9 +355,9 @@ class SettingsScreenState < StatePattern::State
                                     settings.window_height,
                                     stateful.main_window)
     @settings_gui.show
-    @controller = SettingsController.new(self, @settings_gui)
+    @controller = SettingsController.new(self,
+                                         @settings_gui)
 
-    # assert settings_gui.is_a? SettingsGUI
     assert @controller.is_a? SettingsController
     assert valid?
   end
@@ -271,9 +398,8 @@ class ApplicationStateMachine < Qt::Widget
     @main_window.setFixedSize(settings.window_width, settings.window_height)
     @main_window.setWindowTitle("Ruby-Board-Games")
 
+    @main_window.show#show title
     open_title_screen #init title screen
-
-    @main_window.show #show title
 
     assert @window.is_a? QTApplication
     assert @main_window.is_a? Qt::MainWindow
@@ -284,7 +410,7 @@ class ApplicationStateMachine < Qt::Widget
   end
 
   # Callback:
-  def open_title_screen # TODO...
+  def open_title_screen
     assert valid?
 
     transition_to(TitleScreenState)

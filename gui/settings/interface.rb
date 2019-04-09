@@ -310,7 +310,9 @@ class SettingsGUI < Qt::Widget
     @themeText.text = Qt::Application.translate("SettingsWindow", "Theme:", nil, Qt::Application::UnicodeUTF8)
     @themeComboBox.insertItems(0, [Qt::Application.translate("SettingsWindow", "Default", nil, Qt::Application::UnicodeUTF8),
                                    Qt::Application.translate("SettingsWindow", "Colorblind", nil, Qt::Application::UnicodeUTF8)])
-    @resolutionComboBox.insertItems(0, [Qt::Application.translate("SettingsWindow", "800x700", nil, Qt::Application::UnicodeUTF8)])
+    @resolutionComboBox.insertItems(0, [Qt::Application.translate("SettingsWindow", "800x700", nil, Qt::Application::UnicodeUTF8),
+                                        Qt::Application.translate("SettingsWindow", "1200x1050", nil, Qt::Application::UnicodeUTF8),
+                                        Qt::Application.translate("SettingsWindow", "1920x1080", nil, Qt::Application::UnicodeUTF8)])
     @windowModeText.text = Qt::Application.translate("SettingsWindow", "Window Mode:", nil, Qt::Application::UnicodeUTF8)
     @windowModeComboBox.insertItems(0, [Qt::Application.translate("SettingsWindow", "Windowed", nil, Qt::Application::UnicodeUTF8),
                                         Qt::Application.translate("SettingsWindow", "Fullscreen", nil, Qt::Application::UnicodeUTF8)])

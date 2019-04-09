@@ -1,6 +1,7 @@
 require 'Qt'
 require 'test/unit'
 
+require_relative 'online_player'
 require_relative 'abstract_player'
 require_relative 'local_player'
 require_relative 'ai_player'
@@ -42,9 +43,9 @@ class PlayerLobby < Qt::Frame
     setStyleSheet("background-color:#{LobbyColor::DARK_BLUE}; border: 1px; border-radius: 10px")
   end
 
-  def addPlayer()
+  def addPlayer(username = nil, type = nil)
     if @player_count < @@MAX_PLAYER_COUNT
-      @room.addPlayer()
+      @room.addPlayer(username, type)
       @player_count += 1
     end
   end
@@ -139,22 +140,39 @@ class PlayerRoom < Qt::Frame
     assert valid?
   end
 
-  def addPlayer()
+  def addPlayer(username, type)
     assert valid?
 
-    playerInfo = PlayerInfo.new(parent: self)
+    puts username.is_a? String
+
+    if username.nil?
+      playerInfo = PlayerInfo.new(parent: self)
+    else
+      playerInfo = PlayerInfo.new(name: username, parent: self)
+    end
+
+    if type.nil?
+      playerInfo.type = "Local"
+    else
+      playerInfo.type = type
+    end
+
     @playerInfos << playerInfo
     @layout.addWidget(playerInfo)
+
+    assert playerInfo.is_a? PlayerInfo
     assert valid?
   end
 
   def removePlayer()
     assert valid?
+    assert @playerInfos.count > 0
 
     player = @playerInfos.pop
     player.close
     @layout.removeWidget(player)
 
+    assert @playerInfos.include? player == false
     assert valid?
   end
 
@@ -202,7 +220,7 @@ class PlayerInfoTypeBox < Qt::ComboBox
     font = self.font()
     font.setPixelSize(15)
     self.setFont(font)
-    addItems(["Local", "Computer"])
+    addItems(["Local", "Computer", "Online", "OnlineLocal"])
     setStyleSheet("color:#{LobbyColor::GREY};")
   end
 end
@@ -288,6 +306,12 @@ class PlayerInfo < Qt::Widget
 
   def initialize(name: "Player", wins: 0, loss: 0, ties: 0, color: "blue", parent: nil)
     parent != nil ? super(parent) : super()
+    assert wins.is_a? Integer
+    assert loss.is_a? Integer
+    assert ties.is_a? Integer
+    assert wins >= 0
+    assert loss >= 0
+    assert ties >= 0
 
     setMaximumHeight(50)
     setMinimumHeight(50)
@@ -345,11 +369,16 @@ class PlayerInfo < Qt::Widget
   end
 
   def type=(t)
+
     case t
     when LocalPlayer
-      @type.currentText = "Local"
+      @type.currentIndex = 0
     when AIPlayer
-      @type.currentText = "Computer"
+      @type.currentIndex = 1
+    when :MultiplayerOnlinePlayer
+      @type.currentIndex = 2
+    when :MultiplayerLocalPlayer
+      @type.currentIndex = 3
     end
   end
 
@@ -374,11 +403,15 @@ class PlayerInfo < Qt::Widget
   end
 
   def ties=(t)
+    assert t.is_a? Integer
+    assert t >= 0
+
     @ties.text = t
   end
 
   def construct_player(parent)
     # constructs and returns the player based off info
+    assert type.is_a? String
 
     player = nil
 
@@ -387,6 +420,10 @@ class PlayerInfo < Qt::Widget
       player = LocalPlayer.new(self.name, self.color, parent: parent)
     when "Computer"
       player = AIPlayer.new(self.name, self.color, parent: parent)
+    when "OnlineLocal"
+      player = MultiplayerLocalPlayer.new(self.name, self.color, parent: parent)
+    when "Online"
+      player = MultiplayerOnlinePlayer.new(self.name, self.color, parent: parent)
     end
 
     return if player == nil
@@ -395,10 +432,15 @@ class PlayerInfo < Qt::Widget
     player.losses = self.losses
     player.ties = self.ties
 
+    assert player.is_a? Player
+    assert player.ties >= 0
+    assert player.losses >= 0
+    assert player.wins >= 0
+
     return player
   end
 
-  def valid?()
+  def valid?
     # return false unless @name.is_a?(String)
     # return false unless @wins.is_a?(Integer) and @wins >= 0
     # return false unless @loss.is_a?(Integer) and @loss >= 0

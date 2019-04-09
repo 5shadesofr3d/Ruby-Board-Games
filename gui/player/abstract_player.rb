@@ -22,7 +22,6 @@ class Player < Qt::Object
 		assert player_name.is_a? String
 		#TODO: Player color
 
-
 		@name = player_name
 		@wins = 0
 		@losses = 0
@@ -79,7 +78,7 @@ class Player < Qt::Object
 		assert game.board.model.is_a? Board::Model
 	end
 
-	def right()
+	def right
 		assert game.is_a? Game
 		assert game.board.model.is_a? Board::Model
 
@@ -99,12 +98,11 @@ class Player < Qt::Object
 		assert game.board.model.is_a? Board::Model
 	end
 
-	def drop()
+	def drop
 		assert game.is_a? Game
 		assert current_column.is_a? Integer
 		assert current_column >= 0
 		assert current_chip.is_a? Board::Model::Chip
-
 
 		game.board.drop(current_chip, current_column)
 		@current_chip = nil
@@ -112,7 +110,7 @@ class Player < Qt::Object
 		assert @current_chip == nil
 	end
 
-	def enable()
+	def enable
 		assert game.is_a? Game
 		assert game.board.is_a? Board::Widget
 
@@ -126,7 +124,6 @@ class Player < Qt::Object
 
 	def disable()
 		assert game.board.is_a? Board::Widget
-
 		disconnect(game.board.controller, SIGNAL("dropped()"), self, SIGNAL("finished()"))
 	end
 

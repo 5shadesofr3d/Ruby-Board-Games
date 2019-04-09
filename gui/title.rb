@@ -5,6 +5,7 @@ class Title < Qt::Widget
   include Test::Unit::Assertions
 
   attr_reader :bPlay
+  attr_reader :bMultiplayer
   attr_reader :bSettings
   attr_reader :bQuit
 
@@ -15,24 +16,27 @@ class Title < Qt::Widget
     assert height > 0
     parent != nil ? super(parent) : super()
 
+    @parent = parent
     @layout = Qt::VBoxLayout.new(self)
-		@layout.setSpacing(height/6) #This value seems to use the screen space well
+    @layout.setSpacing(height/6) #This value seems to use the screen spae well
     setLayout(@layout)
     setScreenSize(width,height)
     setWindowTitle("Ruby-Board-Games")
-
+    show
     drawMenu
     draw_color
-    show
 
+    # @parent.showFullScreen
     assert @layout.is_a? Qt::VBoxLayout
   end
 
+  # Sets the size of the main window and the title screen
   def setScreenSize(width, height)
     assert width.is_a?(Integer) and width.between?(100, 1920)
 		assert height.is_a?(Integer) and height.between?(100, 1080)
 
 		resize(width, height)
+    @parent.setFixedSize(width, height)
 
 		assert width() == width
 		assert height() == height
@@ -54,6 +58,7 @@ class Title < Qt::Widget
     @title.setStyleSheet(text_style)
 
     @bPlay.setStyleSheet(button_style)
+    @bMultiplayer.setStyleSheet(button_style)
     @bSettings.setStyleSheet(button_style)
     @bQuit.setStyleSheet(button_style)
 
@@ -83,6 +88,11 @@ class Title < Qt::Widget
     @bPlay.setAutoFillBackground(true)
     @bPlay.maximumSize = Qt::Size.new(300, 50)
 
+    @bMultiplayer = Qt::PushButton.new("Multiplayer")
+    @bMultiplayer.font = fontB
+    @bMultiplayer.setAutoFillBackground(true)
+    @bMultiplayer.maximumSize = Qt::Size.new(300, 50)
+
     @bSettings = Qt::PushButton.new("Settings")
     @bSettings.font = fontB
     @bSettings.setAutoFillBackground(true)
@@ -97,10 +107,12 @@ class Title < Qt::Widget
 
     @layout.addWidget(@title)
     @layout.addWidget(@bPlay)
+    @layout.addWidget(@bMultiplayer)
     @layout.addWidget(@bSettings)
     @layout.addWidget(@bQuit)
 
     assert @bPlay.is_a? Qt::PushButton
+    assert @bMultiplayer.is_a? Qt::PushButton
     assert @bSettings.is_a? Qt::PushButton
     assert @bQuit.is_a? Qt::PushButton
     assert valid?

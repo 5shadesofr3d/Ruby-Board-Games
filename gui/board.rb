@@ -85,10 +85,10 @@ module Board
 			#setStyleSheet("background-color: #{theme.color[:board_background]};")
 		end
 
-		def clear()
+    def clear()
 			@model.each(:tile) {|tile| tile.detach }
 			@model.update()
-		end
+    end
 
 		def color=(c)
 			@model.color = c

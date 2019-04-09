@@ -18,10 +18,10 @@ class GameStateMachine < Qt::StateMachine
     assert valid?
   end
 
-  def setup()
+  def setup(lobby_type = GameLobbyState)
     assert game.is_a? Game
 
-    lobby = GameLobbyState.new(self, game)
+    lobby = lobby_type.new(self, game)
     start = GamePlayState.new(self, game)
     move = GamePlayerMoveState.new(self, game)
     status = GameDetermineStatusState.new(self, game)
@@ -48,7 +48,7 @@ class GameStateMachine < Qt::StateMachine
     #assert complete.transition.count > 0
   end
 
-  def valid?()
+  def valid?
     return false unless @game.is_a?(Game)
     return true
   end
@@ -76,7 +76,7 @@ class GameLobbyState < GameState
 
   slots 'exit_lobby()','start_game()'
 
-  def startButton()
+  def startButton
     assert game.is_a? Game
     return game.lobby.buttons.start
   end
@@ -85,7 +85,7 @@ class GameLobbyState < GameState
     # show game lobby
     assert game.is_a? Game
 
-    game.showLobby()
+    game.showLobby
 
     # when start button is clicked, go to the next state
     connect(startButton, SIGNAL("clicked()"), self, SLOT("start_game()"))
@@ -118,7 +118,7 @@ class GameLobbyState < GameState
 
   def onExit(event)
     assert game.is_a? Game
-    assert game.players.size == 0
+    # assert game.players.size == 0 TODO: Assertion bug?
     # disconnect the start button so it no longer works
     disconnect(startButton, SIGNAL("clicked()"))
     game.updatePlayers()
@@ -126,6 +126,42 @@ class GameLobbyState < GameState
     assert game.players.is_a? Array
     assert game.players.size > 0
     assert game.players.each {|p| assert p.is_a? Player}
+  end
+
+end
+
+class OnlineGameLobbyState < GameLobbyState
+
+  def start_game
+    assert game.lobby.room.playerInfos.count > 0
+
+    puts "start game"
+    players = game.lobby.room.playerInfos
+    cols = []
+    duplicate = false
+    for i in 0...players.count do
+      pCol = players[i].color
+      if cols.include? pCol
+        duplicate = true
+      end
+      cols << pCol
+    end
+
+    # Wait until all players are ready.
+    client = Client.instance.conn
+    puts client.call("lobby.server_status")
+    client.call("lobby.ready")
+
+    while not client.call("lobby.is_ready")
+      puts client.call("lobby.server_status")
+      sleep(0.5)
+    end
+
+    if !duplicate
+      done()
+    end
+
+    assert players.count > 0
   end
 
 end
@@ -158,9 +194,9 @@ class GamePlayerMoveState < GameState
     # get next player
     player = game.players.first
     # acknowledge moves from this player
+    connect(player, SIGNAL("finished()"), self, SIGNAL("done()"))
     player.enable
     # after player completes his move, go to the next state
-    connect(player, SIGNAL("finished()"), self, SIGNAL("done()"))
 
     assert player.is_a? Player
   end
@@ -187,7 +223,7 @@ class GameDetermineStatusState < GameState
     assert game.is_a? Game
     assert game.players.count > 0
 
-    if game.winner?
+    if game.winner? or game.tie?
       win()
     else
       # cycle to next player and get his move
