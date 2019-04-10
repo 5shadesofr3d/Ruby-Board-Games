@@ -1,4 +1,5 @@
 require_relative '../board'
+require_relative '../lobby/model'
 require_relative '../states/game_states'
 require_relative '../debug'
 
@@ -6,10 +7,10 @@ module Game
 	class Model::Abstract
 		include Test::Unit::Assertions
 		include Debug
+		attr_reader :view
 		attr_reader :board_model, :board_controller
 		attr_reader :lobby_model
 		attr_reader :machine
-		attr_reader :players
 
 		def initialize(rows: 7, columns: 8)
 			@players = {}
@@ -19,6 +20,24 @@ module Game
 			@lobby_model = Lobby::Model.new()
 		end
 
+		def view?()
+			return @view.is_a?(Game::View)
+		end
+
+		def view=(view)
+			assert view.is_a?(Game::View)
+			@view = view
+
+			update()
+		end
+
+		def update()
+			return unless view?
+
+			board_model.update()
+			lobby_model.update()
+		end
+
 		def start()
 			machine.setup()
 			machine.start()
@@ -26,6 +45,10 @@ module Game
 
 		def constructChip(color, column: 0)
 			raise NotImplementedError
+		end
+
+		def players()
+			return lobby.players
 		end
 
 		def findGoal()

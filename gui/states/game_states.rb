@@ -74,11 +74,14 @@ end
 
 class GameLobbyState < GameState
 
-  slots 'exit_lobby()','start_game()'
-
   def startButton
     assert game.is_a? Game
-    return game.lobby.buttons.start
+    return game.lobby.view.buttons.start
+  end
+
+  def exitButton
+    assert game.is_a? Game
+    return game.lobby.view.buttons.exit
   end
 
   def onEntry(event)
@@ -88,32 +91,8 @@ class GameLobbyState < GameState
     game.showLobby
 
     # when start button is clicked, go to the next state
-    connect(startButton, SIGNAL("clicked()"), self, SLOT("start_game()"))
-    connect(game.lobby.buttons.exit, SIGNAL("clicked()"), self, SLOT("exit_lobby()"))
-  end
-
-  def start_game
-    assert game.lobby.table.rows.count > 0
-
-    players = game.lobby.table.rows
-    cols = []
-    duplicate = false
-    for i in 0...players.count do
-      pCol = players[i].color
-      if cols.include? pCol
-        duplicate = true
-      end
-      cols << pCol
-    end
-    if !duplicate
-      done()
-    end
-
-    assert players.count > 0
-  end
-
-  def exit_lobby
-    game.stop
+    connect(startButton, SIGNAL("clicked()"), self, SIGNAL("done()"))
+    connect(exitButton, SIGNAL("clicked()"), self, SLOT("exit_lobby()"))
   end
 
   def onExit(event)
@@ -121,47 +100,12 @@ class GameLobbyState < GameState
     # assert game.players.size == 0 TODO: Assertion bug?
     # disconnect the start button so it no longer works
     disconnect(startButton, SIGNAL("clicked()"))
+    disconnect(exitButton, SIGNAL("clicked()"))
     game.updatePlayers()
 
     assert game.players.is_a? Array
     assert game.players.size > 0
     assert game.players.each {|p| assert p.is_a? Player}
-  end
-
-end
-
-class OnlineGameLobbyState < GameLobbyState
-
-  def start_game
-    assert game.lobby.room.rows.count > 0
-
-    puts "start game"
-    players = game.lobby.room.rows
-    cols = []
-    duplicate = false
-    for i in 0...players.count do
-      pCol = players[i].color
-      if cols.include? pCol
-        duplicate = true
-      end
-      cols << pCol
-    end
-
-    # Wait until all players are ready.
-    client = Client.instance.conn
-    puts client.call("lobby.server_status")
-    client.call("lobby.ready")
-
-    while not client.call("lobby.is_ready")
-      puts client.call("lobby.server_status")
-      sleep(0.5)
-    end
-
-    if !duplicate
-      done()
-    end
-
-    assert players.count > 0
   end
 
 end

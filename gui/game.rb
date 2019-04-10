@@ -1,13 +1,15 @@
 require 'Qt'
 require_relative 'board'
-require_relative 'lobby'
+require_relative 'lobby/view'
+require_relative 'player/online_player'
 require_relative 'states/game_states'
 require_relative 'debug'
 
-class Game < Qt::Widget
+module Game
+class View < Qt::Widget
   include Test::Unit::Assertions
   include Debug
-  attr_reader :board, :lobby, :machine, :players
+  # attr_reader :board, :lobby, :machine
   attr_reader :model
 
   signals "keyPressed(const QKeyEvent*)"
@@ -24,7 +26,6 @@ class Game < Qt::Widget
     parent != nil ? super(parent) : super()
     resize(width, height)
 
-    @players = []
     @machine = GameStateMachine.new(self)
 
     setupUI(rows, columns)
@@ -60,18 +61,17 @@ class Game < Qt::Widget
   end
 
   def setupLobby
-    assert true unless @players.nil?
-
-    @lobby = Lobby::Widget.new(parent: self)
-    @lobby.add
+    @lobby = Lobby::Model.new(view: Lobby::View.new(parent: self))
+    @lobby.add(OnlinePlayer.new("Godzilla", Qt::green, parent: self))
+    @lobby.update()
 
     @lobbyWidget = Qt::Widget.new(self)
     hlayout = Qt::HBoxLayout.new(@lobbyWidget)
-    hlayout.addWidget(@lobby)
+    hlayout.addWidget(@lobby.view)
     @lobbyWidget.setLayout(hlayout)
     @stack.addWidget(@lobbyWidget)
 
-    assert @lobby.table.rows.count > 0
+    assert @lobby.view.table.rows.count > 0
   end
 
   def start()
@@ -86,6 +86,10 @@ class Game < Qt::Widget
   def stop()
     machine.stop
     @statem.open_title_screen
+  end
+
+  def players()
+    return lobby.players
   end
 
   def showLobby
@@ -161,35 +165,33 @@ class Game < Qt::Widget
   def updatePlayerScores()
     goal = winnersGoal
     if (goal != nil) # a winner was found
-      players.each { |player| player.goal == goal ? player.wins += 1 : player.losses += 1 }
+      lobby.players.each { |player| player.goal == goal ? player.wins += 1 : player.losses += 1 }
     else # we had a tie
-      players.each { |player| player.ties += 1 }
+      lobby.players.each { |player| player.ties += 1 }
     end
   end
 
   def updatePlayers()
-    assert lobby.is_a? Lobby::Widget
+    assert lobby.is_a? Lobby::Model
 
-    @players = lobby.getAll()
-    players.each { |player| player.game = self }
+    lobby.players.each { |player| player.game = self }
     setPlayerGoals()
 
-    assert @players.is_a? Array
-    @players.each {|e| assert e.goal.is_a? Array}
-    @players.each {|e| assert e.is_a? Player}
-    assert @players.count > 0
+    lobby.players.each {|e| assert e.goal.is_a? Array}
+    lobby.players.each {|e| assert e.is_a? Player}
+
+    assert lobby.players.count > 0
   end
 
   def updatePlayerInfos()
-    @lobby.populate(players)
-
-    assert @lobby.getAll().count > 0
+    lobby.update()
+    assert lobby.players.count > 0
   end
 
   def addPlayer(player)
     assert Player.is_a?(Player)
-    @players << player
-    assert @players.include? player
+    lobby.add(player)
+    assert lobby.players.include? player
   end
 
   def valid?()
@@ -233,21 +235,21 @@ class Connect4 < Game
   end
 
   def setPlayerGoals
-    assert players.is_a? Array
-    assert players.size > 0
+    assert lobby.players.is_a? Array
+    assert lobby.players.size > 0
 
-    players.each { |player| player.goal = Array.new(4, player.color.name) }
+    lobby.players.each { |player| player.goal = Array.new(4, player.color.name) }
 
-    assert players.is_a? Array
-    assert players.size > 0
-    players.each {|p| assert p.goal.first == p.color.name}
-    players.each {|p| assert p.goal.is_a? Array}
-    players.each {|p| assert p.goal.size == 4}
+    assert lobby.players.is_a? Array
+    assert lobby.players.size > 0
+    lobby.players.each {|p| assert p.goal.first == p.color.name}
+    lobby.players.each {|p| assert p.goal.is_a? Array}
+    lobby.players.each {|p| assert p.goal.size == 4}
   end
 
   def winnersGoal
     chips = findGoal()
-    players.each { |player| return player.goal if player.goal.size == chips.size && player.goal == chips.map(&:id) } # we have a winner if the chip sequence matches the player's goal
+    lobby.players.each { |player| return player.goal if player.goal.size == chips.size && player.goal == chips.map(&:id) } # we have a winner if the chip sequence matches the player's goal
     return nil
   end
 
@@ -292,12 +294,12 @@ class OTTO < Game
 
   def winnersGoal()
     chips = findGoal()
-    players.each { |player| return player.goal if player.goal.size == chips.size && player.goal == chips.map(&:id) }
+    lobby.players.each { |player| return player.goal if player.goal.size == chips.size && player.goal == chips.map(&:id) }
     return nil
   end
 
   def setPlayerGoals()
-    players.each_with_index { |player, index| player.goal = index.even? ? @@otto : @@toot }
+    lobby.players.each_with_index { |player, index| player.goal = index.even? ? @@otto : @@toot }
   end
 
   def valid?
@@ -306,4 +308,5 @@ class OTTO < Game
     return true
   end
 
+end
 end
