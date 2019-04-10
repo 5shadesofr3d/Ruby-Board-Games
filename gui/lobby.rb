@@ -20,7 +20,7 @@ module Lobby
 
     slots :add,:pop
 
-    @@MAX_PLAYER_COUNT = 4
+    @@MAX_ITEM_COUNT = 4
 
     def initialize(parent: nil)
       parent != nil ? super(parent) : super()
@@ -45,7 +45,7 @@ module Lobby
     end
 
     def add(username = nil, type = nil)
-      if @item_count < @@MAX_PLAYER_COUNT
+      if @item_count < @@MAX_ITEM_COUNT
         @table.add(username, type)
         @item_count += 1
       end
