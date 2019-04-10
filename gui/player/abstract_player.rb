@@ -10,6 +10,7 @@ class Player < Qt::Object
 
 	attr_reader :name, :color, :current_chip
 	attr_accessor :wins, :losses, :ties, :game, :current_column, :goal
+	attr_accessor :host
 
 	slots :enable, :disable
 	signals :finished
@@ -27,6 +28,7 @@ class Player < Qt::Object
 		@losses = 0
 		@ties = 0
 		@color = Qt::Color.new(player_color)
+		@host = true
 
 		#post
 		assert @color.is_a? Qt::Color
@@ -40,12 +42,17 @@ class Player < Qt::Object
 
 	def valid?
 		return false unless name.is_a?(String)
+		return false unless host? == true or host? == false
 		return false unless wins.is_a?(Integer) and @wins >= 0
 		return false unless losses.is_a?(Integer) and @losses >= 0
 		return false unless ties.is_a?(Integer) and @ties >= 0
 		return false unless color.is_a?(Qt::Color)
 		return false unless game.is_a?(Game) or game == nil
 		return true
+	end
+
+	def host?()
+		return @host
 	end
 
 	def up()
