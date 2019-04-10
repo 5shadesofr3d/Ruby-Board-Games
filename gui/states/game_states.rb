@@ -12,16 +12,16 @@ class GameStateMachine < Qt::StateMachine
   def initialize(game)
     assert game.is_a?(Game)
 
-    super(game)
+    super(game) if game.is_a?(Qt::Object)
     @game = game
 
     assert valid?
   end
 
-  def setup(lobby_type = GameLobbyState)
+  def setup()
     assert game.is_a? Game
 
-    lobby = lobby_type.new(self, game)
+    lobby = GameLobbyState.new(self, game)
     start = GamePlayState.new(self, game)
     move = GamePlayerMoveState.new(self, game)
     status = GameDetermineStatusState.new(self, game)

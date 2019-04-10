@@ -22,21 +22,25 @@ module Board
 			@model = Board::Model.new(rows, cols)
 			@controller = Board::Controller.new(parent: self)
 
-			setupViews()
-			setupLayout()
-			setupWindow(width, height)
-			setupBackground()
+			setupUI()
 
 			assert @model.is_a? Board::Model
 			assert valid?
 		end
 
 		def valid?
-			return false unless @layout.is_a?(Qt::GridLayout)
+			return false unless @layout.is_a?(Qt::GridLayout) or @layout == nil
 			return false unless @model.is_a?(Board::Model)
 			return false unless @controller.is_a?(Board::Controller)
 
 			return true
+		end
+
+		def setupUI()
+			setupViews()
+			setupLayout()
+			setupWindow(width, height)
+			setupBackground()
 		end
 
 		def setupViews()
@@ -85,10 +89,10 @@ module Board
 			#setStyleSheet("background-color: #{theme.color[:board_background]};")
 		end
 
-    def clear()
+		def clear()
 			@model.each(:tile) {|tile| tile.detach }
 			@model.update()
-    end
+		end
 
 		def color=(c)
 			@model.color = c

@@ -6,30 +6,25 @@ require_relative 'debug'
 class Game < Qt::Widget
   include Test::Unit::Assertions
   include Debug
-  attr_reader :board, :lobby, :machine, :players
+  # attr_reader :board, :lobby, :machine, :players
+  attr_reader :model
 
   signals "keyPressed(const QKeyEvent*)"
 
   def initialize(rows: 7, columns: 8,
                  width: 800, height: 600,
-                 players: {"Player": :Local}, lobby_type: GameLobbyState,
+                 players: {"Player": :Local},
                  parent: nil)
 
     assert rows.is_a?(Integer) and rows > 0
     assert columns.is_a?(Integer) and columns > 0
     assert width.is_a?(Integer) and width >= 300
     assert height.is_a?(Integer) and  height >= 300
-    assert players.is_a? Hash
-
-    # players.each do |i|
-    #   assert i.is_a? String
-    # end
 
     parent != nil ? super(parent) : super()
     resize(width, height)
 
     @players = players
-    @lobby_type = lobby_type
     @machine = GameStateMachine.new(self)
 
     setupUI(rows, columns)
@@ -83,8 +78,8 @@ class Game < Qt::Widget
     assert @lobby.room.playerInfos.count > 0
   end
 
-  def start
-    machine.setup(@lobby_type)
+  def start()
+    machine.setup()
     machine.start()
   end
 
@@ -107,7 +102,7 @@ class Game < Qt::Widget
     @stack.setCurrentWidget(@board)
   end
 
-  def constructChip(c, column: 0)
+  def constructChip(color, column: 0)
     raise NotImplementedError
   end
 
@@ -206,49 +201,12 @@ class Game < Qt::Widget
     return false unless @stack.is_a?(Qt::StackedLayout)
     return true
   end
-
-  def getNumberOfPlayers()
-    assert valid?
-  end
-
-  def getRows()
-    assert valid?
-  end
-
-  def getCols()
-    assert valid?
-  end
-
-  def getHeight()
-    assert valid?
-  end
-
-  def getWidth()
-    assert valid?
-  end
-
-  def getType()
-    assert valid?
-  end
-
-  def getColors()
-    assert valid?
-  end
-
-  def getTurn()
-    assert valid?
-  end
-
-  def getChips()
-    assert valid?
-  end
-
 end
 
 class Connect4 < Game
   def initialize(rows: 7, columns: 8,
                  width: 800, height: 600,
-                 players: {"Player": :Local}, lobby_type: GameLobbyState,
+                 players: {"Player": :Local},
                  parent: nil)
 
     assert rows.is_a? Integer
@@ -262,7 +220,7 @@ class Connect4 < Game
 
     super(rows: rows, columns: columns,
           width: width, height: height,
-          players: players, lobby_type: lobby_type,
+          players: players,
           parent: parent)
   end
 
@@ -314,12 +272,12 @@ class OTTO < Game
 
   def initialize(rows: 7, columns: 8,
                  width: 800, height: 600,
-                 players: ["Player"], lobby_type: GameLobbyState,
+                 players: ["Player"],
                  parent: nil)
 
     super(rows: rows, columns: columns,
           width: width, height: height,
-          players: players, lobby_type: lobby_type,
+          players: players,
           parent: parent)
 
     lobby.addPlayer # minimum 2 players
