@@ -93,9 +93,9 @@ class GameLobbyState < GameState
   end
 
   def start_game
-    assert game.lobby.room.playerInfos.count > 0
+    assert game.lobby.table.rows.count > 0
 
-    players = game.lobby.room.playerInfos
+    players = game.lobby.table.rows
     cols = []
     duplicate = false
     for i in 0...players.count do
@@ -133,10 +133,10 @@ end
 class OnlineGameLobbyState < GameLobbyState
 
   def start_game
-    assert game.lobby.room.playerInfos.count > 0
+    assert game.lobby.room.rows.count > 0
 
     puts "start game"
-    players = game.lobby.room.playerInfos
+    players = game.lobby.room.rows
     cols = []
     duplicate = false
     for i in 0...players.count do

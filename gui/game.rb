@@ -67,7 +67,7 @@ class Game < Qt::Widget
 
     # Insert our online players
     @players.each do |player, type|
-      @lobby.addPlayer(player.to_s, type)
+      @lobby.add(player.to_s, type)
     end
 
     @lobbyWidget = Qt::Widget.new(self)
@@ -76,7 +76,7 @@ class Game < Qt::Widget
     @lobbyWidget.setLayout(hlayout)
     @stack.addWidget(@lobbyWidget)
 
-    assert @lobby.table.playerInfos.count > 0
+    assert @lobby.table.rows.count > 0
   end
 
   def start()
@@ -281,7 +281,7 @@ class OTTO < Game
           players: players,
           parent: parent)
 
-    lobby.addPlayer # minimum 2 players
+    lobby.add # minimum 2 players
   end
 
   def constructChip(c, column: 0)
