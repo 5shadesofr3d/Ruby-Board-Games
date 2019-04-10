@@ -2,6 +2,7 @@ require 'test/unit'
 require "xmlrpc/server"
 
 require_relative 'game_server_state_machine'
+require_relative 'object_converter'
 
 class LobbyHandler
   include Test::Unit::Assertions
@@ -12,6 +13,7 @@ class LobbyHandler
     @num_ready = 0
     @lobby = []
     @game_server = GameServerStateMachine.new (@lobby)
+    @game_server.set_state(WaitingOnTurnState)
   end
 
   def is_valid?
@@ -45,8 +47,6 @@ class LobbyHandler
     end
     return false
 
-    # return true
-
   end
 
   def ready
@@ -61,8 +61,9 @@ class LobbyHandler
     @lobby.length
   end
 
+  # Issue, server cannot return objects. Only primitive values.
   def current_state
-    @game_server.current_state_instance
+    ObjectConverter.convert_to_primitive(@game_server.current_state_instance)
   end
 
   def server_status
@@ -70,21 +71,24 @@ class LobbyHandler
     "Num ready: #{@num_ready} \n" +
     "Current Move: #{@game_server.current_move} \n" +
     "Current Turn: #{@game_server.current_turn} \n" +
-    "Lobby: #{@lobby.to_s} \n"
+    "Lobby: #{@lobby.to_s} \n" +
+    "Game Server State #{@game_server.current_state_instance}"
   end
 
   def make_move(current_chip_color, current_column)
     assert @game_server.current_move.is_a? Hash
     assert @game_server.current_turn.is_a? Integer
 
+    @game_server.next
     @game_server.current_move =  {"chip_color": current_chip_color,
                                   "column": current_column}
-    @game_server.next
+    return true
   end
 
   def get_move
     assert is_valid?
 
+    puts server_status
     @game_server.current_move
   end
 

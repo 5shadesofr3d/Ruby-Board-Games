@@ -18,7 +18,8 @@ class MultiplayerOnlinePlayer < Player
 
     client = Client.instance
 
-    while client.conn.call2("lobby.current_state")[1].is_a? WaitingOnTurnState
+    while client.conn.call2("lobby.current_state")[1] ==
+                                          "WaitingOnTurnState"
       sleep 1
     end
 
@@ -28,10 +29,9 @@ class MultiplayerOnlinePlayer < Player
     client.conn.call2("lobby.ack_move",
                        Client.instance.username)
 
-    puts client.conn.call("lobby.server_status")
-
     # Loop as long as we don't have all acknowledgements.
-    while client.conn.call2("lobby.current_state")[1].is_a? WaitingOnAllAcksState
+    while client.conn.call2("lobby.current_state")[1] ==
+                                        "WaitingOnAllAcksState"
       sleep 1
     end
 
@@ -89,17 +89,20 @@ class MultiplayerLocalPlayer < LocalPlayer
 
     game.board.drop(current_chip, current_column)
 
+    puts "Column #{@current_column} #{@current_column.class.name} #{@current_chip.color} #{@current_chip.color.class.name}"
+
     # Update server with current move.
     client = Client.instance.conn
     client.call2("lobby.make_move",
                  @current_chip.color,
-                 @current_column)
+                 @current_column.to_i)
 
     client.call2("lobby.ack_move",
                  Client.instance.username)
 
     # Loop as long as we don't have all acknowledgements.
-    while client.conn.call2("lobby.current_state")[1].is_a? WaitingOnAllAcksState
+    while client.call2("lobby.current_state")[1] ==
+                                          "WaitingOnAllAcksState"
       sleep 1
       puts client.call("lobby.server_status")
     end
