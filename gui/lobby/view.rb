@@ -75,6 +75,10 @@ module Lobby
       end
     end
 
+    def update(model)
+      self.setAll(model.players)
+    end
+
   end
 
   class ButtonPanel < Qt::Widget

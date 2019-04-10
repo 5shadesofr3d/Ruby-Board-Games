@@ -85,7 +85,7 @@ module Board
 			rows.each do |r|
 				row = []
 				columns.each do |c|
-					item = Board::View::Item.new(parent: self)
+					item = Board::View::Tile.new(parent: self)
 					row << item
 				end
 				@tile << row
@@ -100,7 +100,7 @@ module Board
 			assert @head.size == 0
 
 			columns.each do |col|
-				item = Board::View::Item.new(parent: self)
+				item = Board::View::Tile.new(parent: self)
 				@head << item
 			end
 
@@ -140,6 +140,10 @@ module Board
 			return true
 		end
 
+		def update(model)
+			raise NotImplementedError
+		end
+
 		def paintEvent(event)
 			assert valid?
 
@@ -170,6 +174,21 @@ module Board
 			painter.end
 
 			assert valid?
+		end
+	end
+
+	class View::Tile < View::Item
+		def update(model)
+			self.primary = model.color
+			self.secondary = Qt::transparent
+		end
+	end
+
+	class View::Chip < View::Item
+		def update(model)
+			self.primary = Qt::transparent
+			self.secondary = model.color
+			self.text = model.text
 		end
 	end
 end

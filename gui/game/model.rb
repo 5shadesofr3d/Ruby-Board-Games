@@ -8,36 +8,38 @@ module Game
 	class Abstract
 		include Test::Unit::Assertions
 		include Debug
-		attr_reader :view
+		attr_reader :views
 		attr_reader :board
 		attr_reader :lobby
 		attr_reader :machine
 
 		def initialize(rows: 7, columns: 8)
+			@views = []
 			@players = {}
 			@machine = GameStateMachine.new(self)
 			@board = Board::Model.new(rows, columns)
 			@lobby = Lobby::Model.new()
 		end
 
-		def view?()
-			return @view.is_a?(Game::View)
-		end
-
-		def view=(view)
-			assert (view.is_a?(Game::View) or view == nil)
-			@view = view
-			if view?
-				board.view = view.board
-				lobby.view = view.lobby
-				view.show()
-			end
+		def addView(view)
+			assert (view.is_a?(Game::View))
+			@views << view
+			board.addView view.board
+			lobby.addView view.lobby
+			view.show()
 			notify()
 		end
 
-		def notify()
-			return unless view?
+		def showLobby()
+			views.each { |view| view.showLobby() }
+		end
 
+		def showBoard()
+			views.each { |view| view.showBoard() }
+		end
+
+		def notify()
+			views.each { |view| view.update(self) }
 			board.notify()
 			lobby.notify()
 		end
@@ -134,7 +136,11 @@ module Game
 	class Connect4 < Abstract
 		def constructChip(color, column: 0)
 			chip = Board::Model::Connect4Chip.new(color: color)
-			chip.view = Board::View::Item.new(parent: view.board) if view?
+			views.each do |view|
+				chip_view = Board::View::Chip.new(parent: view.board)
+				chip.addView chip_view
+				chip_view.geometry = view.board.head(column).geometry
+			end			
 			board.head(column).attach(chip)
 			return chip
 		end
@@ -174,7 +180,11 @@ module Game
 		def constructChip(color, column: 0)
 			symbol = @@chip_iteration.even?() ? :T : :O
 			chip = Board::Model::OTTOChip.new(id: symbol, color: color)
-			chip.view = Board::View::Item.new(parent: view.board) if view?
+			views.each do |view|
+				chip_view = Board::View::Chip.new(parent: view.board)
+				chip.addView chip_view
+				chip_view.geometry = view.board.head(column).geometry
+			end
 			board.head(column).attach(chip)
 			@@chip_iteration += 1
 			return chip

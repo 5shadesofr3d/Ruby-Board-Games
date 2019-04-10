@@ -40,6 +40,10 @@ module Game
       setFocusPolicy(Qt::StrongFocus)
     end
 
+    def update(model)
+      
+    end
+
     def keyPressEvent(event)
       assert event.is_a?(Qt::KeyEvent)
       super(event)

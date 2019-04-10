@@ -73,34 +73,27 @@ class GameState < Qt::State
 end
 
 class GameLobbyState < GameState
-
-  def startButton
-    assert game.is_a? Game::Model::Abstract
-    return game.lobby.view.buttons.start
-  end
-
-  def exitButton
-    assert game.is_a? Game::Model::Abstract
-    return game.lobby.view.buttons.exit
-  end
-
   def onEntry(event)
     # show game lobby
     assert game.is_a? Game::Model::Abstract
 
-    game.view.showLobby
+    game.showLobby
 
     # when start button is clicked, go to the next state
-    connect(startButton, SIGNAL("clicked()"), self, SIGNAL("done()"))
-    connect(exitButton, SIGNAL("clicked()"), self, SLOT("exit_lobby()"))
+    game.lobby.views.each do |view|
+      connect(view.buttons.start, SIGNAL("clicked()"), self, SIGNAL("done()"))
+      # connect(exitButton, SIGNAL("clicked()"), self, SLOT("exit_lobby()"))
+    end
   end
 
   def onExit(event)
     assert game.is_a? Game::Model::Abstract
     # assert game.players.size == 0 TODO: Assertion bug?
     # disconnect the start button so it no longer works
-    disconnect(startButton, SIGNAL("clicked()"))
-    disconnect(exitButton, SIGNAL("clicked()"))
+    game.lobby.views.each do |view|
+      disconnect(view.buttons.start, SIGNAL("clicked()"), self, SIGNAL("done()"))
+      # disconnect(exitButton, SIGNAL("clicked()"), self, SLOT("exit_lobby()"))
+    end
     game.updatePlayerObjects()
 
     assert game.players.is_a? Array
@@ -116,13 +109,12 @@ class GamePlayState < GameState
     assert game.is_a? Game::Model::Abstract
 
     # show game board
-    game.view.showBoard()
+    game.showBoard()
     # game time
     # game score
     done()
 
     assert game.is_a? Game::Model::Abstract
-    assert game.view.board.visible
   end
 
   def onExit(event)

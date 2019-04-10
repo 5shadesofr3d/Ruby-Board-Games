@@ -8,7 +8,6 @@ require 'Qt'
 require_relative 'gui/game'
 require_relative 'gui/board'
 require_relative 'gui/debug'
-require_relative 'server/network'
 require_relative 'application'
 
 # Bugs:
@@ -31,41 +30,12 @@ Debug::on # may cause animation lag due to excessive printing to terminal
 
 app = Qt::Application.new ARGV
 
-# board = Board.new(7, 8)
-# board.background = Qt::white
-# board.color = Qt::Color.new("#48dbfb").name
+client = Game::Client.new()
+# model = Game::Model::Connect4.new()
+# model.addView Game::View.new(model.rows, model.columns)
+# model.start()
 
-# lobby = PlayerLobby.new()
-# lobby.show()
-
-# lobby.addPlayer
-# lobby.addPlayer
-
-model = Game::Model::OTTO.new()
-# model.view = Game::View.new(model.rows, model.columns)
-model.start()
-
-model.lobby.add(Player::Online.new("Godzilla", Qt::green))
+# model.lobby.add(Player::Online.new("Godzilla", Qt::green))
 # model.lobby.notify()
-
-s = Game::Server.new(address: "server", port: 8080, model: model)
-thr = Thread.new { s.serve }
-
-# chip_red = Connect4Chip.new(color: Qt::red, parent: board)
-# chip_yellow = Connect4Chip.new(color: Qt::yellow, parent: board)
-
-# chip_t = OTTOChip.new(:T, parent: board)
-# chip_o = OTTOChip.new(:O, parent: board)
-
-# chip_red == chip_yellow ? puts("yes") : puts("no")
-# chip_t == chip_o ? puts("yes") : puts("no")
-
-# model = board.model
-# board.translate(item: chip_yellow, from: model.head(0), to: model.head(4), time: 1000)
-
-# board.insert(chip_yellow, 3)
-# board.drop(chip_red, 2)
-# board.drop(chip_t, 3)
-# board.drop(chip_o, 3)
 
 app.exec

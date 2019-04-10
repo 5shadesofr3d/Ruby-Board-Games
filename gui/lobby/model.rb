@@ -7,15 +7,11 @@ module Lobby
 		include Test::Unit::Assertions
 		include Debug
 
-		attr_reader :view, :players
+		attr_reader :views, :players
 
-		def initialize(players: [], view: nil)
+		def initialize(players: [], views: [])
 			@players = players
-			self.view = view
-		end
-
-		def view?()
-			return @view.is_a?(Lobby::View)
+			@views = views
 		end
 
 		def add(player)
@@ -28,15 +24,14 @@ module Lobby
 			@players.delete_if { |element| element.name == player.name }
 		end
 
-		def view=(view)
-			assert (view.is_a?(Lobby::View) or view == nil)
-			@view = view
+		def addView(view)
+			assert view.is_a?(Lobby::View)
+			@views << view
 			notify()
 		end
 
 		def notify()
-			return unless view?
-			view.setAll(@players)
+			views.each { |view| view.update(self) }
 		end
 	end
 end
