@@ -39,8 +39,6 @@ module Lobby
       layout.setAlignment(buttons, Qt::AlignHCenter | Qt::AlignBottom)
       setLayout(layout)
 
-      connect(buttons.add, SIGNAL("clicked()"), self, SLOT(:add))
-      connect(buttons.remove, SIGNAL("clicked()"), self, SLOT(:pop))
       setStyleSheet("background-color:#{Color::DARK_BLUE}; border: 1px; border-radius: 10px")
     end
 
@@ -90,13 +88,13 @@ module Lobby
       parent != nil ? super(parent) : super()
 
       buttonLayout = Qt::HBoxLayout.new(self)
-      @add = Button.new("Add", self)
+      # @add = Button.new("Add", self)
       @start = Button.new("Start", self)
       @exit = Button.new("Exit",self)
-      @remove = Button.new("Remove",self)
+      # @remove = Button.new("Remove",self)
       buttonLayout.addWidget(exit)
-      buttonLayout.addWidget(add)
-      buttonLayout.addWidget(remove)
+      # buttonLayout.addWidget(add)
+      # buttonLayout.addWidget(remove)
       buttonLayout.addWidget(start)
       setLayout(buttonLayout)
 

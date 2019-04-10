@@ -41,11 +41,12 @@ app = Qt::Application.new ARGV
 # lobby.addPlayer
 # lobby.addPlayer
 
-game = Connect4.new()
-game.board.background = Qt::white
-game.board.color = Qt::Color.new("#48dbfb")
-game.show()
-game.start()
+model = Game::Model::OTTO.new()
+model.view = Game::View.new(model.rows, model.columns)
+model.start()
+
+model.lobby.add(LocalPlayer.new("Godzilla", Qt::green))
+model.lobby.notify()
 
 # chip_red = Connect4Chip.new(color: Qt::red, parent: board)
 # chip_yellow = Connect4Chip.new(color: Qt::yellow, parent: board)

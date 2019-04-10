@@ -10,16 +10,16 @@ class GameStateMachine < Qt::StateMachine
   attr_reader :game
 
   def initialize(game)
-    assert game.is_a?(Game)
+    assert game.is_a?(Game::Model::Abstract)
 
-    super(game) if game.is_a?(Qt::Object)
+    game.is_a?(Qt::Object) ? super(game) : super()
     @game = game
 
     assert valid?
   end
 
   def setup()
-    assert game.is_a? Game
+    assert game.is_a? Game::Model::Abstract
 
     lobby = GameLobbyState.new(self, game)
     start = GamePlayState.new(self, game)
@@ -49,7 +49,7 @@ class GameStateMachine < Qt::StateMachine
   end
 
   def valid?
-    return false unless @game.is_a?(Game)
+    return false unless @game.is_a?(Game::Model::Abstract)
     return true
   end
 
@@ -64,10 +64,10 @@ class GameState < Qt::State
 
   def initialize(machine, game)
     assert machine.is_a? Qt::StateMachine
-    assert game.is_a? Game
+    assert game.is_a? Game::Model::Abstract
     super(machine)
     @game = game
-    assert @game.is_a? Game
+    assert @game.is_a? Game::Model::Abstract
   end
 
 end
@@ -75,20 +75,20 @@ end
 class GameLobbyState < GameState
 
   def startButton
-    assert game.is_a? Game
+    assert game.is_a? Game::Model::Abstract
     return game.lobby.view.buttons.start
   end
 
   def exitButton
-    assert game.is_a? Game
+    assert game.is_a? Game::Model::Abstract
     return game.lobby.view.buttons.exit
   end
 
   def onEntry(event)
     # show game lobby
-    assert game.is_a? Game
+    assert game.is_a? Game::Model::Abstract
 
-    game.showLobby
+    game.view.showLobby
 
     # when start button is clicked, go to the next state
     connect(startButton, SIGNAL("clicked()"), self, SIGNAL("done()"))
@@ -96,12 +96,12 @@ class GameLobbyState < GameState
   end
 
   def onExit(event)
-    assert game.is_a? Game
+    assert game.is_a? Game::Model::Abstract
     # assert game.players.size == 0 TODO: Assertion bug?
     # disconnect the start button so it no longer works
     disconnect(startButton, SIGNAL("clicked()"))
     disconnect(exitButton, SIGNAL("clicked()"))
-    game.updatePlayers()
+    game.updatePlayerObjects()
 
     assert game.players.is_a? Array
     assert game.players.size > 0
@@ -113,16 +113,16 @@ end
 class GamePlayState < GameState
 
   def onEntry(event)
-    assert game.is_a? Game
+    assert game.is_a? Game::Model::Abstract
 
     # show game board
-    game.showBoard()
+    game.view.showBoard()
     # game time
     # game score
     done()
 
-    assert game.is_a? Game
-    assert game.board.visible
+    assert game.is_a? Game::Model::Abstract
+    assert game.view.board.visible
   end
 
   def onExit(event)
@@ -164,7 +164,7 @@ class GameDetermineStatusState < GameState
   signals :win
 
   def onEntry(event)
-    assert game.is_a? Game
+    assert game.is_a? Game::Model::Abstract
     assert game.players.count > 0
 
     if game.winner? or game.tie?
@@ -175,7 +175,7 @@ class GameDetermineStatusState < GameState
       done()
     end
 
-    assert game.is_a? Game
+    assert game.is_a? Game::Model::Abstract
     assert game.players.count > 0
   end
 
@@ -188,21 +188,18 @@ end
 class GameEndState < GameState
 
   def onEntry(event)
-    assert game.is_a? Game #TODO: check and assert event type
+    assert game.is_a? Game::Model::Abstract #TODO: check and assert event type
     assert game.players.first.is_a? Player
     assert game.players.each {|p| assert p.is_a? Player}
     # display winner, clear game board, score
 
     game.updatePlayerScores()
-    game.updatePlayerInfos()
-    game.board.clear()
+    Board::Controller::clear(game.board)
     done()
-
-    assert game.players.count == 0 #game is over
   end
 
   def onExit(event)
-
+    game.notify()
   end
 
 end

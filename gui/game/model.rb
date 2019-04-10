@@ -4,20 +4,20 @@ require_relative '../states/game_states'
 require_relative '../debug'
 
 module Game
-	class Model::Abstract
+	module Model
+	class Abstract
 		include Test::Unit::Assertions
 		include Debug
 		attr_reader :view
-		attr_reader :board_model, :board_controller
-		attr_reader :lobby_model
+		attr_reader :board
+		attr_reader :lobby
 		attr_reader :machine
 
 		def initialize(rows: 7, columns: 8)
 			@players = {}
 			@machine = GameStateMachine.new(self)
-			@board_model = Board::Model.new(rows, columns)
-			@board_controller = Board::Controller.new()
-			@lobby_model = Lobby::Model.new()
+			@board = Board::Model.new(rows, columns)
+			@lobby = Lobby::Model.new()
 		end
 
 		def view?()
@@ -25,22 +25,34 @@ module Game
 		end
 
 		def view=(view)
-			assert view.is_a?(Game::View)
+			assert (view.is_a?(Game::View) or view == nil)
 			@view = view
-
-			update()
+			if view?
+				board.view = view.board
+				lobby.view = view.lobby
+				view.show()
+			end
+			notify()
 		end
 
-		def update()
+		def notify()
 			return unless view?
 
-			board_model.update()
-			lobby_model.update()
+			board.notify()
+			lobby.notify()
 		end
 
 		def start()
 			machine.setup()
 			machine.start()
+		end
+
+		def rows()
+			return board.rowSize
+		end
+
+		def columns()
+			return board.columnSize
 		end
 
 		def constructChip(color, column: 0)
@@ -53,25 +65,25 @@ module Game
 
 		def findGoal()
 			# if a goal was found, we have a winner!
-			assert board_model.is_a? Board::Model
+			assert board.is_a? Board::Model
 
 			# check every column
-			board_model.columns.each do |col|
-				cols = model.to_enum(:each_in_column, :chip, col)
+			board.columns.each do |col|
+				cols = board.to_enum(:each_in_column, :chip, col)
 				cols.each_cons(4) { |chips| return chips if matchesGoal?(chips) }
 			end
 
 			# check every row
-			board_model.rows.each do |row|
-				rows = model.to_enum(:each_in_row, :chip, row)
+			board.rows.each do |row|
+				rows = board.to_enum(:each_in_row, :chip, row)
 				rows.each_cons(4) { |chips| return chips if matchesGoal?(chips) }
 			end
 
 			# check every diagonal
-			board_model.diagonals.each do |diagonal|
-				upper_diag = model.to_enum(:each_in_diagonal, :chip, diagonal, :up)
+			board.diagonals.each do |diagonal|
+				upper_diag = board.to_enum(:each_in_diagonal, :chip, diagonal, :up)
 				upper_diag.each_cons(4) { |chips| return chips if matchesGoal?(chips) }
-				lower_diag = model.to_enum(:each_in_diagonal, :chip, diagonal, :down)
+				lower_diag = board.to_enum(:each_in_diagonal, :chip, diagonal, :down)
 				lower_diag.each_cons(4) { |chips| return chips if matchesGoal?(chips) }
 			end
 
@@ -83,7 +95,7 @@ module Game
 		end
 
 		def tie?()
-			topRow = board_model.to_enum(:each_in_row, :chip, 0)
+			topRow = board.to_enum(:each_in_row, :chip, 0)
 			return (!topRow.include?(nil) and !winner?)
 		end
 
@@ -95,7 +107,7 @@ module Game
 			raise NotImplementedError
 		end
 
-		def setPlayerGoals()
+		def initializePlayerGoals()
 			raise NotImplementedError
 		end
 
@@ -108,34 +120,22 @@ module Game
 			end
 		end
 
-		def updatePlayers()
-			assert lobby.is_a? PlayerLobby
+		def updatePlayerObjects()
+			players.each { |player| player.game = self }
+			initializePlayerGoals()
 
-			@players = lobby_model.getPlayers()
-			@players.each { |player| player.game = self }
-			setPlayerGoals()
-
-			assert @players.is_a? Array
-			@players.each {|e| assert e.goal.is_a? Array}
-			@players.each {|e| assert e.is_a? Player}
-			assert @players.count > 0
-		end
-
-		def updatePlayerInfos()
-			lobby_model.setPlayers(players)
-			assert @lobby_model.getPlayers.count > 0
-		end
-
-		def addPlayer(player)
-			assert Player.is_a?(Player)
-			@players << player
-			assert @players.include? player
+			assert players.is_a? Array
+			players.each {|e| assert e.is_a? Player}
+			players.each {|e| assert e.goal.is_a? Array}
+			assert players.count > 0
 		end
 	end
 
-	class Model::Connect4 < Model::Abstract
+	class Connect4 < Abstract
 		def constructChip(color, column: 0)
 			chip = Board::Model::Connect4Chip.new(color: color)
+			chip.view = Board::View::Item.new(parent: view.board) if view?
+			board.head(column).attach(chip)
 			return chip
 		end
 
@@ -146,7 +146,7 @@ module Game
 			return chips.uniq { |c| c.id }.length == 1
 		end
 
-		def setPlayerGoals()
+		def initializePlayerGoals()
 			assert players.is_a? Array
 			assert players.size > 0
 
@@ -166,7 +166,7 @@ module Game
 		end
 	end
 
-	class Model::OTTO < Model::Abstract
+	class OTTO < Abstract
 		@@chip_iteration = 0
 		@@otto = [:O, :T, :T, :O]
 		@@toot = [:T, :O, :O, :T]
@@ -174,6 +174,8 @@ module Game
 		def constructChip(color, column: 0)
 			symbol = @@chip_iteration.even?() ? :T : :O
 			chip = Board::Model::OTTOChip.new(id: symbol, color: color)
+			chip.view = Board::View::Item.new(parent: view.board) if view?
+			board.head(column).attach(chip)
 			@@chip_iteration += 1
 			return chip
 		end
@@ -186,13 +188,13 @@ module Game
 
 		def winnersGoal()
 			chips = findGoal()
-			@players.each { |player| return player.goal if player.goal.size == chips.size && player.goal == chips.map(&:id) }
+			players.each { |player| return player.goal if player.goal.size == chips.size && player.goal == chips.map(&:id) }
 			return nil
 		end
 
-		def setPlayerGoals()
-			@players.each_with_index { |player, index| player.goal = index.even? ? @@otto : @@toot }
+		def initializePlayerGoals()
+			players.each_with_index { |player, index| player.goal = index.even? ? @@otto : @@toot }
 		end
 	end
-
+	end
 end

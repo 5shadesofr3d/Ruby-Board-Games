@@ -2,6 +2,7 @@
 # are present for a player within the "Connect4" game
 require 'Qt'
 require 'test/unit'
+require_relative '../board'
 require_relative '../debug'
 
 class Player < Qt::Object
@@ -11,6 +12,7 @@ class Player < Qt::Object
 	attr_reader :name, :color, :current_chip
 	attr_accessor :wins, :losses, :ties, :game, :current_column, :goal
 	attr_accessor :host
+	attr_reader :controller
 
 	slots :enable, :disable
 	signals :finished
@@ -29,6 +31,8 @@ class Player < Qt::Object
 		@ties = 0
 		@color = Qt::Color.new(player_color)
 		@host = true
+
+		@controller = Board::Controller.new(parent: self)
 
 		#post
 		assert @color.is_a? Qt::Color
@@ -66,13 +70,13 @@ class Player < Qt::Object
 	end
 
 	def left()
-		assert game.is_a? Game
-		assert game.board.model.is_a? Board::Model
+		assert game.is_a? Game::Model::Abstract
+		assert game.board.is_a? Board::Model
 
 		return if current_column == 0
 
-		model = game.board.model
-		game.board.translate(
+		model = game.board
+		controller.translate(
 			item: current_chip,
 			from: model.head(current_column),
 			to: model.head(current_column - 1),
@@ -81,18 +85,18 @@ class Player < Qt::Object
 		@current_column -= 1
 
 		assert @current_column.is_a? Integer
-		assert game.is_a? Game
-		assert game.board.model.is_a? Board::Model
+		assert game.is_a? Game::Model::Abstract
+		assert game.board.is_a? Board::Model
 	end
 
 	def right
-		assert game.is_a? Game
-		assert game.board.model.is_a? Board::Model
+		assert game.is_a? Game::Model::Abstract
+		assert game.board.is_a? Board::Model
 
-		return if current_column == game.board.model.columns.max
+		return if current_column == game.board.columns.max
 
-		model = game.board.model
-		game.board.translate(
+		model = game.board
+		controller.translate(
 			item: current_chip,
 			from: model.head(current_column),
 			to: model.head(current_column + 1),
@@ -101,37 +105,37 @@ class Player < Qt::Object
 		@current_column += 1
 
 		assert @current_column.is_a? Integer
-		assert game.is_a? Game
-		assert game.board.model.is_a? Board::Model
+		assert game.is_a? Game::Model::Abstract
+		assert game.board.is_a? Board::Model
 	end
 
 	def drop
-		assert game.is_a? Game
+		assert game.is_a? Game::Model::Abstract
 		assert current_column.is_a? Integer
 		assert current_column >= 0
 		assert current_chip.is_a? Board::Model::Chip
 
-		game.board.drop(current_chip, current_column)
+		controller.drop(current_chip, current_column, game.board)
 		@current_chip = nil
 
 		assert @current_chip == nil
 	end
 
 	def enable
-		assert game.is_a? Game
-		assert game.board.is_a? Board::Widget
+		assert game.is_a? Game::Model::Abstract
+		assert game.board.is_a? Board::Model
 
 		@current_chip = game.constructChip(color)
 		@current_column = 0
-		connect(game.board.controller, SIGNAL("dropped()"), self, SIGNAL("finished()"))
+		connect(controller, SIGNAL("dropped()"), self, SIGNAL("finished()"))
 
 		assert @current_chip.is_a? Board::Model::Chip
 		assert current_column.is_a? Integer and current_column >= 0
 	end
 
 	def disable()
-		assert game.board.is_a? Board::Widget
-		disconnect(game.board.controller, SIGNAL("dropped()"), self, SIGNAL("finished()"))
+		assert game.board.is_a? Board::Model
+		disconnect(controller, SIGNAL("dropped()"), self, SIGNAL("finished()"))
 	end
 
 	def total_score

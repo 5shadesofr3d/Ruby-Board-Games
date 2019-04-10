@@ -18,6 +18,10 @@ module Board
 			connect(animation, SIGNAL("finished()"), self, SIGNAL("translateCompleted()"))
 		end
 
+		def self.clear(model)
+			model.each(:tile) {|tile| tile.detach }
+		end
+
 		def drop(chip, col, model, time: 750)
 			assert chip.is_a? Board::Model::Chip
 			assert col.is_a? Integer
@@ -41,7 +45,7 @@ module Board
 			from.detach(destroy_view: false)
 			to.attach(item)
 
-			return if from == to or item.view == nil or from.view == nil or to.view == nil
+			return if time == 0 or from == to or item.view == nil or from.view == nil or to.view == nil
 
 			animation.targetObject = item.view
 			animation.propertyName = "geometry"

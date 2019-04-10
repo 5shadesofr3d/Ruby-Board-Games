@@ -29,12 +29,12 @@ module Lobby
 		end
 
 		def view=(view)
-			assert view.is_a? Lobby::View
+			assert (view.is_a?(Lobby::View) or view == nil)
 			@view = view
-			update()
+			notify()
 		end
 
-		def update()
+		def notify()
 			return unless view?
 			view.setAll(@players)
 		end

@@ -9,6 +9,9 @@ module Board
 	class Model
 		include Test::Unit::Assertions
 		include Board::Iterator
+		include Debug
+
+		attr_reader :view
 
 		def initialize(rows, cols)
 			assert rows.is_a? Integer
@@ -45,22 +48,18 @@ module Board
 			assert valid?
 		end
 
-		def head(col)
-			assert col.is_a?(Integer) and columns.include?(col)
-			assert valid?
-
-			return @head[col]
+		def view?()
+			return @view.is_a?(Board::View)
 		end
 
-		def tile(row, col)
-			assert row.is_a?(Integer) and rows.include?(row)
-			assert col.is_a?(Integer) and columns.include?(col)
-
-			return @tile[row][col]
-		end
-
-		def chip(row, col)
-			return tile(row, col).attached
+		def view=(view)
+			assert (view.is_a? (Board::View) or view == nil)
+			@view = view
+			if view?
+				self.each_with_index(:head) { |head, row, col| head.view = view.head(col) }
+				self.each_with_index(:tile) { |tile, row, col| tile.view = view.tile(row, col) }
+			end
+			notify()
 		end
 
 		def color=(c)
@@ -71,9 +70,19 @@ module Board
 			return @rows * @cols
 		end
 
-		def update()
-			each(:head) { |head| head.update() }
-			each(:tile) { |tile| tile.update() }
+		def notify()
+			return unless view?
+
+			each(:head) { |head| head.notify() }
+			each(:tile) { |tile| tile.notify() }
+		end
+
+		def rowSize()
+			return @rows
+		end
+
+		def columnSize()
+			return @cols
 		end
 
 	private
@@ -120,6 +129,7 @@ module Board
 
 	class Model::Tile
 		include Test::Unit::Assertions
+		include Debug
 		attr_reader :view, :attached
 		attr_accessor :color
 
@@ -130,38 +140,46 @@ module Board
 		def attach(chip)
 			assert chip.is_a?(Board::Model::Chip)
 			@attached = chip
+			notify()
 		end
 
 		def detach(destroy_view: true)
 			attached.view.deleteLater() if destroy_view and attached != nil and attached.view != nil
 			@attached = nil
+			notify()
 		end
 
 		def empty?()
 			return @attached.is_a?(NilClass)
 		end
 
-		def view=(view)
-			assert (view.is_a?(Board::View) or view == nil)
-			@view.deleteLater() if @view.is_a?(Board::View) and view == nil
-			@view = view
-
-			update()
+		def view?()
+			return view.is_a?(Board::View::Item)
 		end
 
-		def update()
-			return if view == nil
+		def view=(view)
+			assert (view.is_a?(Board::View::Item) or view == nil)
+			@view.deleteLater() if view?
+			@view = view
+
+			notify()
+		end
+
+		def notify()
+			return unless view?
 
 			view.primary = self.color
 			view.secondary = Qt::transparent
 
-			attached.update() unless empty?
-			attached.geometry = view.geometry unless empty?
+			unless empty?
+				attached.notify(geometry: self.view.geometry)
+			end
 		end
 	end
 
 	class Model::Chip
 		include Test::Unit::Assertions
+		include Debug
 		attr_reader :view, :color
 		attr_accessor :id
 
@@ -171,15 +189,19 @@ module Board
 			self.view = view
 		end
 
+		def view?()
+			return view.is_a?(Board::View::Item)
+		end
+
 		def view=(view)
-			assert (view.is_a?(Board::View) or view == nil)
+			assert (view.is_a?(Board::View::Item) or view == nil)
 			
-			@view.deleteLater() if @view.is_a?(Board::View) and view == nil
+			@view.deleteLater() if view?
 			@view = view
 			
 			# place chip behind tiles
-			@view.lower() if @view != nil 
-			update()
+			@view.lower() if view? 
+			notify()
 		end
 
 		def color=(value)
@@ -187,8 +209,9 @@ module Board
 			@color = value
 		end
 
-		def update()
-			return if view == nil
+		def notify(geometry: nil)
+			return unless view?
+			view.geometry = geometry if geometry != nil
 			view.primary = Qt::transparent
 			view.secondary = self.color
 		end
@@ -217,15 +240,15 @@ module Board
 			@id = value
 		end
 
-		def update()
-			return if view == nil
-			
+		def notify(geometry: nil)
+			return unless view?
+
 			case id
 			when :T then view.text = "T"
 			when :O then view.text = "O"
 			end
 
-			super()
+			super(geometry: geometry)
 		end
 	end
 
