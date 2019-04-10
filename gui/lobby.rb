@@ -60,7 +60,7 @@ module Lobby
 
     def getAll()
       items = []
-      @table.rows.each {|info| items << info.construct_item(parent) }
+      @table.rows.each {|info| items << info.construct(parent) }
       return items
     end
 
@@ -405,7 +405,7 @@ module Lobby
       @ties.text = t
     end
 
-    def construct_item(parent)
+    def construct(parent)
       # constructs and returns the item based off info
       assert type.is_a? String
 
