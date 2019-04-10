@@ -27,7 +27,7 @@ module Lobby
 
       @table = Table.new(parent: self)
       @buttons = ButtonPanel.new(parent: self)
-      @player_count = 0
+      @item_count = 0
 
       setSizePolicy(Qt::SizePolicy::Preferred, Qt::SizePolicy::Minimum)
       setMaximumWidth(550)
@@ -45,34 +45,34 @@ module Lobby
     end
 
     def add(username = nil, type = nil)
-      if @player_count < @@MAX_PLAYER_COUNT
+      if @item_count < @@MAX_PLAYER_COUNT
         @table.add(username, type)
-        @player_count += 1
+        @item_count += 1
       end
     end
 
     def pop()
-      if @player_count > 1
+      if @item_count > 1
         @table.pop()
-        @player_count -= 1
+        @item_count -= 1
       end
     end
 
     def getAll()
-      players = []
-      @table.rows.each {|info| players << info.construct_player(parent) }
-      return players
+      items = []
+      @table.rows.each {|info| items << info.construct_item(parent) }
+      return items
     end
 
-    def populate(players)
+    def populate(items)
       @table.rows.each do |info|
-        player = players.shift
-        info.name = player.name
-        info.color = player.color
-        info.type = player.class
-        info.wins = player.wins
-        info.losses = player.losses
-        info.ties = player.ties
+        item = items.shift
+        info.name = item.name
+        info.color = item.color
+        info.type = item.class
+        info.wins = item.wins
+        info.losses = item.losses
+        info.ties = item.ties
       end
     end
 
@@ -405,33 +405,33 @@ module Lobby
       @ties.text = t
     end
 
-    def construct_player(parent)
-      # constructs and returns the player based off info
+    def construct_item(parent)
+      # constructs and returns the item based off info
       assert type.is_a? String
 
-      player = nil
+      item = nil
 
       case type
       when "Local"
-        player = LocalPlayer.new(self.name, self.color, parent: parent)
+        item = LocalPlayer.new(self.name, self.color, parent: parent)
       when "Computer"
-        player = AIPlayer.new(self.name, self.color, parent: parent)
+        item = AIPlayer.new(self.name, self.color, parent: parent)
       when "Online"
-        player = OnlinePlayer.new(self.name, self.color, parent: parent)
+        item = OnlinePlayer.new(self.name, self.color, parent: parent)
       end
 
-      return if player == nil
+      return if item == nil
 
-      player.wins = self.wins
-      player.losses = self.losses
-      player.ties = self.ties
+      item.wins = self.wins
+      item.losses = self.losses
+      item.ties = self.ties
 
-      assert player.is_a? Player
-      assert player.ties >= 0
-      assert player.losses >= 0
-      assert player.wins >= 0
+      assert item.is_a? Player
+      assert item.ties >= 0
+      assert item.losses >= 0
+      assert item.wins >= 0
 
-      return player
+      return item
     end
 
     def valid?

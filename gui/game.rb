@@ -175,7 +175,7 @@ class Game < Qt::Widget
   def updatePlayers()
     assert lobby.is_a? Lobby::Widget
 
-    @players = lobby.getPlayers()
+    @players = lobby.getAll()
     players.each { |player| player.game = self }
     setPlayerGoals()
 
@@ -186,9 +186,9 @@ class Game < Qt::Widget
   end
 
   def updatePlayerInfos()
-    @lobby.setPlayers(players)
+    @lobby.populate(players)
 
-    assert @lobby.getPlayers.count > 0
+    assert @lobby.getAll().count > 0
   end
 
   def addPlayer(player)
