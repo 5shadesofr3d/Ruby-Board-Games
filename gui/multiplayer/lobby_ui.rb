@@ -9,6 +9,7 @@
 
 require 'Qt'
 
+
 class LobbyGUI < Qt::Widget
 
     attr_reader :centralWidget
@@ -70,4 +71,3 @@ class LobbyGUI < Qt::Widget
 
 
 end
-

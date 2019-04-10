@@ -58,6 +58,8 @@ class TitleScreenState < StatePattern::State
 
 end
 
+
+
 class TitleController < Qt::Widget
   include Test::Unit::Assertions
 
@@ -151,6 +153,85 @@ class TitleController < Qt::Widget
     @state.open_game
 
     assert @title.visible == false
+  end
+
+end
+
+class MultiplayerLobbyState < StatePattern::State
+  def valid?
+    return true
+  end
+
+  def enter
+    #no preconditions as setup is performed here
+    assert stateful.main_window.is_a? Qt::MainWindow
+
+    @title = MultiplayerLobbyController.new(self,stateful.main_window)
+
+
+    assert valid?
+  end
+
+  #Find games currently in hosted
+  def query_games
+
+  end
+
+  #Join a game
+  def join_game
+
+  end
+
+  #Create a new game
+  def create_game
+
+  end
+
+
+  # load a saved game
+  def load_game
+
+  end
+
+  #Quit to title screen
+  def quit
+
+  end
+
+end
+
+class MultiplayerLobbyController < Qt::Widget
+
+  def initialize(state, window)
+
+    #TODO: Make a new GUI for the lobby
+    gui = LobbyGUI.new(window)
+  end
+
+  #Find games currently in hosted
+  def query_games
+
+  end
+
+  #Join a game
+  def join_game
+
+  end
+
+  #Create a new game
+  def create_game
+
+  end
+
+
+  # load a saved game
+  def load_game
+
+  end
+
+  #Quit to title screen
+  def quit
+
   end
 
 end
