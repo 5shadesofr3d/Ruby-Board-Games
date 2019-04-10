@@ -42,11 +42,14 @@ app = Qt::Application.new ARGV
 # lobby.addPlayer
 
 model = Game::Model::OTTO.new()
-model.view = Game::View.new(model.rows, model.columns)
+# model.view = Game::View.new(model.rows, model.columns)
 model.start()
 
 model.lobby.add(Player::Online.new("Godzilla", Qt::green))
-model.lobby.notify()
+# model.lobby.notify()
+
+s = Game::Server.new(address: "server", port: 8080, model: model)
+thr = Thread.new { s.serve }
 
 # chip_red = Connect4Chip.new(color: Qt::red, parent: board)
 # chip_yellow = Connect4Chip.new(color: Qt::yellow, parent: board)
