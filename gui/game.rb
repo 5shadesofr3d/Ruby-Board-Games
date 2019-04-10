@@ -1,12 +1,13 @@
 require 'Qt'
 require_relative 'board'
+require_relative 'lobby'
 require_relative 'states/game_states'
 require_relative 'debug'
 
 class Game < Qt::Widget
   include Test::Unit::Assertions
   include Debug
-  # attr_reader :board, :lobby, :machine, :players
+  attr_reader :board, :lobby, :machine, :players
   attr_reader :model
 
   signals "keyPressed(const QKeyEvent*)"
@@ -56,13 +57,13 @@ class Game < Qt::Widget
 
   def setupBoard(rows, cols)
     @board = Board::Widget.new(rows, cols, parent: self)
-    @stack.addWidget(board)
+    @stack.addWidget(@board)
   end
 
   def setupLobby
     assert true unless @players.nil?
 
-    @lobby = PlayerLobby.new(parent: self)
+    @lobby = Lobby::Widget.new(parent: self)
 
     # Insert our online players
     @players.each do |player, type|
@@ -71,11 +72,11 @@ class Game < Qt::Widget
 
     @lobbyWidget = Qt::Widget.new(self)
     hlayout = Qt::HBoxLayout.new(@lobbyWidget)
-    hlayout.addWidget(lobby)
+    hlayout.addWidget(@lobby)
     @lobbyWidget.setLayout(hlayout)
     @stack.addWidget(@lobbyWidget)
 
-    assert @lobby.room.playerInfos.count > 0
+    assert @lobby.table.playerInfos.count > 0
   end
 
   def start()
@@ -172,7 +173,7 @@ class Game < Qt::Widget
   end
 
   def updatePlayers()
-    assert lobby.is_a? PlayerLobby
+    assert lobby.is_a? Lobby::Widget
 
     @players = lobby.getPlayers()
     players.each { |player| player.game = self }
