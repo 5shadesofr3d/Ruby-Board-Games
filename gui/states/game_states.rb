@@ -1,6 +1,6 @@
 require 'Qt'
 require "test/unit"
-require_relative '../player/abstract_player'
+require_relative '../player'
 require_relative '../debug'
 
 class GameStateMachine < Qt::StateMachine
@@ -105,7 +105,7 @@ class GameLobbyState < GameState
 
     assert game.players.is_a? Array
     assert game.players.size > 0
-    assert game.players.each {|p| assert p.is_a? Player}
+    assert game.players.each {|p| assert p.is_a? Player::Abstract}
   end
 
 end
@@ -134,7 +134,7 @@ class GamePlayerMoveState < GameState
 
   def onEntry(event)
     assert game.players.count > 0
-    assert game.players.first.is_a? Player
+    assert game.players.first.is_a? Player::Abstract
     # get next player
     player = game.players.first
     # acknowledge moves from this player
@@ -142,19 +142,19 @@ class GamePlayerMoveState < GameState
     player.enable
     # after player completes his move, go to the next state
 
-    assert player.is_a? Player
+    assert player.is_a? Player::Abstract
   end
 
   def onExit(event)
     assert game.players.count > 0
-    assert game.players.first.is_a? Player
+    assert game.players.first.is_a? Player::Abstract
     player = game.players.first
     # disconnect signal for the player that just played his move
     disconnect(player, SIGNAL("finished()"), self, SIGNAL("done()"))
     # no longer acknowledge moves from this player
     player.disable
 
-    assert player.is_a? Player
+    assert player.is_a? Player::Abstract
   end
 
 end
@@ -189,8 +189,8 @@ class GameEndState < GameState
 
   def onEntry(event)
     assert game.is_a? Game::Model::Abstract #TODO: check and assert event type
-    assert game.players.first.is_a? Player
-    assert game.players.each {|p| assert p.is_a? Player}
+    assert game.players.first.is_a? Player::Abstract
+    assert game.players.each {|p| assert p.is_a? Player::Abstract}
     # display winner, clear game board, score
 
     game.updatePlayerScores()

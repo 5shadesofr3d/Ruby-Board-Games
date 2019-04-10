@@ -1,10 +1,10 @@
 require 'Qt'
 require_relative 'model'
 require_relative '../board'
-require_relative '../lobby/view'
-require_relative '../player/online_player'
-require_relative '../states/game_states'
+require_relative '../player'
 require_relative '../debug'
+require_relative '../lobby/view'
+require_relative '../states/game_states'
 
 module Game
   class View < Qt::Widget

@@ -1,10 +1,6 @@
 require 'Qt'
 require 'test/unit'
-
-require_relative '../player/online_player'
-require_relative '../player/abstract_player'
-require_relative '../player/local_player'
-require_relative '../player/ai_player'
+require_relative '../player'
 
 module Lobby
   module Color
@@ -361,11 +357,11 @@ module Lobby
     def type=(t)
 
       case t
-      when LocalPlayer
+      when Player::Local
         @type.currentIndex = 0
-      when AIPlayer
+      when Player::AI
         @type.currentIndex = 1
-      when OnlinePlayer
+      when Player::Online
         @type.currentIndex = 2
       end
     end

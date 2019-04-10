@@ -1,7 +1,7 @@
 require_relative '../board'
+require_relative '../debug'
 require_relative '../lobby/model'
 require_relative '../states/game_states'
-require_relative '../debug'
 
 module Game
 	module Model
@@ -125,7 +125,7 @@ module Game
 			initializePlayerGoals()
 
 			assert players.is_a? Array
-			players.each {|e| assert e.is_a? Player}
+			players.each {|e| assert e.is_a? Player::Abstract}
 			players.each {|e| assert e.goal.is_a? Array}
 			assert players.count > 0
 		end

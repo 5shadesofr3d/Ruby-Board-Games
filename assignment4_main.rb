@@ -45,7 +45,7 @@ model = Game::Model::OTTO.new()
 model.view = Game::View.new(model.rows, model.columns)
 model.start()
 
-model.lobby.add(LocalPlayer.new("Godzilla", Qt::green))
+model.lobby.add(Player::Local.new("Godzilla", Qt::green))
 model.lobby.notify()
 
 # chip_red = Connect4Chip.new(color: Qt::red, parent: board)

@@ -1,5 +1,5 @@
 require 'test/unit'
-require_relative '../player/abstract_player'
+require_relative '../player'
 require_relative '../debug'
 
 module Lobby
@@ -19,12 +19,12 @@ module Lobby
 		end
 
 		def add(player)
-			assert player.is_a?(Player)
+			assert player.is_a?(Player::Abstract)
 			@players << player
 		end
 
 		def remove(player)
-			assert player.is_a?(Player)
+			assert player.is_a?(Player::Abstract)
 			@players.delete_if { |element| element.name == player.name }
 		end
 
