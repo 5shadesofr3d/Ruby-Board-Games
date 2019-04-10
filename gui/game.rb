@@ -14,7 +14,6 @@ class Game < Qt::Widget
 
   def initialize(rows: 7, columns: 8,
                  width: 800, height: 600,
-                 players: {"Player": :Local},
                  parent: nil)
 
     assert rows.is_a?(Integer) and rows > 0
@@ -25,7 +24,7 @@ class Game < Qt::Widget
     parent != nil ? super(parent) : super()
     resize(width, height)
 
-    @players = players
+    @players = []
     @machine = GameStateMachine.new(self)
 
     setupUI(rows, columns)
@@ -64,11 +63,7 @@ class Game < Qt::Widget
     assert true unless @players.nil?
 
     @lobby = Lobby::Widget.new(parent: self)
-
-    # Insert our online players
-    @players.each do |player, type|
-      @lobby.add(player.to_s, type)
-    end
+    @lobby.add
 
     @lobbyWidget = Qt::Widget.new(self)
     hlayout = Qt::HBoxLayout.new(@lobbyWidget)
@@ -207,7 +202,6 @@ end
 class Connect4 < Game
   def initialize(rows: 7, columns: 8,
                  width: 800, height: 600,
-                 players: {"Player": :Local},
                  parent: nil)
 
     assert rows.is_a? Integer
@@ -221,7 +215,6 @@ class Connect4 < Game
 
     super(rows: rows, columns: columns,
           width: width, height: height,
-          players: players,
           parent: parent)
   end
 
@@ -273,12 +266,10 @@ class OTTO < Game
 
   def initialize(rows: 7, columns: 8,
                  width: 800, height: 600,
-                 players: ["Player"],
                  parent: nil)
 
     super(rows: rows, columns: columns,
           width: width, height: height,
-          players: players,
           parent: parent)
 
     lobby.add # minimum 2 players
