@@ -73,12 +73,12 @@ class OnlineLobbyUI < Qt::Frame
 
   slots :createRoom, :addRoom
 
-  @@MAX_ROOM_COUNT = 4
+  @@MAX_ROOM_COUNT = 5
 
   def initialize(parent: nil)
     parent != nil ? super(parent) : super()
 
-    @lobby = PlayerRoom.new(parent: self)
+    @lobby = LobbyRoom.new(parent: self)
     @buttons = LobbyButtons.new(parent: self)
     @room_count = 0
 
@@ -113,8 +113,6 @@ class OnlineLobbyUI < Qt::Frame
       name = @popup.roomNameText.text.to_s
       @popup.hide
     end
-
-    puts name
 
     if @room_count < @@MAX_ROOM_COUNT
       @lobby.addRoom(name, game_id)
@@ -174,7 +172,7 @@ class LobbyButton < Qt::PushButton
   end
 end
 
-class PlayerRoom < Qt::Frame
+class LobbyRoom < Qt::Frame
   include Test::Unit::Assertions
 
   attr_reader :playerInfos
@@ -184,11 +182,22 @@ class PlayerRoom < Qt::Frame
 
     @lobby_infos = []
     @layout = Qt::VBoxLayout.new(self)
-    setLayout(@layout)
 
+    @scrollArea = Qt::ScrollArea.new(self)
+    @scrollArea.setMinimumSize(500, 225)
+    @scrollArea.widgetResizable = true
+    @scrollAreaWidgetContents = Qt::Widget.new()
+
+    @scrollLayout = Qt::VBoxLayout.new(@scrollAreaWidgetContents)
+    @scrollLayout.spacing = 6
+    @scrollLayout.margin = 11
+
+    setLayout(@layout)
     setSizePolicy(Qt::SizePolicy::Preferred, Qt::SizePolicy::Maximum)
 
     addHeader
+    @scrollArea.setWidget(@scrollAreaWidgetContents)
+    @layout.addWidget(@scrollArea)
 
     assert valid?
   end
@@ -207,9 +216,9 @@ class PlayerRoom < Qt::Frame
     puts name.is_a? String
 
     if name.nil?
-      lobbyInfo = LobbyInfo.new(parent: self)
+      lobbyInfo = LobbyInfo.new(parent: @scrollAreaWidgetContents)
     else
-      lobbyInfo = LobbyInfo.new(name: name, parent: self)
+      lobbyInfo = LobbyInfo.new(name: name, parent: @scrollAreaWidgetContents)
     end
 
     if game_id.nil?
@@ -219,7 +228,9 @@ class PlayerRoom < Qt::Frame
     end
 
     @lobby_infos << lobbyInfo
-    @layout.addWidget(lobbyInfo)
+    @scrollLayout.addWidget(lobbyInfo)
+    verticalSpacer = Qt::SpacerItem.new(20, 20, Qt::SizePolicy::Minimum, Qt::SizePolicy::Expanding)
+    @scrollLayout.addItem(verticalSpacer)
 
     assert lobbyInfo.is_a? LobbyInfo
     assert valid?
@@ -382,6 +393,8 @@ app = Qt::Application.new ARGV
 @main_window.setFixedSize(400, 400)
 lobby = OnlineLobbyUI.new()
 lobby.show()
-#lobby.addRoom
-#lobby.addRoom("Great lobby", 4)
+lobby.addRoom
+lobby.addRoom("Great lobby", 4)
+lobby.addRoom
+lobby.addRoom("Great lobby", 4)
 app.exec
