@@ -5,7 +5,9 @@
 # Jose Ramirez
 # Jori Romans
 require 'Qt'
+require 'json'
 require_relative 'gui/game'
+require_relative 'gui/player'
 require_relative 'gui/board'
 require_relative 'gui/debug'
 require_relative 'application'
@@ -29,6 +31,11 @@ Debug::on # may cause animation lag due to excessive printing to terminal
 # app = GameApplication.new
 
 app = Qt::Application.new ARGV
+
+# player = Game::Model::Connect4.new()
+# data = JSON.dump(player)
+# puts data
+# p2 = JSON.load(data)
 
 client = Game::Client.new()
 # model = Game::Model::Connect4.new()

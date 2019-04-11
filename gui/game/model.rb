@@ -9,8 +9,8 @@ module Game
 		include Test::Unit::Assertions
 		include Debug
 		attr_reader :views
-		attr_reader :board
-		attr_reader :lobby
+		attr_accessor :board
+		attr_accessor :lobby
 		attr_reader :machine
 
 		def initialize(rows: 7, columns: 8)
@@ -21,8 +21,36 @@ module Game
 			@lobby = Lobby::Model.new()
 		end
 
+		def to_json(options={})
+			return {
+				'b' => @board.to_json,
+				'l' => @lobby.to_json,
+			}.to_json
+		end
+
+		def self.from_json(string)
+			data = JSON.load string
+			model = new 
+			model.board = Board::Model::from_json(data['b'])
+			model.lobby = Lobby::Model::from_json(data['l'])
+			return model
+		end
+
+		def _dump(level)
+			[Marshal.dump(@board), Marshal.dump(@lobby)].join("<GM>")
+		end
+
+		def self._load(args)
+			b, l = *args.split('<GM>')
+			puts l
+			model = new()
+			model.board = Marshal.load(b)
+			model.lobby = Marshal.load(l)
+			return model
+		end
+
 		def addView(view)
-			assert (view.is_a?(Game::View))
+			assert (view.is_a?(Game::View) or view.is_a?(Game::View::Proxy))
 			@views << view
 			board.addView view.board
 			lobby.addView view.lobby
@@ -40,8 +68,6 @@ module Game
 
 		def notify()
 			views.each { |view| view.update(self) }
-			board.notify()
-			lobby.notify()
 		end
 
 		def start()

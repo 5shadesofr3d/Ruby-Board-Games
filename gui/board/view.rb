@@ -25,6 +25,12 @@ module Board
 			assert valid?
 		end
 
+		def update(model)
+			puts model
+			self.each_with_index(:head) { |head, row, col| head.update(model.head(col)) }
+			self.each_with_index(:tile) { |tile, row, col| tile.update(model.tile(row, col)) }
+		end
+
 		def valid?
 			return false unless @layout.is_a?(Qt::GridLayout) or @layout == nil
 			return true
@@ -189,6 +195,41 @@ module Board
 			self.primary = Qt::transparent
 			self.secondary = model.color
 			self.text = model.text
+		end
+	end
+
+	class View::Proxy
+    	include XMLRPC::Marshallable
+
+		def initialize(username, port)
+			@username = username
+			@port = port
+			@server = XMLRPC::Client.new("localhost", "/RPC2", port)
+			@view = @server.proxy("#{@username}_board")
+		end
+
+		def head(column)
+			return View::Tile::Proxy.new(@username, @port, column)
+		end
+
+		def tile(row, column)
+			return View::Tile::Proxy.new(@username, @port, "#{row}_#{column}")
+		end
+	end
+
+	class View::Tile::Proxy
+		include XMLRPC::Marshallable
+		
+		def initialize(username, port, suffix)
+			@username = username
+			@column = column
+			@port = port
+			@server = XMLRPC::Client.new("localhost", "/RPC2", port)
+			@view = @server.proxy("#{@username}_board_#{suffix}")
+		end
+
+		def update(model)
+			@view.update(model)
 		end
 	end
 end

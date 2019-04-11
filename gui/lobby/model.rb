@@ -14,14 +14,27 @@ module Lobby
 			@views = views
 		end
 
+		def to_json(options={})
+			return {
+				'p' => @players
+			}.to_json
+		end
+
+		def self.from_json(string)
+			data = JSON.load string
+			players = data['p'].map { |player| Player::Abstract::from_json(player.to_json) }
+			return new players: players
+		end
+
 		def add(player)
 			assert player.is_a?(Player::Abstract)
+			return if @players.any? { |e| e.name == player.name }
 			@players << player
 		end
 
 		def remove(player)
 			assert player.is_a?(Player::Abstract)
-			@players.delete_if { |element| element.name == player.name }
+			@players.delete_if { |e| e.name == player.name }
 		end
 
 		def addView(view)

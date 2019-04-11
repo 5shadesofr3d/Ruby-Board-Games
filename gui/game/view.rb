@@ -1,4 +1,6 @@
 require 'Qt'
+require 'xmlrpc/utils'
+require 'xmlrpc/client'
 require_relative 'model'
 require_relative '../board'
 require_relative '../player'
@@ -41,7 +43,8 @@ module Game
     end
 
     def update(model)
-      
+      board.update(model.board)
+      lobby.update(model.lobby)
     end
 
     def keyPressEvent(event)
@@ -80,6 +83,44 @@ module Game
     def showBoard()
       assert @board.is_a? Qt::Widget
       @stack.setCurrentWidget(@board)
+    end
+  end
+
+  class View::Proxy
+    include XMLRPC::Marshallable
+
+    def initialize(username, port)
+      @username = username
+      @port = port
+    end
+
+    def view()
+      server = XMLRPC::Client.new("localhost", "/RPC2", @port)
+      return server.proxy("#{@username}_view")
+    end
+
+    def update(model)
+      self.view.update(model)
+    end
+
+    def showLobby()
+      self.view.showLobby()
+    end
+
+    def showBoard()
+      self.view.showBoard()
+    end
+
+    def show()
+      self.view.show()
+    end
+
+    def board()
+      # return Board::View::Proxy.new(@username, @port)
+    end
+
+    def lobby()
+      # return Lobby::View::Proxy.new(@username, @port)
     end
   end
 end

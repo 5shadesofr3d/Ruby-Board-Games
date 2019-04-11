@@ -1,7 +1,9 @@
 require 'Qt'
 require 'test/unit'
+require 'xmlrpc/config'
 require 'xmlrpc/server'
 require_relative 'model'
+require_relative 'view'
 require_relative '../player'
 require_relative '../debug'
 
@@ -9,38 +11,48 @@ module Game
 	class Client < Qt::Object
 		include Test::Unit::Assertions
 		include Debug
-		attr_reader :address, :port, :server
-		attr_reader :user
-		attr_reader :model, :lobby, :board
+		attr_reader :address, :port, :server, :connection
+		attr_reader :game, :lobby, :board, :view
 
-		def initialize(username: "Godzilla", address: "local", port: 8080, parent: nil)
+		def initialize(username: "Godzilla", address: "hello", port: 8080, parent: nil)
 			parent != nil ? super(parent) : super()
-			@user = Player::Online.new(username, Qt::green, parent: self)
+			@user = Player::Online.new(username, "green")
 			@address = address
 			@port = port
 
-			setupServerConnection()
+			setupConnections()
 			setupProxy()
 			setupUI()
 		end
 
-		def setupServerConnection()
-			@server = XMLRPC::Client.new(port)
+		def setupConnections()
+			@server = XMLRPC::Client.new("localhost", "/RPC2", port)
 		end
 
 		def setupProxy()
-			@model = @server.proxy("#{address}_model")
+			@game = @server.proxy("#{address}_game")
 			@lobby = @server.proxy("#{address}_lobby")
 			@board = @server.proxy("#{address}_board")
 		end
 
 		def setupUI()
-			@view = Game::View.new(model.rows, model.columns, parent: self)
-			model.addView @view
-			model.start()
+			# puts XMLRPC::Config::ENABLE_MARSHALLING
+			@view = Game::View.new(game.rows, game.columns)
+			@view.show()
+			lobby.add(user)
+			update()
+		end
 
-			lobby.add(@user)
-			lobby.notify()
+		def user()
+			return JSON.dump(@user)
+		end
+
+		def update()
+			@view.update(Game::Model::Abstract::from_json(game.instance))
+		end
+
+		def quit()
+			lobby.remove(user)
 		end
 	end
 end

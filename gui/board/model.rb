@@ -11,18 +11,45 @@ module Board
 		include Board::Iterator
 		include Debug
 
-		def initialize(rows, cols)
+		def initialize(rows, cols, tile: [], head: [])
 			assert rows.is_a? Integer
 			assert cols.is_a? Integer
 			assert rows > 0
 			assert cols > 0
 
-			@tile = []
-			@head = []
+			@rows = rows
+			@cols = cols
+			@tile = tile
+			@head = head
 
-			setBoardSize(rows, cols)
+			setBoardSize(rows, cols) unless head.size > 0
 
 			assert valid?
+		end
+
+		def to_json(options={})
+			return {
+				'r' => @rows,
+				'c' => @cols,
+				't' => @tile,
+				'h' => @head
+			}.to_json
+		end
+
+		def self.from_json(string)
+			data = JSON.load string
+			t = data['t'].map { |r| r.map { |c| Board::Model::Tile::from_h(c) } }
+			h = data['h'].map { |t| Board::Model::Tile::from_h(t) }
+			return new data['r'], data['c'], tile: t, head: h
+		end
+
+		def _dump(level)
+			[@rows, @cols, Marshal.dump(@tile), Marshal.dump(@head)].join("<BM>")
+		end
+
+		def self._load(args)
+			r, c, t, h = *args.split("<BM>")
+			return new(r.to_i, c.to_i, tile: Marshal.load(t), head: Marshal.load(h))
 		end
 
 		def valid?
@@ -47,7 +74,7 @@ module Board
 		end
 
 		def addView(view)
-			assert view.is_a? (Board::View)
+			assert (view.is_a?(Board::View) or view.is_a?(Board::View::Proxy))
 			self.each_with_index(:head) { |head, row, col| head.addView view.head(col) }
 			self.each_with_index(:tile) { |tile, row, col| tile.addView view.tile(row, col) }
 		end
@@ -122,12 +149,30 @@ module Board
 		attr_accessor :color
 
 		def initialize(color: Qt::transparent, view: nil)
-			@color = color
+			@color = Qt::Color.new(color)
 			@views = []
 		end
 
+		def to_json(options={})
+			return {
+				'a' => @attached.to_json,
+				'c' => @color.name,
+			}.to_json
+		end
+
+		def self.from_json(string)
+			data = JSON.load string
+			return self.from_h(data)
+		end
+
+		def self.from_h(data)
+			tile = new color: data['c']
+			tile.attach(Board::Model::Chip::from_json(data['a'])) unless data['a'].nil?
+			return tile
+		end
+
 		def attach(chip)
-			assert chip.is_a?(Board::Model::Chip)
+			assert (chip.is_a?(Board::Model::Chip) or chip.nil?)
 			@attached = chip
 			notify()
 		end
@@ -145,7 +190,7 @@ module Board
 		end
 
 		def addView(view)
-			assert (view.is_a?(Board::View::Item))
+			assert (view.is_a?(Board::View::Item) or view.is_a?(Board::View::Tile::Proxy))
 			@views << view
 			notify()
 		end
@@ -170,6 +215,19 @@ module Board
 			self.id = id
 			self.color = Qt::Color.new(color)
 			@views = []
+		end
+
+		def to_json(options={})
+			return {
+				'i' => @id,
+				'c' => @color.name,
+			}.to_json
+		end
+
+		def self.from_json(string)
+			data = JSON.load string
+			return data if data.nil?
+			return new id: data['i'], color: data['c']
 		end
 
 		def addView(view)

@@ -2,6 +2,7 @@
 # are present for a player within the "Connect4" game
 require 'Qt'
 require 'test/unit'
+require 'xmlrpc/utils'
 require_relative '../board'
 require_relative '../debug'
 
@@ -43,6 +44,41 @@ module Player
 			assert @losses >= 0 and @losses.is_a? Integer
 			assert @ties >=0 and @ties.is_a? Integer
 			assert valid?
+		end
+
+		def to_json(options={})
+			return {
+				'n' => @name,
+				'w' => @wins,
+				'l' => @losses,
+				't' => @ties,
+				'c' => @color.name,
+				'h' => @host
+			}.to_json
+		end
+
+		def self.from_json(string)
+			data = JSON.load string
+			player = new data['n'], data['c']
+			player.wins = data['w']
+			player.losses = data['l']
+			player.ties = data['t']
+			player.host = data['h']
+			return player
+		end
+
+		def _dump(level)
+			return [@name, @wins, @losses, @ties, @color.name, @host].join(":")
+		end
+
+		def self._load(args)
+			name, wins, losses, ties, color, host = *args.split(':')
+			player = new(name, color)
+			player.wins = wins
+			player.losses = losses
+			player.ties = ties
+			player.host = host
+			return player
 		end
 
 		def valid?
