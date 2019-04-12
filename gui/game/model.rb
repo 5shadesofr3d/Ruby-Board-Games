@@ -12,6 +12,7 @@ module Game
 		attr_accessor :board
 		attr_accessor :lobby
 
+		
 		def initialize(rows: 7, columns: 8)
 			@views = []
 			@players = {}
