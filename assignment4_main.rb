@@ -27,7 +27,7 @@ require_relative 'application'
 # gem install chroma
 
 
-Debug::on # may cause animation lag due to excessive printing to terminal
+# Debug::on # may cause animation lag due to excessive printing to terminal
 # app = GameApplication.new
 
 app = Qt::Application.new []

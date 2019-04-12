@@ -17,6 +17,8 @@ module Game
 		attr_reader :user, :machine, :timer
 		attr_reader :model_stack
 
+		@@timeout = 100
+
 		slots "onTimeout()"
 
 		def initialize(username: "Godzilla", address: "hello", port: 8080, parent: nil)
@@ -57,7 +59,7 @@ module Game
 
 		def setupUpdateTimer()
 			@timer = Qt::Timer.new(self)
-			@timer.setInterval(1000)
+			@timer.setInterval(@@timeout)
 
 			connect(@timer, SIGNAL("timeout()"), self, SLOT("onTimeout()"))
 		end
@@ -87,24 +89,24 @@ module Game
 		def push(model: self.current_model)
 			model.state = current_state
 			@model.push(model.to_json)
-			debug()
+			debug() if Debug::enabled
 		end
 
 		def deliver_user()
 			lobby.update(json_user)
-			debug()
+			debug() if Debug::enabled
 		end
 
 		def update()
-			debug()
+			debug() if Debug::enabled
 			model = query_model
 			@view.update(model)
 			user.host = true if model.players.any? { |e| e.name == user.name and e.host }
 
 			next_state = model.state
 			machine.current_state.done if next_state != self.current_state
-			puts "EXPECTED: #{next_state}, GOT: #{self.current_state}"
-			debug()
+			puts "EXPECTED: #{next_state}, GOT: #{self.current_state}" if Debug::enabled
+			debug() if Debug::enabled
 		end
 
 		def debug()

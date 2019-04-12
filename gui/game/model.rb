@@ -131,7 +131,6 @@ module Game
 
 		def updatePlayerScores()
 			goal = winnersGoal
-			puts goal.nil?
 			if (goal != nil) # a winner was found
 				players.each { |player| player.goal == goal ? player.wins += 1 : player.losses += 1 }
 			else # we had a tie
@@ -174,7 +173,6 @@ module Game
 
 		def winnersGoal()
 			chips = findGoal()
-			puts chips.map(&:id).to_s
 			# we have a winner if the chip sequence matches the player's goal
 			players.each { |player| return player.goal if player.goal.size == chips.size && player.goal == chips.map(&:id) }
 			return nil

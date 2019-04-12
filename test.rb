@@ -1,7 +1,7 @@
 require 'Qt'
 require_relative 'gui/game'
 
-Debug::on
+# Debug::on
 app = Qt::Application.new ARGV
 
 widget = Qt::Widget.new()
