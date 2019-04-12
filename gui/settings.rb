@@ -9,7 +9,7 @@ class Settings
 
   attr_accessor :game_mode, :num_cols, :num_rows
   attr_accessor :theme, :theme_setting
-  attr_accessor :window_height, :window_width, :window_mode
+  attr_accessor :window_height, :window_width, :window_mode, :selected_game_id
   attr_reader   :valid_game_mode, :valid_themes, :valid_window_mode, :valid_resolutions
 
   def initialize
@@ -20,6 +20,7 @@ class Settings
     @valid_themes = [:Default, :Colorblind]
     @valid_window_mode = [:Windowed, :Fullscreen]
     @valid_resolutions = ["800x700", "1200x1050", "1920x1080"]
+    @selected_game_id = -1 #init value, -1 does not correspond to a game
 
     if File.file?("settings.json")
       tempHash = JSON.parse(IO.read("settings.json"))

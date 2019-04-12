@@ -148,7 +148,7 @@ class LobbyButtons < Qt::Widget
     parent != nil ? super(parent) : super()
 
     buttonLayout = Qt::HBoxLayout.new(self)
-    @add = LobbyButton.new("Create Room", self)
+    #@add = LobbyButton.new("Create Room", self)
     @exit = LobbyButton.new("Exit",self)
     @join = LobbyButton.new("Join Room", self)
     @gameID = LobbyTextBox.new(self)
@@ -204,13 +204,13 @@ class LobbyRoom < Qt::Frame
     @layout = Qt::VBoxLayout.new(self)
 
     @scrollArea = Qt::ScrollArea.new(self)
-    @scrollArea.setMinimumSize(500, 225)
+    @scrollArea.setMinimumSize(500, 500)
     @scrollArea.widgetResizable = true
     @scrollAreaWidgetContents = Qt::Widget.new()
 
     @scrollLayout = Qt::VBoxLayout.new(@scrollAreaWidgetContents)
-    @scrollLayout.spacing = 6
-    @scrollLayout.margin = 11
+    @scrollLayout.spacing = 1
+    @scrollLayout.margin = 5
 
     setLayout(@layout)
     setSizePolicy(Qt::SizePolicy::Preferred, Qt::SizePolicy::Maximum)
@@ -389,7 +389,8 @@ class LobbyInfo < Qt::Widget
     lobby = OnlineLobbyData.new
 
     assert lobby.is_a? OnlineLobbyData
-    assert not(lobby.name.empty?)
+
+    #assert not(lobby.name.empty?)
     assert lobby.game_id >= 0
     assert lobby.num_players >= 0
 
@@ -397,10 +398,7 @@ class LobbyInfo < Qt::Widget
   end
 
   def valid?
-    # return false unless @name.is_a?(String)
-    # return false unless @wins.is_a?(Integer) and @wins >= 0
-    # return false unless @loss.is_a?(Integer) and @loss >= 0
-    # return false unless @ties.is_a?(Integer) and @ties >= 0
+
 
     return true
   end

@@ -193,7 +193,7 @@ class MultiplayerLobbyState < StatePattern::State
 
     #TODO: Transition to multiplayer game lobby
     #stateful.main_window.centralWidget.close if stateful.main_window.centralWidget != nil
-    #transition_to(GameScreenState)
+    transition_to(OnlineGameScreenState)
 
     assert valid?
   end
@@ -219,7 +219,6 @@ class MultiplayerLobbyController < Qt::Widget
     add_rooms
 
     connect(@mpLobby.buttons.exit,  SIGNAL('clicked()'), self, SLOT('exit_lobby()'))
-    connect(@mpLobby.buttons.add,  SIGNAL('clicked()'), self, SLOT('create_lobby()'))
     connect(@mpLobby.buttons.join,  SIGNAL('clicked()'), self, SLOT('join_game()'))
 
     assert @state.is_a? MultiplayerLobbyState
@@ -245,18 +244,28 @@ class MultiplayerLobbyController < Qt::Widget
     #TODO: Join the game room
     puts 'Joined a new lobby'
     rooms = @mpLobby.lobby.lobby_infos #to verify game exists
-    selectedGameId = @mpLobby.buttons.gameID.text
-    puts "Selected game: " + selectedGameId
-    #POST
-    #@mpLobby.close
-    #@state.open_game
-    #Transition to multiplayer game lobby
+    begin
+      selectedGameId = Integer(@mpLobby.buttons.gameID.text)
+    rescue
+      return
+    end
+    settings = Settings.instance
+    if selectedGameId <= 4 and selectedGameId >= 0
+      settings.selected_game_id = selectedGameId
+
+      #POST
+      @mpLobby.close
+      @state.open_game
+      #Transition to multiplayer game lobby
+    end
   end
 
   def add_rooms
     #TODO: Query server for rooms, and then list them.
     #for all lobbies found...
-    @mpLobby.addRoom("Lobby Name",2)
+    for i in 0..5
+      @mpLobby.addRoom("Lobby "+String(i),i)
+    end
   end
 
 end
@@ -271,6 +280,10 @@ class OnlineGameScreenState < StatePattern::State
 
   def enter
     # game_mode = :Connect4
+    settings = Settings.instance
+    lobby_name = "Lobby "+String(settings.selected_game_id)
+    puts lobby_name
+
 
     client = Client.instance
     players = client.conn.call2("lobby.lobby")[1]
