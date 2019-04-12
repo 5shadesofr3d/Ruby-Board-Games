@@ -12,12 +12,18 @@ module Game
 		attr_accessor :board
 		attr_accessor :lobby
 
-		
+
 		def initialize(rows: 7, columns: 8)
 			@views = []
 			@players = {}
 			@board = Board::Model.new(rows, columns)
 			@lobby = Lobby::Model.new()
+		end
+
+		def saveToFile(fileName)
+			file = File.open(fileName, 'w')
+			file.puts self.to_json
+			file.close
 		end
 
 		def to_json(options={})
@@ -101,6 +107,8 @@ module Game
 				lower_diag = board.to_enum(:each_in_diagonal, :chip, diagonal, :down)
 				lower_diag.each_cons(4) { |chips| return chips if matchesGoal?(chips) }
 			end
+
+			saveToFile('test.txt')
 
 			return []
 		end
