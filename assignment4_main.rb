@@ -5,8 +5,9 @@
 # Jose Ramirez
 # Jori Romans
 require 'Qt'
+require 'json'
 require_relative 'gui/game'
-require_relative 'gui/player/player_lobby'
+require_relative 'gui/player'
 require_relative 'gui/board'
 require_relative 'gui/debug'
 require_relative 'application'
@@ -27,41 +28,37 @@ require_relative 'application'
 
 
 # Debug::on # may cause animation lag due to excessive printing to terminal
-app = GameApplication.new
+# app = GameApplication.new
 
-# app = Qt::Application.new ARGV
+app = Qt::Application.new []
 
-# board = Board.new(7, 8)
-# board.background = Qt::white
-# board.color = Qt::Color.new("#48dbfb").name
+# player = Game::Model::Connect4.new()
+# data = JSON.dump(player)
+# puts data
+# p2 = JSON.load(data)
 
-# lobby = PlayerLobby.new()
-# lobby.show()
+username = ARGV.first
+client = Game::Client.new(username: username)
+# model = Game::Model::Connect4.new()
+# model.addView Game::View.new(model.rows, model.columns)
+# model.start()
 
-# lobby.addPlayer
-# lobby.addPlayer
+# model.lobby.add(Player::Online.new("Godzilla", Qt::green))
+# model.lobby.notify()
 
-# game = Connect4.new()
-# game.board.background = Qt::white
-# game.board.color = Qt::Color.new("#48dbfb")
-# game.show()
-# game.start()
+# model = Board::Model.new(7, 8)
+# view = Board::View.new(model.rowSize, model.columnSize)
+# controller = Board::Controller.new()
+# view.show()
 
-# chip_red = Connect4Chip.new(color: Qt::red, parent: board)
-# chip_yellow = Connect4Chip.new(color: Qt::yellow, parent: board)
+# view.update(model)
 
-# chip_t = OTTOChip.new(:T, parent: board)
-# chip_o = OTTOChip.new(:O, parent: board)
+# chip_model = Board::Model::Chip.new()
+# chip_view = Board::View::Chip.new(parent: view)
 
-# chip_red == chip_yellow ? puts("yes") : puts("no")
-# chip_t == chip_o ? puts("yes") : puts("no")
+# controller.drop(
+# 	chip_model: chip_model, chip_view: chip_view,
+# 	board_model: model, board_view: view,
+# 	column: 0)
 
-# model = board.model
-# board.translate(item: chip_yellow, from: model.head(0), to: model.head(4), time: 1000)
-
-# board.insert(chip_yellow, 3)
-# board.drop(chip_red, 2)
-# board.drop(chip_t, 3)
-# board.drop(chip_o, 3)
-
-# app.exec
+app.exec
