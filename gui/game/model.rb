@@ -1,7 +1,6 @@
 require_relative '../board'
 require_relative '../debug'
 require_relative '../lobby/model'
-require_relative '../states/game_states'
 
 module Game
 	module Model
@@ -11,41 +10,27 @@ module Game
 		attr_reader :views
 		attr_accessor :board
 		attr_accessor :lobby
-		attr_reader :machine
 
 		def initialize(rows: 7, columns: 8)
 			@views = []
 			@players = {}
-			@machine = GameStateMachine.new(self)
 			@board = Board::Model.new(rows, columns)
 			@lobby = Lobby::Model.new()
 		end
 
 		def to_json(options={})
 			return {
-				'b' => @board.to_json,
-				'l' => @lobby.to_json,
+				'class' => self.class,
+				'board' => @board.to_json,
+				'lobby' => @lobby.to_json
 			}.to_json
 		end
 
 		def self.from_json(string)
 			data = JSON.load string
-			model = new 
-			model.board = Board::Model::from_json(data['b'])
-			model.lobby = Lobby::Model::from_json(data['l'])
-			return model
-		end
-
-		def _dump(level)
-			[Marshal.dump(@board), Marshal.dump(@lobby)].join("<GM>")
-		end
-
-		def self._load(args)
-			b, l = *args.split('<GM>')
-			puts l
-			model = new()
-			model.board = Marshal.load(b)
-			model.lobby = Marshal.load(l)
+			model = Object.const_get(data['class']).new 
+			model.board = Board::Model::from_json(data['board'])
+			model.lobby = Lobby::Model::from_json(data['lobby'])
 			return model
 		end
 
@@ -146,16 +131,6 @@ module Game
 			else # we had a tie
 				players.each { |player| player.ties += 1 }
 			end
-		end
-
-		def updatePlayerObjects()
-			players.each { |player| player.game = self }
-			initializePlayerGoals()
-
-			assert players.is_a? Array
-			players.each {|e| assert e.is_a? Player::Abstract}
-			players.each {|e| assert e.goal.is_a? Array}
-			assert players.count > 0
 		end
 	end
 

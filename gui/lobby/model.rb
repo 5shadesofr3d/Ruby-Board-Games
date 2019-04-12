@@ -30,6 +30,12 @@ module Lobby
 			assert player.is_a?(Player::Abstract)
 			return if @players.any? { |e| e.name == player.name }
 			@players << player
+			player.host = true if @players.first == player
+		end
+
+		def update(player)
+			assert player.is_a?(Player::Abstract)
+			@players.map! { |e| e.name == player.name ? player : e }
 		end
 
 		def remove(player)

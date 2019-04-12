@@ -8,13 +8,13 @@ module Game
 		include Test::Unit::Assertions
 		include Debug
 		attr_reader :address, :port, :connection
-		attr_reader :game
+		attr_reader :model
 
 		@@MAX_CONNECTIONS = 10
 
 		def initialize(address: "hello", port: 8080, model: nil)
 			assert model.is_a?(Game::Model::Abstract)
-			@game = model
+			@model = model
 			@address = address
 			@port = port
 			@connection = XMLRPC::Server.new(port, "localhost", @@MAX_CONNECTIONS)
@@ -22,20 +22,35 @@ module Game
 		end
 
 		def setupHandlers
-			@connection.add_handler("#{address}_game", GameHandler.new(game))
-			@connection.add_handler("#{address}_lobby", LobbyHandler.new(game.lobby))
-			@connection.add_handler("#{address}_board", game.board)
+			@connection.add_handler("#{address}_model", GameHandler.new(model))
+			@connection.add_handler("#{address}_lobby", LobbyHandler.new(model.lobby))
+			@connection.add_handler("#{address}_board", model.board)
 		end
 
 		def serve()
 			@thread = Thread.new { @connection.serve }
-			game.start()
 		end
 	end
 
 	class LobbyHandler
 		def initialize(lobby)
 			@lobby = lobby
+		end
+
+		def host()
+			data = nil
+			Qt.execute_in_main_thread do
+				data = @lobby.players.first.name
+			end
+			return data
+		end
+
+		def update(player)
+			Qt.execute_in_main_thread do
+				obj = Player::Abstract::from_json(player)
+				@lobby.update(obj)
+			end
+			return true
 		end
 
 		def add(data)
@@ -66,6 +81,22 @@ module Game
 				data = JSON.dump(@game)
 			end
 			return data
+		end
+
+		def pregameSetup()
+			Qt.execute_in_main_thread do
+				@game.initializePlayerGoals()
+			end
+			return true
+		end
+
+		def update(model)
+			Qt.execute_in_main_thread do
+				model = Game::Model::Abstract::from_json(model)
+				@game.board = model.board
+				@game.lobby = model.lobby
+			end
+			return true
 		end
 
 		def rows()

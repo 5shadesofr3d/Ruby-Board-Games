@@ -22,13 +22,26 @@ module Board
 			model.each(:tile) {|tile| tile.detach }
 		end
 
-		def drop(chip, col, model, time: 750)
-			assert chip.is_a? Board::Model::Chip
-			assert col.is_a? Integer
-			assert col >= 0
-			connect(self, SIGNAL("translateCompleted()"), self, SLOT("onDrop()"))
+		def drop(
+			chip_model: nil, chip_view: nil,
+			board_model: nil, board_view: nil,
+			column: 0, time: 750)
 			
-			translate(item: chip, from: model.head(col), to: model.next_empty(col), time: time)
+			assert (chip_model.is_a?(Board::Model::Chip) or chip_model.nil?)
+			assert (chip_view.is_a?(Board::View::Chip) or chip_view.nil?)
+			assert column.is_a? Integer
+			assert column >= 0
+			
+			connect(self, SIGNAL("translateCompleted()"), self, SLOT("onDrop()"))
+
+			chip_view.update(chip_model) unless chip_view.nil?
+
+			unless chip_model.nil? or board_model.nil?
+				translate_model(item: chip_model, from: board_model.head(column), to: board_model.next_empty(column))
+			end
+			unless chip_view.nil? or board_view.nil?
+				translate_view(item: chip_view, from: board_view.head(column), to: board_view.next_empty(column), time: time)
+			end
 		end
 
 		def onDrop()
@@ -36,22 +49,29 @@ module Board
 			disconnect(self, SIGNAL("translateCompleted()"), self, SLOT("onDrop()"))
 		end
 
-		def translate(item: nil, from: nil, to: nil, time: 0)
+		def translate_model(item: nil, from: nil, to: nil)
 			assert item.is_a?(Board::Model::Chip)
 			assert from.is_a?(Board::Model::Tile)
 			assert to.is_a?(Board::Model::Tile)
+
+			from.detach(destroy_view: false)
+			to.attach(item)
+		end
+
+		def translate_view(item: nil, from: nil, to: nil, time: 0)
+			assert item.is_a?(Board::View::Chip)
+			assert from.is_a?(Board::View::Tile)
+			assert to.is_a?(Board::View::Tile)
 			assert time.is_a?(Integer) and time >= 0
 
 			from.detach(destroy_view: false)
 			to.attach(item)
 
-			return if time == 0 or from == to or item.view == nil or from.view == nil or to.view == nil
-
-			animation.targetObject = item.view
+			animation.targetObject = item
 			animation.propertyName = "geometry"
 			animation.duration = time
-			animation.startValue = from.view.geometry
-			animation.endValue = to.view.geometry
+			animation.startValue = from.geometry
+			animation.endValue = to.geometry
 
 			translateStarted
 

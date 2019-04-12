@@ -5,52 +5,41 @@ require_relative 'abstract'
 
 module Player
 	class Local < Abstract
-
 		slots "play(const QKeyEvent*)", :acknowledge_keyboard, :ignore_keyboard
 
-		def enable
-			super()
-			assert game.is_a? Game::Model::Abstract
-			assert game.board.is_a? Board::Model
+		def enable(model)
+			super(model)
 
-			connect(controller, SIGNAL("translateStarted()"), self, SLOT("ignore_keyboard()"))
-			connect(controller, SIGNAL("translateCompleted()"), self, SLOT("acknowledge_keyboard()"))
+			connect(self.controller, SIGNAL("translateStarted()"), self, SLOT("ignore_keyboard()"))
+			connect(self.controller, SIGNAL("translateCompleted()"), self, SLOT("acknowledge_keyboard()"))
 
-			acknowledge_keyboard
+			acknowledge_keyboard()
 		end
 
 		def disable
-			assert game.is_a? Game::Model::Abstract
-			assert game.board.is_a? Board::Model
-
 			super()
 
-			disconnect(controller, SIGNAL("translateStarted()"), self, SLOT("ignore_keyboard()"))
-			disconnect(controller, SIGNAL("translateCompleted()"), self, SLOT("acknowledge_keyboard()"))
+			disconnect(self.controller, SIGNAL("translateStarted()"), self, SLOT("ignore_keyboard()"))
+			disconnect(self.controller, SIGNAL("translateCompleted()"), self, SLOT("acknowledge_keyboard()"))
 
-			ignore_keyboard
+			ignore_keyboard()
 		end
 
 		def acknowledge_keyboard
-			assert game.is_a? Game::Model::Abstract
-			connect(game.view, SIGNAL("keyPressed(const QKeyEvent*)"), self, SLOT("play(const QKeyEvent*)"))
+			connect(self.view, SIGNAL("keyPressed(const QKeyEvent*)"), self, SLOT("play(const QKeyEvent*)"))
 		end
 
 		def ignore_keyboard
-			assert game.is_a? Game::Model::Abstract
-			disconnect(game.view, SIGNAL("keyPressed(const QKeyEvent*)"), self, SLOT("play(const QKeyEvent*)"))
+			disconnect(self.view, SIGNAL("keyPressed(const QKeyEvent*)"), self, SLOT("play(const QKeyEvent*)"))
 		end
 
 		def play(event)
 			# Position is in terms of the column position on the board
-			#pre
-			assert game.is_a?(Game::Model::Abstract)
 			assert event.is_a?(Qt::KeyEvent) or event.is_a?(Qt::MouseEvent)
 
-			handle_key(event) # or self.handle_mouse(event)
+			handle_key(event)
 
-			#post
-			assert current_column.is_a?(Numeric)
+			assert self.column.is_a?(Integer)
 		end
 
 		def handle_key(key_event)
@@ -63,7 +52,7 @@ module Player
 			# Qt::Key_Space
 
 			#pre
-			assert current_column.is_a?(Numeric) and current_column >= 0
+			assert self.column.is_a?(Integer) and self.column >= 0
 			assert key_event.is_a?(Qt::KeyEvent)
 
 			case key_event.key
@@ -78,7 +67,7 @@ module Player
 			when Qt::Key_Space.value
 				tile = nil
 				begin
-					tile = game.board.next_empty(current_column)
+					tile = self.model.board.next_empty(self.column)
 				rescue Board::Iterator::ColumnFullError
 					tile = nil
 					puts "Column full, try again"
@@ -90,7 +79,7 @@ module Player
 			end
 
 			#post
-			assert current_column.is_a?(Numeric)
+			assert self.column.is_a?(Integer)
 		end
 
 		def handle_mouse(current_position, event)

@@ -8,7 +8,6 @@ widget = Qt::Widget.new()
 widget.show()
 
 model = Game::Model::Connect4.new()
-model.start()
 
 # model.lobby.add(Player::Online.new("Godzilla", Qt::green))
 # model.lobby.notify()

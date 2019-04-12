@@ -45,4 +45,19 @@ client = Game::Client.new()
 # model.lobby.add(Player::Online.new("Godzilla", Qt::green))
 # model.lobby.notify()
 
+# model = Board::Model.new(7, 8)
+# view = Board::View.new(model.rowSize, model.columnSize)
+# controller = Board::Controller.new()
+# view.show()
+
+# view.update(model)
+
+# chip_model = Board::Model::Chip.new()
+# chip_view = Board::View::Chip.new(parent: view)
+
+# controller.drop(
+# 	chip_model: chip_model, chip_view: chip_view,
+# 	board_model: model, board_view: view,
+# 	column: 0)
+
 app.exec

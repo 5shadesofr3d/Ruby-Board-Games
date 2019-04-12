@@ -1,6 +1,7 @@
 require 'Qt'
 require 'test/unit'
 require_relative '../player'
+require_relative '../debug'
 
 module Lobby
   module Color
@@ -12,7 +13,8 @@ module Lobby
   end
 
   class View < Qt::Frame
-    attr_reader :table, :buttons
+    include Debug
+    attr_reader :table, :buttons, :client
 
     slots :add,:pop
 
@@ -59,7 +61,7 @@ module Lobby
 
     def getAll()
       items = []
-      @table.rows.each {|info| items << info.construct(parent) }
+      @table.rows.each {|info| items << info.construct(self.parent) }
       return items
     end
 
@@ -77,6 +79,14 @@ module Lobby
 
     def update(model)
       self.setAll(model.players)
+      if self.visible and self.client.user.name == model.players.first.name
+        self.buttons.start.show
+      end
+    end
+
+    def client=(value)
+      @client = value
+      @table.client = value
     end
 
   end
@@ -88,16 +98,18 @@ module Lobby
       parent != nil ? super(parent) : super()
 
       buttonLayout = Qt::HBoxLayout.new(self)
-      # @add = Button.new("Add", self)
+      @add = Button.new("Add", self)
       @start = Button.new("Start", self)
       @exit = Button.new("Exit",self)
-      # @remove = Button.new("Remove",self)
+      @remove = Button.new("Remove",self)
       buttonLayout.addWidget(exit)
-      # buttonLayout.addWidget(add)
-      # buttonLayout.addWidget(remove)
+      buttonLayout.addWidget(add)
+      buttonLayout.addWidget(remove)
       buttonLayout.addWidget(start)
       setLayout(buttonLayout)
-
+      add.hide
+      remove.hide
+      start.hide
     end
 
   end
@@ -119,8 +131,8 @@ module Lobby
 
   class Table < Qt::Frame
     include Test::Unit::Assertions
-
-    attr_reader :rows
+    include Debug
+    attr_reader :rows, :client
 
     def initialize(parent: nil)
       parent != nil ? super(parent) : super()
@@ -148,6 +160,7 @@ module Lobby
       assert valid?
 
       row = TableRow.new(parent: self)
+      row.client = @client
       @rows << row
       @layout.addWidget(row)
 
@@ -164,6 +177,10 @@ module Lobby
       @layout.removeWidget(row)
 
       assert valid?
+    end
+
+    def client=(value)
+      @client = value
     end
 
     def valid?()
@@ -216,12 +233,13 @@ module Lobby
   end
 
   class ColorBox < Qt::Widget
-    attr_accessor :color
+    attr_accessor :color, :row
 
     @@colors = ["red", "green", Color::LIGHT_BLUE, "yellow", "pink", "magenta"]
 
     def initialize(parent)
       super(parent)
+      @row = parent
       setMaximumSize(75, 30)
       setMinimumSize(75, 30)
       setColor
@@ -235,10 +253,12 @@ module Lobby
       @color = @@colors.first
       updateColor
       @@colors.rotate!
+      # colorChanged #signal
     end
 
     def mousePressEvent(event)
       setColor
+      row.deliver()
     end
 
   end
@@ -333,6 +353,17 @@ module Lobby
       assert valid?
     end
 
+    def client=(value)
+      @client = value
+    end
+
+    def deliver()
+      if not @client.nil? and @name.text == @client.user.name
+        @client.user.color = @color.color
+        @client.deliver_user()
+      end
+    end
+
     def close_all
       @layout.each {|e| e.hide}
     end
@@ -359,7 +390,6 @@ module Lobby
     end
 
     def type=(t)
-
       case t
       when Player::Local
         @type.currentIndex = 0

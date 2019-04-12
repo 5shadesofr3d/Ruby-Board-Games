@@ -9,7 +9,6 @@ module Board
 	class Model
 		include Test::Unit::Assertions
 		include Board::Iterator
-		include Debug
 
 		def initialize(rows, cols, tile: [], head: [])
 			assert rows.is_a? Integer
@@ -29,18 +28,18 @@ module Board
 
 		def to_json(options={})
 			return {
-				'r' => @rows,
-				'c' => @cols,
-				't' => @tile,
-				'h' => @head
+				'row' => @rows,
+				'col' => @cols,
+				'tile' => @tile,
+				'head' => @head
 			}.to_json
 		end
 
 		def self.from_json(string)
 			data = JSON.load string
-			t = data['t'].map { |r| r.map { |c| Board::Model::Tile::from_h(c) } }
-			h = data['h'].map { |t| Board::Model::Tile::from_h(t) }
-			return new data['r'], data['c'], tile: t, head: h
+			t = data['tile'].map { |r| r.map { |c| Board::Model::Tile::from_h(c) } }
+			h = data['head'].map { |t| i = Board::Model::Tile::from_h(t); i.color = Qt::transparent; i }
+			return new data['row'], data['col'], tile: t, head: h
 		end
 
 		def _dump(level)
@@ -119,7 +118,7 @@ module Board
 			rows.each do |r|
 				row = []
 				columns.each do |c|
-					item = Board::Model::Tile.new(color: tile_color)
+					item = Board::Model::Tile.new(color: tile_color, row: r, column: c)
 					row << item
 				end
 				@tile << row
@@ -134,7 +133,7 @@ module Board
 			assert @head.size == 0
 
 			columns.each do |col|
-				item = Board::Model::Tile.new(color: Qt::transparent)
+				item = Board::Model::Tile.new(color: Qt::transparent, column: col)
 				@head << item
 			end
 
@@ -144,19 +143,22 @@ module Board
 
 	class Model::Tile
 		include Test::Unit::Assertions
-		include Debug
-		attr_reader :views, :attached
-		attr_accessor :color
+		attr_reader :views, :attached, :row, :column
+		attr_reader :color
 
-		def initialize(color: Qt::transparent, view: nil)
+		def initialize(color: Qt::transparent, row: 0, column: 0, view: nil)
+			@row = row
+			@column = column
 			@color = Qt::Color.new(color)
 			@views = []
 		end
 
 		def to_json(options={})
 			return {
-				'a' => @attached.to_json,
-				'c' => @color.name,
+				'attached' => @attached.to_json,
+				'color' => @color.name,
+				'row' => @row,
+				'column' => @column
 			}.to_json
 		end
 
@@ -166,9 +168,13 @@ module Board
 		end
 
 		def self.from_h(data)
-			tile = new color: data['c']
-			tile.attach(Board::Model::Chip::from_json(data['a'])) unless data['a'].nil?
+			tile = new color: data['color'], row: data['row'], column: data['column']
+			tile.attach(Board::Model::Chip::from_json(data['attached'])) unless data['attached'].nil?
 			return tile
+		end
+
+		def color=(value)
+			@color = Qt::Color.new(value)
 		end
 
 		def attach(chip)
@@ -206,7 +212,6 @@ module Board
 
 	class Model::Chip
 		include Test::Unit::Assertions
-		include Debug
 		attr_reader :views, :color, :text
 		attr_accessor :id
 
@@ -219,15 +224,15 @@ module Board
 
 		def to_json(options={})
 			return {
-				'i' => @id,
-				'c' => @color.name,
+				'id' => @id,
+				'color' => @color.name,
 			}.to_json
 		end
 
 		def self.from_json(string)
 			data = JSON.load string
 			return data if data.nil?
-			return new id: data['i'], color: data['c']
+			return new id: data['id'], color: data['color']
 		end
 
 		def addView(view)
@@ -238,8 +243,7 @@ module Board
 		end
 
 		def color=(value)
-			assert value.is_a?(Qt::Color)
-			@color = value
+			@color = Qt::Color.new(value)
 		end
 
 		def notify()

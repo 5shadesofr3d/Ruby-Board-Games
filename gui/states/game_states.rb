@@ -2,30 +2,31 @@ require 'Qt'
 require "test/unit"
 require_relative '../player'
 require_relative '../debug'
+require_relative '../game'
 
 class GameStateMachine < Qt::StateMachine
   include Test::Unit::Assertions
   include Debug
 
-  attr_reader :game
+  attr_reader :client
 
-  def initialize(game)
-    assert game.is_a?(Game::Model::Abstract)
+  def initialize(client)
+    assert client.is_a?(Game::Client)
 
-    game.is_a?(Qt::Object) ? super(game) : super()
-    @game = game
+    client.is_a?(Qt::Object) ? super(client) : super()
+    @client = client
 
     assert valid?
   end
 
   def setup()
-    assert game.is_a? Game::Model::Abstract
+    assert client.is_a? Game::Client
 
-    lobby = GameLobbyState.new(self, game)
-    start = GamePlayState.new(self, game)
-    move = GamePlayerMoveState.new(self, game)
-    status = GameDetermineStatusState.new(self, game)
-    complete = GameEndState.new(self, game)
+    lobby = GameLobbyState.new(self, client)
+    start = GamePlayState.new(self, client)
+    move = GamePlayerMoveState.new(self, client)
+    status = GameDetermineStatusState.new(self, client)
+    complete = GameEndState.new(self, client)
 
     lobby.addTransition(lobby, SIGNAL("done()"), start)
     start.addTransition(start, SIGNAL("done()"), move)
@@ -49,7 +50,7 @@ class GameStateMachine < Qt::StateMachine
   end
 
   def valid?
-    return false unless @game.is_a?(Game::Model::Abstract)
+    return false unless @client.is_a?(Game::Client)
     return true
   end
 
@@ -59,46 +60,50 @@ class GameState < Qt::State
   include Debug
   include Test::Unit::Assertions
 
-  attr_reader :game
+  attr_reader :client
   signals :done
 
-  def initialize(machine, game)
+  def initialize(machine, client)
     assert machine.is_a? Qt::StateMachine
-    assert game.is_a? Game::Model::Abstract
+    assert client.is_a? Game::Client
     super(machine)
-    @game = game
-    assert @game.is_a? Game::Model::Abstract
+    @client = client
+    assert @client.is_a? Game::Client
   end
 
 end
 
 class GameLobbyState < GameState
+  def startButton()
+    return client.view.lobby.buttons.start
+  end
+
+  def exitButton()
+    return client.view.lobby.buttons.exit
+  end
+
   def onEntry(event)
     # show game lobby
-    assert game.is_a? Game::Model::Abstract
+    assert client.is_a? Game::Client
 
-    game.showLobby
+    client.view.showLobby
 
     # when start button is clicked, go to the next state
-    game.lobby.views.each do |view|
-      connect(view.buttons.start, SIGNAL("clicked()"), self, SIGNAL("done()"))
-      # connect(exitButton, SIGNAL("clicked()"), self, SLOT("exit_lobby()"))
-    end
+    connect(startButton, SIGNAL("clicked()"), self, SIGNAL("done()"))
+    connect(exitButton, SIGNAL("clicked()"), self, SLOT("exit_lobby()"))
   end
 
   def onExit(event)
-    assert game.is_a? Game::Model::Abstract
-    # assert game.players.size == 0 TODO: Assertion bug?
+    assert client.is_a? Game::Client
+    model = client.query_model
+    # assert client.players.size == 0 TODO: Assertion bug?
     # disconnect the start button so it no longer works
-    game.lobby.views.each do |view|
-      disconnect(view.buttons.start, SIGNAL("clicked()"), self, SIGNAL("done()"))
-      # disconnect(exitButton, SIGNAL("clicked()"), self, SLOT("exit_lobby()"))
-    end
-    game.updatePlayerObjects()
+    disconnect(startButton, SIGNAL("clicked()"), self, SIGNAL("done()"))
+    disconnect(exitButton, SIGNAL("clicked()"), self, SLOT("exit_lobby()"))
 
-    assert game.players.is_a? Array
-    assert game.players.size > 0
-    assert game.players.each {|p| assert p.is_a? Player::Abstract}
+    assert model.players.is_a? Array
+    assert model.players.size > 0
+    assert model.players.each {|p| assert p.is_a? Player::Abstract}
   end
 
 end
@@ -106,47 +111,37 @@ end
 class GamePlayState < GameState
 
   def onEntry(event)
-    assert game.is_a? Game::Model::Abstract
+    assert client.is_a? Game::Client
 
-    # show game board
-    game.showBoard()
-    # game time
-    # game score
+    client.view.showBoard()
+    client.model.pregameSetup()
     done()
 
-    assert game.is_a? Game::Model::Abstract
+    assert client.is_a? Game::Client
   end
 
   def onExit(event)
-
+    client.update()
   end
 end
 
 class GamePlayerMoveState < GameState
 
   def onEntry(event)
-    assert game.players.count > 0
-    assert game.players.first.is_a? Player::Abstract
-    # get next player
-    player = game.players.first
-    # acknowledge moves from this player
-    connect(player, SIGNAL("finished()"), self, SIGNAL("done()"))
-    player.enable
-    # after player completes his move, go to the next state
-
-    assert player.is_a? Player::Abstract
+    model = client.query_model
+    if client.user.name == model.players.first.name
+      connect(client.user, SIGNAL("finished()"), self, SIGNAL("done()"))
+      client.user.enable(model)
+    end
   end
 
   def onExit(event)
-    assert game.players.count > 0
-    assert game.players.first.is_a? Player::Abstract
-    player = game.players.first
-    # disconnect signal for the player that just played his move
-    disconnect(player, SIGNAL("finished()"), self, SIGNAL("done()"))
-    # no longer acknowledge moves from this player
-    player.disable
-
-    assert player.is_a? Player::Abstract
+    model = client.query_model
+    if client.user.name == model.players.first.name
+      client.user.disable
+      disconnect(client.user, SIGNAL("finished()"), self, SIGNAL("done()"))
+      client.deliver
+    end
   end
 
 end
@@ -156,19 +151,19 @@ class GameDetermineStatusState < GameState
   signals :win
 
   def onEntry(event)
-    assert game.is_a? Game::Model::Abstract
-    assert game.players.count > 0
+    model = client.query_model
+    assert client.is_a? Game::Client
+    assert model.players.count > 0
 
-    if game.winner? or game.tie?
+    if model.winner? or model.tie?
       win()
     else
-      # cycle to next player and get his move
-      game.players.rotate!
+      model.players.rotate!
       done()
     end
 
-    assert game.is_a? Game::Model::Abstract
-    assert game.players.count > 0
+    assert client.is_a? Game::Client
+    assert model.players.count > 0
   end
 
   def onExit(event)
@@ -180,18 +175,18 @@ end
 class GameEndState < GameState
 
   def onEntry(event)
-    assert game.is_a? Game::Model::Abstract #TODO: check and assert event type
-    assert game.players.first.is_a? Player::Abstract
-    assert game.players.each {|p| assert p.is_a? Player::Abstract}
-    # display winner, clear game board, score
+    model = client.query_model
+    assert client.is_a? Game::Client #TODO: check and assert event type
+    assert model.players.first.is_a? Player::Abstract
+    assert model.players.each { |p| assert p.is_a? Player::Abstract }
 
-    game.updatePlayerScores()
-    Board::Controller::clear(game.board)
+    # clear game board (DONE BY SERVER?)
+
     done()
   end
 
   def onExit(event)
-    game.notify()
+
   end
 
 end

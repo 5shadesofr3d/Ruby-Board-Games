@@ -6,7 +6,6 @@ module Board
 	class View < Qt::Widget
 		include Test::Unit::Assertions
 		include Board::Iterator
-		include Debug
 
 		def initialize(rows, cols, width: 800, height: 600, parent: nil)
 			assert rows.is_a? Integer
@@ -26,7 +25,6 @@ module Board
 		end
 
 		def update(model)
-			puts model
 			self.each_with_index(:head) { |head, row, col| head.update(model.head(col)) }
 			self.each_with_index(:tile) { |tile, row, col| tile.update(model.tile(row, col)) }
 		end
@@ -184,9 +182,28 @@ module Board
 	end
 
 	class View::Tile < View::Item
+		def empty?()
+			return @attached.is_a?(NilClass)
+		end
+
+		def attach(chip)
+			assert (chip.is_a?(Board::View::Chip) or chip.nil?)
+			@attached = chip
+		end
+
+		def detach(destroy_view: true)
+			@attached = nil
+		end
+
 		def update(model)
 			self.primary = model.color
 			self.secondary = Qt::transparent
+
+			unless model.empty?
+				self.attach(Board::View::Chip.new(parent: self.parent)) if self.empty?
+				@attached.update( model.attached )
+				@attached.geometry = self.geometry
+			end
 		end
 	end
 

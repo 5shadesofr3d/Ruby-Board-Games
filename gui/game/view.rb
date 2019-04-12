@@ -13,7 +13,7 @@ module Game
     include Test::Unit::Assertions
     include Debug
 
-    attr_reader :lobby, :board
+    attr_reader :lobby, :board, :client
 
     signals "keyPressed(const QKeyEvent*)"
 
@@ -84,6 +84,12 @@ module Game
       assert @board.is_a? Qt::Widget
       @stack.setCurrentWidget(@board)
     end
+
+    def client=(value)
+      @client = value
+      @lobby.client = value
+    end
+
   end
 
   class View::Proxy

@@ -11,10 +11,17 @@ module Player
 		include Test::Unit::Assertions
 		include Debug
 
-		attr_reader :name, :color, :current_chip
-		attr_accessor :wins, :losses, :ties, :game, :current_column, :goal
-		attr_accessor :host
-		attr_reader :controller
+		# basic attributes
+		attr_reader :name, :color
+
+		# scores
+		attr_accessor :wins, :losses, :ties
+
+		# game data
+		attr_accessor :host, :client, :goal, :model, :view
+		
+		# playing
+		attr_reader :controller, :chip_model, :chip_view, :column
 
 		slots :enable, :disable
 		signals :finished
@@ -22,10 +29,6 @@ module Player
 		public
 		def initialize(player_name, player_color, parent: nil)
 			parent != nil ? super(parent) : super()
-			# Set the name of the player and make the score 0
-			#pre
-			assert player_name.is_a? String
-			#TODO: Player color
 
 			@name = player_name
 			@wins = 0
@@ -35,156 +38,114 @@ module Player
 			@host = true
 
 			@controller = Board::Controller.new(parent: self)
-
-			#post
-			assert @color.is_a? Qt::Color
-			assert @name.is_a? String
-			assert @name == player_name
-			assert @wins >= 0 and @wins.is_a? Integer
-			assert @losses >= 0 and @losses.is_a? Integer
-			assert @ties >=0 and @ties.is_a? Integer
-			assert valid?
 		end
 
 		def to_json(options={})
 			return {
-				'n' => @name,
-				'w' => @wins,
-				'l' => @losses,
-				't' => @ties,
-				'c' => @color.name,
-				'h' => @host
+				'name' => @name,
+				'wins' => @wins,
+				'losses' => @losses,
+				'ties' => @ties,
+				'color' => @color.name,
+				'goal' => @goal,
+				'host' => @host
 			}.to_json
 		end
 
 		def self.from_json(string)
 			data = JSON.load string
-			player = new data['n'], data['c']
-			player.wins = data['w']
-			player.losses = data['l']
-			player.ties = data['t']
-			player.host = data['h']
+			player = new data['name'], data['color']
+			player.wins = data['wins']
+			player.losses = data['losses']
+			player.ties = data['ties']
+			player.host = data['host']
+			player.goal = data['goal']
 			return player
 		end
 
-		def _dump(level)
-			return [@name, @wins, @losses, @ties, @color.name, @host].join(":")
-		end
-
-		def self._load(args)
-			name, wins, losses, ties, color, host = *args.split(':')
-			player = new(name, color)
-			player.wins = wins
-			player.losses = losses
-			player.ties = ties
-			player.host = host
-			return player
-		end
-
-		def valid?
+		def valid?()
 			return false unless name.is_a?(String)
 			return false unless host? == true or host? == false
 			return false unless wins.is_a?(Integer) and @wins >= 0
 			return false unless losses.is_a?(Integer) and @losses >= 0
 			return false unless ties.is_a?(Integer) and @ties >= 0
 			return false unless color.is_a?(Qt::Color)
-			return false unless game.is_a?(Game) or game == nil
 			return true
 		end
 
-		def host?()
-			return @host
+		def color=(c)
+			@color = Qt::Color.new(c)
+		end
+
+		def enable(model)
+			@model = model
+			@view = client.view
+
+			@chip_model = model.constructChip(self.color)
+			@chip_view = Board::View::Chip.new(parent: self.client.view.board)
+			@column = 0
+
+			self.chip_view.update(self.chip_model)
+			self.chip_view.geometry = client.view.board.head(self.column).geometry
+			
+			connect(self.controller, SIGNAL("dropped()"), self, SIGNAL("finished()"))
+		end
+
+		def disable()
+			disconnect(self.controller, SIGNAL("dropped()"), self, SIGNAL("finished()"))
+		end
+
+		def drop()
+			self.controller.drop(
+				chip_model: self.chip_model, chip_view: self.chip_view,
+				board_model: self.model.board, board_view: self.view.board,
+				column: self.column, time: 750)
+		end
+
+		def left()
+			return if self.column == 0
+
+			controller.translate_model(
+				item: self.chip_model,
+				from: self.model.board.head(self.column),
+				to:   self.model.board.head(self.column - 1))
+
+			controller.translate_view(
+				item: self.chip_view,
+				from: self.view.board.head(self.column),
+				to:   self.view.board.head(self.column - 1),
+				time: 100)
+
+			@column -= 1
+		end
+
+		def right()
+			return if self.column == model.columns - 1
+
+			controller.translate_model(
+				item: self.chip_model,
+				from: self.model.board.head(self.column),
+				to:   self.model.board.head(self.column + 1))
+
+			controller.translate_view(
+				item: self.chip_view,
+				from: self.view.board.head(self.column),
+				to:   self.view.board.head(self.column + 1),
+				time: 100)
+
+			@column += 1
 		end
 
 		def up()
-			return if @current_chip == nil
-			@current_chip.view = nil # deletes current view
-			@current_chip = game.constructChip(color, column: @current_column)
+			@chip_model = model.constructChip(self.color)
+			self.chip_view.update( self.chip_model )
 		end
 
 		def down()
 			up()
 		end
 
-		def left()
-			assert game.is_a? Game::Model::Abstract
-			assert game.board.is_a? Board::Model
-
-			return if current_column == 0
-
-			model = game.board
-			controller.translate(
-				item: current_chip,
-				from: model.head(current_column),
-				to: model.head(current_column - 1),
-				time: 100)
-
-			@current_column -= 1
-
-			assert @current_column.is_a? Integer
-			assert game.is_a? Game::Model::Abstract
-			assert game.board.is_a? Board::Model
-		end
-
-		def right
-			assert game.is_a? Game::Model::Abstract
-			assert game.board.is_a? Board::Model
-
-			return if current_column == game.board.columns.max
-
-			model = game.board
-			controller.translate(
-				item: current_chip,
-				from: model.head(current_column),
-				to: model.head(current_column + 1),
-				time: 100)
-
-			@current_column += 1
-
-			assert @current_column.is_a? Integer
-			assert game.is_a? Game::Model::Abstract
-			assert game.board.is_a? Board::Model
-		end
-
-		def drop
-			assert game.is_a? Game::Model::Abstract
-			assert current_column.is_a? Integer
-			assert current_column >= 0
-			assert current_chip.is_a? Board::Model::Chip
-
-			controller.drop(current_chip, current_column, game.board)
-			@current_chip = nil
-
-			assert @current_chip == nil
-		end
-
-		def enable
-			assert game.is_a? Game::Model::Abstract
-			assert game.board.is_a? Board::Model
-
-			@current_chip = game.constructChip(color)
-			@current_column = 0
-			connect(controller, SIGNAL("dropped()"), self, SIGNAL("finished()"))
-
-			assert @current_chip.is_a? Board::Model::Chip
-			assert current_column.is_a? Integer and current_column >= 0
-		end
-
-		def disable()
-			assert game.board.is_a? Board::Model
-			disconnect(controller, SIGNAL("dropped()"), self, SIGNAL("finished()"))
-		end
-
-		def total_score
-			assert wins.is_a? Integer
-			assert losses.is_a? Integer
-			assert wins >= 0
-			assert losses >= 0
-
-			return wins - losses
-		end
-
-		def play
+		def play()
 			# This function will be implemented differently based on the player type
 			raise AbstractClassError
 		end
