@@ -104,7 +104,10 @@ class Player < Qt::Object
 		assert current_column >= 0
 		assert current_chip.is_a? Board::Model::Chip
 
+		puts current_column
+		puts current_chip
 		game.board.drop(current_chip, current_column)
+		puts "Abstract drop finished"
 		@current_chip = nil
 
 		assert @current_chip == nil

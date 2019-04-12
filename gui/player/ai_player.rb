@@ -20,9 +20,22 @@ class AIPlayer < Player
 		
 	end
 
-	# def disable()
-	# 	puts "we are about to disable"
+	# def disable
+	# 	# This is to prevent any keyboard presses from happening
+	# 	assert game.is_a? Game
+	# 	assert game.board.is_a? Board::Widget
+
 	# 	super()
+
+	# 	disconnect(game.board.controller, SIGNAL("translateStarted()"), self, SLOT("ignore_keyboard()"))
+	# 	disconnect(game.board.controller, SIGNAL("translateCompleted()"), self, SLOT("acknowledge_keyboard()"))
+
+	# 	ignore_keyboard
+	# end
+
+	# def ignore_keyboard
+	# 	assert game.is_a? Game
+	# 	disconnect(game, SIGNAL("keyPressed(const QKeyEvent*)"), self, SLOT("play(const QKeyEvent*)"))
 	# end
 
 	def play
@@ -46,6 +59,7 @@ class AIPlayer < Player
 
 		# AI will get the next position, will be determined based on the difficulty setting
 		@current_column = @ai_object.getBestScore()
+		puts @current_column
 		if @ai_object.is_a?(AI_OTTO)
 			# random value
 			temp_num = rand(2)
@@ -54,6 +68,7 @@ class AIPlayer < Player
 			end
 		end
 		drop()
+		puts "drop finished"
 		finished()
 
 		#post

@@ -71,10 +71,12 @@ class AI
 
 	def get_score
 		# This will be the general loop that will give the scoring matrix
-		@current_chip.hide
+		# TODO: Fix the changes made to the models in board to be used by the AI
+		@current_chip.view.hide()
 		current_model = @playing_game.board.model
 		current_model.columns.each do |col|
 			# get the next empty row num
+			score = 0
 			empty_row = 0
 			# TODO: verify that this works
 			e = current_model.to_enum(:each_in_column, :tile, col)
@@ -84,17 +86,23 @@ class AI
 				end
 			end
 			tile = current_model.next_empty(col)
-			@playing_game.board.translate(
-				item: @current_chip,
-				from: current_model.head(col),
-				to: tile,
-				time: 0)
-			score = scoring(@playing_game.board, @current_chip)
-			tile.detach()
+			if tile != nil
+				# Do the mock translation
+				@current_chip.view.geometry = tile.geometry
+				puts "Making the fake move"
+				@playing_game.board.translate(
+					item: @current_chip,
+					from: current_model.head(col),
+					to: tile,
+					time: 0)
+				score = scoring(@playing_game.board, @current_chip)
+				tile.detach()
+			end
+			# append the column score to the matrix
 			@scoring_matrix << score
 		end
-
-		@current_chip.show
+		puts "showing the chip again"
+		@current_chip.view.show()
 	end
 
 	def minimax_alg

@@ -57,7 +57,7 @@ class AI_Connect4 < AI
 	    return false unless chips.size == 4
 	    return false if chips.include?(nil)
 	    return false unless chips.each {|c| c == @current_chip} # need to test this
-	    return chips.uniq { |c| c.secondary }.length == 1
+	    return chips.uniq { |c| c.id }.length == 1
 	end
 
 	def contain2?(chips)
