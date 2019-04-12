@@ -1,7 +1,11 @@
 
-prereqs:
+c1:
 	/bin/bash --login
+
+c2:
 	rvm user gemsets
+
+c3:
 	rvm use system
 
 qt:
