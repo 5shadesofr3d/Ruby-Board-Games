@@ -17,6 +17,7 @@ module Game
 			@model = model
 			@address = address
 			@port = port
+			#$stdout.reopen('/dev/null', 'w') unless Debug::enabled
 			@connection = XMLRPC::Server.new(port, ENV['HOSTNAME'], @@MAX_CONNECTIONS)
 			setupHandlers()
 		end
