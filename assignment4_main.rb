@@ -30,14 +30,15 @@ require_relative 'application'
 Debug::on # may cause animation lag due to excessive printing to terminal
 # app = GameApplication.new
 
-app = Qt::Application.new ARGV
+app = Qt::Application.new []
 
 # player = Game::Model::Connect4.new()
 # data = JSON.dump(player)
 # puts data
 # p2 = JSON.load(data)
 
-client = Game::Client.new()
+username = ARGV.first
+client = Game::Client.new(username: username)
 # model = Game::Model::Connect4.new()
 # model.addView Game::View.new(model.rows, model.columns)
 # model.start()

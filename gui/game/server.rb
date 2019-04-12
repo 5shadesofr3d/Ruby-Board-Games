@@ -73,6 +73,7 @@ module Game
 	class GameHandler
 		def initialize(game)
 			@game = game
+			@state_stack = []
 		end
 
 		def instance()
@@ -97,6 +98,14 @@ module Game
 				@game.lobby = model.lobby
 			end
 			return true
+		end
+
+		def state_stack()
+			return @state_stack
+		end
+
+		def push_state(state)
+			@state_stack << state
 		end
 
 		def rows()

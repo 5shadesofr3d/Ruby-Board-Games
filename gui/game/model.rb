@@ -1,6 +1,7 @@
 require_relative '../board'
 require_relative '../debug'
 require_relative '../lobby/model'
+require_relative '../states/game_states'
 
 module Game
 	module Model
@@ -28,7 +29,7 @@ module Game
 
 		def self.from_json(string)
 			data = JSON.load string
-			model = Object.const_get(data['class']).new 
+			model = Object.const_get(data['class']).new
 			model.board = Board::Model::from_json(data['board'])
 			model.lobby = Lobby::Model::from_json(data['lobby'])
 			return model

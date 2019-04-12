@@ -9,6 +9,7 @@ class GameStateMachine < Qt::StateMachine
   include Debug
 
   attr_reader :client
+  attr_accessor :current_state
 
   def initialize(client)
     assert client.is_a?(Game::Client)
@@ -60,7 +61,7 @@ class GameState < Qt::State
   include Debug
   include Test::Unit::Assertions
 
-  attr_reader :client
+  attr_reader :client, :machine
   signals :done
 
   def initialize(machine, client)
@@ -68,7 +69,12 @@ class GameState < Qt::State
     assert client.is_a? Game::Client
     super(machine)
     @client = client
+    @machine = machine
     assert @client.is_a? Game::Client
+  end
+
+  def clazz()
+    return self.class.name
   end
 
 end
@@ -83,12 +89,13 @@ class GameLobbyState < GameState
   end
 
   def onEntry(event)
-    # show game lobby
     assert client.is_a? Game::Client
 
+    machine.current_state = self
+    client.state_stack << self.clazz
+    client.model.push_state(self.clazz) if client.user.host
     client.view.showLobby
 
-    # when start button is clicked, go to the next state
     connect(startButton, SIGNAL("clicked()"), self, SIGNAL("done()"))
     connect(exitButton, SIGNAL("clicked()"), self, SLOT("exit_lobby()"))
   end
@@ -97,7 +104,9 @@ class GameLobbyState < GameState
     assert client.is_a? Game::Client
     model = client.query_model
     # assert client.players.size == 0 TODO: Assertion bug?
-    # disconnect the start button so it no longer works
+
+    client.timer.stop
+
     disconnect(startButton, SIGNAL("clicked()"), self, SIGNAL("done()"))
     disconnect(exitButton, SIGNAL("clicked()"), self, SLOT("exit_lobby()"))
 
@@ -112,6 +121,10 @@ class GamePlayState < GameState
 
   def onEntry(event)
     assert client.is_a? Game::Client
+
+    machine.current_state = self
+    client.state_stack << self.clazz
+    client.model.push_state(self.clazz) if client.user.host
 
     client.view.showBoard()
     client.model.pregameSetup()
@@ -128,10 +141,15 @@ end
 class GamePlayerMoveState < GameState
 
   def onEntry(event)
+    machine.current_state = self
+    client.state_stack << self.clazz
+
     model = client.query_model
     if client.user.name == model.players.first.name
       connect(client.user, SIGNAL("finished()"), self, SIGNAL("done()"))
       client.user.enable(model)
+    else
+      client.timer.start
     end
   end
 
@@ -141,6 +159,8 @@ class GamePlayerMoveState < GameState
       client.user.disable
       disconnect(client.user, SIGNAL("finished()"), self, SIGNAL("done()"))
       client.deliver
+    else
+      client.timer.stop
     end
   end
 
@@ -151,6 +171,9 @@ class GameDetermineStatusState < GameState
   signals :win
 
   def onEntry(event)
+    machine.current_state = self
+    client.state_stack << self.clazz
+
     model = client.query_model
     assert client.is_a? Game::Client
     assert model.players.count > 0
@@ -175,6 +198,9 @@ end
 class GameEndState < GameState
 
   def onEntry(event)
+    machine.current_state = self
+    client.state_stack << self.clazz
+
     model = client.query_model
     assert client.is_a? Game::Client #TODO: check and assert event type
     assert model.players.first.is_a? Player::Abstract
