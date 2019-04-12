@@ -75,7 +75,7 @@ class OnlineLobbyUI < Qt::Frame
 
   @@MAX_ROOM_COUNT = 5
 
-  def initialize(parent: nil)
+  def initialize(width: 550, height: 400, parent: nil)
     parent != nil ? super(parent) : super()
 
     @lobby = LobbyRoom.new(parent: self)
@@ -83,8 +83,9 @@ class OnlineLobbyUI < Qt::Frame
     @room_count = 0
 
     setSizePolicy(Qt::SizePolicy::Preferred, Qt::SizePolicy::Minimum)
-    setMaximumWidth(550)
-    setMaximumHeight(400)
+    resize(width,height)
+    #setMaximumWidth(550)
+    #setMaximumHeight(400)
 
     layout = Qt::VBoxLayout.new(self)
     layout.addWidget(@lobby)
@@ -387,14 +388,14 @@ class LobbyInfo < Qt::Widget
 
 end
 
-app = Qt::Application.new ARGV
-@main_window = Qt::MainWindow.new
-@main_window.setWindowTitle("Ruby-Board-Games")
-@main_window.setFixedSize(400, 400)
-lobby = OnlineLobbyUI.new()
-lobby.show()
-lobby.addRoom
-lobby.addRoom("Great lobby", 4)
-lobby.addRoom
-lobby.addRoom("Great lobby", 4)
-app.exec
+#app = Qt::Application.new ARGV
+#@main_window = Qt::MainWindow.new
+#@main_window.setWindowTitle("Ruby-Board-Games")
+#@main_window.setFixedSize(400, 400)
+#lobby = OnlineLobbyUI.new()
+#lobby.show()
+#lobby.addRoom
+#lobby.addRoom("Great lobby", 4)
+#lobby.addRoom
+#lobby.addRoom("Great lobby", 4)
+#app.exec
