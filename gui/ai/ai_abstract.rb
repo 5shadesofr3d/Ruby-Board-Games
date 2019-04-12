@@ -86,6 +86,7 @@ class AI
 					empty_row += 1
 				end
 			end
+			
 			begin
 				tile = current_model.next_empty(col)
 				if tile != nil

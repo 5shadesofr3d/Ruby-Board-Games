@@ -3,6 +3,7 @@ require 'Qt'
 
 require_relative 'gui/settings'
 require_relative 'gui/states/application_states'
+require_relative 'gui/leaderboard/leaderboard'
 
 class QTApplication
   include Singleton
@@ -61,4 +62,22 @@ class GameApplication
 
   end
 
+end
+
+class LeaderboardApplication
+  include Test::Unit::Assertions
+
+  def is_valid?
+    assert @window.is_a? QTApplication
+  end
+
+  def initialize
+    # Use the singleton to create the QT GUI
+    @window = QTApplication.instance
+    @leaderboard = LeaderboardState.new
+
+    @window.app.exec
+
+    is_valid?
+  end
 end
