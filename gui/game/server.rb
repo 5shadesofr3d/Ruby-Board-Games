@@ -12,12 +12,12 @@ module Game
 
 		@@MAX_CONNECTIONS = 10
 
-		def initialize(address: "hello", port: 8080, model: nil)
+		def initialize(address: "hello", port: 50525, model: nil)
 			assert model.is_a?(Game::Model::Abstract)
 			@model = model
 			@address = address
 			@port = port
-			@connection = XMLRPC::Server.new(port, "localhost", @@MAX_CONNECTIONS)
+			@connection = XMLRPC::Server.new(port, ENV['HOSTNAME'], @@MAX_CONNECTIONS)
 			setupHandlers()
 		end
 
