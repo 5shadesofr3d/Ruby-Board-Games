@@ -203,7 +203,7 @@ end
 class MultiplayerLobbyController < Qt::Widget
   include Test::Unit::Assertions
 
-  slots 'exit_lobby()'
+  slots 'exit_lobby()','create_lobby()','join_game()'
 
   def initialize(state, window)
     assert state.is_a? MultiplayerLobbyState
@@ -216,8 +216,11 @@ class MultiplayerLobbyController < Qt::Widget
     settings = Settings.instance
     @mpLobby = OnlineLobbyUI.new(width: settings.window_width, height: settings.window_height, parent: window)
     @mpLobby.show
+    add_rooms
 
     connect(@mpLobby.buttons.exit,  SIGNAL('clicked()'), self, SLOT('exit_lobby()'))
+    connect(@mpLobby.buttons.add,  SIGNAL('clicked()'), self, SLOT('create_lobby()'))
+    connect(@mpLobby.buttons.join,  SIGNAL('clicked()'), self, SLOT('join_game()'))
 
     assert @state.is_a? MultiplayerLobbyState
     assert @window.is_a? Qt::MainWindow
@@ -227,6 +230,27 @@ class MultiplayerLobbyController < Qt::Widget
   def exit_lobby
     @mpLobby.close
     @state.open_title
+  end
+
+  def create_lobby
+    #TODO: Host a room on the server
+    puts 'Created a new lobby'
+    #POST:
+    #@mpLobby.close
+    #@state.open_game
+    #Transition to multiplayer game lobby
+  end
+
+  def join_game
+    #TODO: Join the game room
+    puts 'Joined a new lobby'
+    rooms = @mpLobby.lobby.lobby_infos #to verify game exists
+    selectedGameId = @mpLobby.buttons.gameID.text
+    puts "Selected game: " + selectedGameId
+    #POST
+    #@mpLobby.close
+    #@state.open_game
+    #Transition to multiplayer game lobby
   end
 
   def add_rooms

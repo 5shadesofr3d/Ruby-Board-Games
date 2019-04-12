@@ -69,7 +69,7 @@ class NewRoomPopup < Qt::Widget
 end
 
 class OnlineLobbyUI < Qt::Frame
-  attr_reader :room, :buttons
+  attr_reader :room, :buttons, :lobby
 
   slots :createRoom, :addRoom
 
@@ -142,7 +142,7 @@ class OnlineLobbyUI < Qt::Frame
 end
 
 class LobbyButtons < Qt::Widget
-  attr_reader :add, :exit
+  attr_reader :join, :add, :exit, :gameID
 
   def initialize(parent: nil)
     parent != nil ? super(parent) : super()
@@ -150,12 +150,31 @@ class LobbyButtons < Qt::Widget
     buttonLayout = Qt::HBoxLayout.new(self)
     @add = LobbyButton.new("Create Room", self)
     @exit = LobbyButton.new("Exit",self)
+    @join = LobbyButton.new("Join Room", self)
+    @gameID = LobbyTextBox.new(self)
     buttonLayout.addWidget(exit)
     buttonLayout.addWidget(add)
+    buttonLayout.addWidget(join)
+    buttonLayout.addWidget(gameID)
     setLayout(buttonLayout)
 
   end
 
+end
+
+class LobbyTextBox < Qt::LineEdit
+  def initialize(parent)
+    super(parent)
+
+    setStyleSheet("color:white; background-color:#{LobbyColor::BLUE}; border: 1px; border-radius: 10px")
+
+    setMaximumSize(125, 50)
+    setMinimumSize(125, 50)
+
+    font = self.font()
+    font.setPixelSize(17)
+    self.setFont(font)
+  end
 end
 
 class LobbyButton < Qt::PushButton
@@ -176,7 +195,7 @@ end
 class LobbyRoom < Qt::Frame
   include Test::Unit::Assertions
 
-  attr_reader :playerInfos
+  attr_reader :lobby_infos
 
   def initialize(parent: nil)
     parent != nil ? super(parent) : super()
