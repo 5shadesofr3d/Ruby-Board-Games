@@ -42,20 +42,20 @@ client = Game::Client.new(username: username)
 # model = Game::Model::Connect4.new()
 # model.addView Game::View.new(model.rows, model.columns)
 # model.start()
-
+#
 # model.lobby.add(Player::Online.new("Godzilla", Qt::green))
 # model.lobby.notify()
-
+#
 # model = Board::Model.new(7, 8)
 # view = Board::View.new(model.rowSize, model.columnSize)
 # controller = Board::Controller.new()
 # view.show()
-
+#
 # view.update(model)
-
+#
 # chip_model = Board::Model::Chip.new()
 # chip_view = Board::View::Chip.new(parent: view)
-
+#
 # controller.drop(
 # 	chip_model: chip_model, chip_view: chip_view,
 # 	board_model: model, board_view: view,
