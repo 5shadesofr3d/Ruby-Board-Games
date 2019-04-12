@@ -92,20 +92,20 @@ class GameLobbyState < GameState
     assert client.is_a? Game::Client
 
     machine.current_state = self
-    client.state_stack << self.clazz
-    client.model.push_state(self.clazz) if client.user.host
+    client.push if client.user.host
     client.view.showLobby
 
     connect(startButton, SIGNAL("clicked()"), self, SIGNAL("done()"))
     connect(exitButton, SIGNAL("clicked()"), self, SLOT("exit_lobby()"))
+
+    client.timer.start
   end
 
   def onExit(event)
     assert client.is_a? Game::Client
-    model = client.query_model
     # assert client.players.size == 0 TODO: Assertion bug?
-
     client.timer.stop
+    model = client.current_model
 
     disconnect(startButton, SIGNAL("clicked()"), self, SIGNAL("done()"))
     disconnect(exitButton, SIGNAL("clicked()"), self, SLOT("exit_lobby()"))
@@ -122,19 +122,22 @@ class GamePlayState < GameState
   def onEntry(event)
     assert client.is_a? Game::Client
 
-    machine.current_state = self
-    client.state_stack << self.clazz
-    client.model.push_state(self.clazz) if client.user.host
-
     client.view.showBoard()
-    client.model.pregameSetup()
+
+    machine.current_state = self
+    if client.user.host
+      client.push
+      client.model.pregameSetup()
+    end
+
     done()
 
     assert client.is_a? Game::Client
   end
 
   def onExit(event)
-    client.update()
+    client.update
+    client.update
   end
 end
 
@@ -142,46 +145,50 @@ class GamePlayerMoveState < GameState
 
   def onEntry(event)
     machine.current_state = self
-    client.state_stack << self.clazz
-
-    model = client.query_model
+    model = client.current_model
     if client.user.name == model.players.first.name
+      client.push
       connect(client.user, SIGNAL("finished()"), self, SIGNAL("done()"))
       client.user.enable(model)
     else
       client.timer.start
     end
+
+    client.update
   end
 
   def onExit(event)
-    model = client.query_model
+    model = client.current_model
     if client.user.name == model.players.first.name
       client.user.disable
       disconnect(client.user, SIGNAL("finished()"), self, SIGNAL("done()"))
-      client.deliver
+      client.push(model: client.user.model)
     else
       client.timer.stop
     end
+    client.update if client.user.name == model.players.first.name
   end
 
 end
 
 class GameDetermineStatusState < GameState
-
   signals :win
 
   def onEntry(event)
     machine.current_state = self
-    client.state_stack << self.clazz
 
-    model = client.query_model
+    model = client.current_model
+    if client.user.name == model.players.first.name
+      client.push
+    end
+
     assert client.is_a? Game::Client
     assert model.players.count > 0
 
     if model.winner? or model.tie?
       win()
     else
-      model.players.rotate!
+      client.lobby.rotate! if client.user.name == model.players.first.name
       done()
     end
 
@@ -190,7 +197,8 @@ class GameDetermineStatusState < GameState
   end
 
   def onExit(event)
-
+    client.update
+    client.update
   end
 
 end
@@ -199,20 +207,23 @@ class GameEndState < GameState
 
   def onEntry(event)
     machine.current_state = self
-    client.state_stack << self.clazz
 
-    model = client.query_model
+    model = client.current_model
+    if client.user.name == model.players.first.name
+      model.updatePlayerScores()
+      Board::Controller::clear(model.board)
+      client.push(model: model)
+    end
+
     assert client.is_a? Game::Client #TODO: check and assert event type
     assert model.players.first.is_a? Player::Abstract
     assert model.players.each { |p| assert p.is_a? Player::Abstract }
-
-    # clear game board (DONE BY SERVER?)
 
     done()
   end
 
   def onExit(event)
-
+      client.update
   end
 
 end

@@ -22,9 +22,11 @@ module Game
 		end
 
 		def setupHandlers
-			@connection.add_handler("#{address}_model", GameHandler.new(model))
-			@connection.add_handler("#{address}_lobby", LobbyHandler.new(model.lobby))
-			@connection.add_handler("#{address}_board", model.board)
+			@gameHandler = GameHandler.new(model)
+			@lobbyHandler = LobbyHandler.new(@gameHandler)
+			
+			@connection.add_handler("#{address}_model", @gameHandler)
+			@connection.add_handler("#{address}_lobby", @lobbyHandler)
 		end
 
 		def serve()
@@ -33,22 +35,29 @@ module Game
 	end
 
 	class LobbyHandler
-		def initialize(lobby)
-			@lobby = lobby
+		include Debug
+
+		def initialize(gameHandler)
+			@gameHandler = gameHandler
 		end
 
-		def host()
-			data = nil
-			Qt.execute_in_main_thread do
-				data = @lobby.players.first.name
-			end
-			return data
+		def lobby()
+			@gameHandler.game.lobby
 		end
 
 		def update(player)
 			Qt.execute_in_main_thread do
 				obj = Player::Abstract::from_json(player)
-				@lobby.update(obj)
+				lobby.update(obj)
+				@gameHandler.push_latest
+			end
+			return true
+		end
+
+		def rotate!()
+			Qt.execute_in_main_thread do
+				lobby.rotate!
+				@gameHandler.push_latest
 			end
 			return true
 		end
@@ -56,7 +65,8 @@ module Game
 		def add(data)
 			Qt.execute_in_main_thread do
 				obj = Player::Abstract::from_json(data)
-				@lobby.add(obj)
+				lobby.add(obj)
+				@gameHandler.push_latest
 			end
 			return true
 		end
@@ -64,16 +74,20 @@ module Game
 		def remove(data)
 			Qt.execute_in_main_thread do
 				obj = Player::Abstract::from_json(data)
-				@lobby.remove(obj)
+				lobby.remove(obj)
+				@gameHandler.push_latest
 			end
 			return true
 		end
 	end
 
 	class GameHandler
+		include Debug
+		attr_reader :game, :stack
+
 		def initialize(game)
 			@game = game
-			@state_stack = []
+			@model_stack = []
 		end
 
 		def instance()
@@ -87,12 +101,22 @@ module Game
 		def pregameSetup()
 			Qt.execute_in_main_thread do
 				@game.initializePlayerGoals()
+				push_latest
 			end
 			return true
 		end
 
-		def update(model)
+		def model_stack(index)
+			return @model_stack[index]
+		end
+
+		def model_stack_size()
+			return @model_stack.size
+		end
+
+		def push_model(model)
 			Qt.execute_in_main_thread do
+				@model_stack << model
 				model = Game::Model::Abstract::from_json(model)
 				@game.board = model.board
 				@game.lobby = model.lobby
@@ -100,12 +124,22 @@ module Game
 			return true
 		end
 
-		def state_stack()
-			return @state_stack
+		def push_latest()
+			Qt.execute_in_main_thread do
+				unless @model_stack.empty?
+					model = Game::Model::Abstract::from_json(@model_stack.last)
+					@game.state = model.state
+				end
+				@model_stack << @game.to_json
+				players = @game.players.map { |player| player.name }
+				puts players.to_s
+			end
+			return true
 		end
 
-		def push_state(state)
-			@state_stack << state
+		def push(model)
+			push_model(model)
+			return true
 		end
 
 		def rows()

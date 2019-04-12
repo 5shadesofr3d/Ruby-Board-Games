@@ -15,7 +15,7 @@ module Game
 		attr_reader :address, :port, :server, :connection
 		attr_reader :model, :lobby, :board, :view
 		attr_reader :user, :machine, :timer
-		attr_reader :state_stack
+		attr_reader :model_stack
 
 		slots "onTimeout()"
 
@@ -27,12 +27,12 @@ module Game
 			@machine = GameStateMachine.new(self)
 			@address = address
 			@port = port
-			@state_stack = []
+			@model_stack = []
 
 			setupConnections()
 			setupProxy()
-			setupUI()
 			setupUpdateTimer()
+			setupUI()
 		end
 
 		def setupConnections()
@@ -51,7 +51,6 @@ module Game
 			@view.client = self
 			@view.show()
 			lobby.add(json_user)
-			update()
 			machine.setup()
 			machine.start()
 		end
@@ -61,8 +60,6 @@ module Game
 			@timer.setInterval(1000)
 
 			connect(@timer, SIGNAL("timeout()"), self, SLOT("onTimeout()"))
-
-			@timer.start()
 		end
 
 		def json_user()
@@ -70,30 +67,55 @@ module Game
 		end
 
 		def query_model()
-			return Game::Model::Abstract::from_json(model.instance)
+			if @model_stack.size < model.model_stack_size
+				new_model = Game::Model::Abstract::from_json(model.model_stack(@model_stack.size))				
+				@model_stack << new_model
+				return new_model
+			else
+				return current_model
+			end
 		end
 
-		def deliver()
-			new_model = user.model # the model changed by user
-			model.update(new_model.to_json)
+		def current_model()
+			return @model_stack.last
+		end
+
+		def current_state()
+			return machine.current_state.clazz
+		end
+
+		def push(model: self.current_model)
+			model.state = current_state
+			@model.push(model.to_json)
+			debug()
 		end
 
 		def deliver_user()
 			lobby.update(json_user)
+			debug()
 		end
 
 		def update()
-			@view.update(query_model)
+			debug()
+			model = query_model
+			@view.update(model)
+			user.host = true if model.players.any? { |e| e.name == user.name and e.host }
+
+			next_state = model.state
+			machine.current_state.done if next_state != self.current_state
+			puts "EXPECTED: #{next_state}, GOT: #{self.current_state}"
+			debug()
+		end
+
+		def debug()
+			puts "USER: #{user.name}, HOST: #{user.host}"
+			puts "SERVER SIZE: #{@model.model_stack_size}, LOCAL_SIZE: #{@model_stack.size}"
+			players = self.current_model.players.map { |player| player.name } unless @model_stack.empty?
+			puts "PLAYER ORDER = #{players.to_s}"
 		end
 
 		def onTimeout()
-			self.update()
-			model_stack = model.state_stack
-			# puts model_stack.to_s
-			# puts state_stack.to_s
-			if state_stack.size < model_stack.size
-				machine.current_state.done # force complete the current state
-			end
+			update()
 		end
 
 		def quit()

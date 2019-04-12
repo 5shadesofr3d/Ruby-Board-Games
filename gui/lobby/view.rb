@@ -358,7 +358,6 @@ module Lobby
     end
 
     def deliver()
-      puts "#{@client.user.name}, #{@name.text}"
       if not @client.nil? and @name.text == @client.user.name
         @client.user.color = @color.color
         @client.deliver_user()

@@ -35,7 +35,7 @@ module Player
 			@losses = 0
 			@ties = 0
 			@color = Qt::Color.new(player_color)
-			@host = true
+			@host = false
 
 			@controller = Board::Controller.new(parent: self)
 		end

@@ -11,17 +11,20 @@ module Game
 		attr_reader :views
 		attr_accessor :board
 		attr_accessor :lobby
+		attr_accessor :state
 
 		def initialize(rows: 7, columns: 8)
 			@views = []
 			@players = {}
 			@board = Board::Model.new(rows, columns)
 			@lobby = Lobby::Model.new()
+			@state = "GameLobbyState"
 		end
 
 		def to_json(options={})
 			return {
 				'class' => self.class,
+				'state' => @state,
 				'board' => @board.to_json,
 				'lobby' => @lobby.to_json
 			}.to_json
@@ -30,6 +33,7 @@ module Game
 		def self.from_json(string)
 			data = JSON.load string
 			model = Object.const_get(data['class']).new
+			model.state = data['state']
 			model.board = Board::Model::from_json(data['board'])
 			model.lobby = Lobby::Model::from_json(data['lobby'])
 			return model
@@ -127,6 +131,7 @@ module Game
 
 		def updatePlayerScores()
 			goal = winnersGoal
+			puts goal.nil?
 			if (goal != nil) # a winner was found
 				players.each { |player| player.goal == goal ? player.wins += 1 : player.losses += 1 }
 			else # we had a tie
@@ -169,7 +174,9 @@ module Game
 
 		def winnersGoal()
 			chips = findGoal()
-			players.each { |player| return player.goal if player.goal.size == chips.size && player.goal == chips.map(&:id) } # we have a winner if the chip sequence matches the player's goal
+			puts chips.map(&:id).to_s
+			# we have a winner if the chip sequence matches the player's goal
+			players.each { |player| return player.goal if player.goal.size == chips.size && player.goal == chips.map(&:id) }
 			return nil
 		end
 	end

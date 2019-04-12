@@ -192,6 +192,7 @@ module Board
 		end
 
 		def detach(destroy_view: true)
+			@attached.deleteLater() if destroy_view
 			@attached = nil
 		end
 
@@ -203,6 +204,8 @@ module Board
 				self.attach(Board::View::Chip.new(parent: self.parent)) if self.empty?
 				@attached.update( model.attached )
 				@attached.geometry = self.geometry
+			else
+				self.detach unless self.empty?
 			end
 		end
 	end

@@ -26,11 +26,19 @@ module Lobby
 			return new players: players
 		end
 
+		def rotate!()
+			players = @players.map { |player| player.name }
+			puts "before: #{players.to_s}"
+			@players.rotate!
+			players = @players.map { |player| player.name }
+			puts "after: #{players.to_s}"
+		end
+
 		def add(player)
 			assert player.is_a?(Player::Abstract)
 			return if @players.any? { |e| e.name == player.name }
 			@players << player
-			player.host = true if @players.first == player
+			@players.first.host = true if @players.first.name == player.name
 		end
 
 		def update(player)
