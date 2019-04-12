@@ -1,8 +1,10 @@
 require 'sqlite3'
 require 'test/unit'
-require 'model'
+require_relative 'model'
 
 class SavedGames
+  include Test::Unit::Assertions
+
   def initialize
     @db = SQLite3::Database.new "saved_game.db"
     create_games unless games_exist?
@@ -10,7 +12,6 @@ class SavedGames
     #post
     assert @db.is_a? SQLite3::Database
     assert games_exist?
-    assert @games.each{|g| assert g.is_a? GameData}
   end
 
   #Returns true if the tables for DB exist already, false otherwise
@@ -26,7 +27,7 @@ class SavedGames
     #pre
     assert games_exist?
 
-    @db.execute"SELECT * FROM SavedGames WHERE name='"+name+"'" do |res|
+    @db.execute("SELECT * FROM SavedGames WHERE name=?", [name]) do |res|
       return true
     end
     return false
@@ -56,14 +57,13 @@ class SavedGames
     jsonString = game.to_json
 
     if game_exists?(name)
-      @db.execute("UPDATE SavedGames SET jsonString='"+jsonString+"' WHERE name='"+name+"'")
+      @db.execute("UPDATE SavedGames SET jsonString=? WHERE name=?", [jsonString, name])
     else
-      @db.execute("INSERT INTO SavedGames VALUES ('"+name+"', '"+players+"', '"+jsonString+"'")
+      @db.execute("INSERT INTO SavedGames VALUES (?, ?, ?)", [name, players, jsonString])
     end
 
     #post
-    assert game_exist?(game)
-    assert @games.each{|g| assert g.is_a? GameData}
+    assert game_exists?(name)
   end
 
   def loadGame(name)
@@ -86,19 +86,26 @@ class SavedGames
     assert @db.is_a? SQLite3::Database
 
     games = []
-    @db.execute( "SELECT name, players, jsonString" ) do |row|
+    @db.execute("SELECT * from SavedGames") do |row|
       games << [row[0],row[1],row[2]]
     end
 
     #post
     assert games.is_a? Array
-    games.each{|p| assert p.is_a? GameData}
     return games
+  end
+
+  def get_game(name)
+    #pre
+    assert @db.is_a? SQLite3::Database
+
+    return @db.execute("SELECT * from SavedGames WHERE name=?", [name])
+
   end
 
 
   def debug_print_data
-    @db.execute( "SELECT * FROM game" ) do |row|
+    @db.execute( "SELECT * FROM SavedGames" ) do |row|
       p row
     end
   end

@@ -2,6 +2,7 @@ require_relative '../board'
 require_relative '../debug'
 require_relative '../lobby/model'
 require_relative '../states/game_states'
+require_relative 'saved_game'
 
 module Game
 	module Model
@@ -13,7 +14,7 @@ module Game
 		attr_accessor :lobby
 
 
-		def initialize(rows: 7, columns: 8)
+		def initialize(rows: 2, columns: 2)
 			@views = []
 			@players = {}
 			@board = Board::Model.new(rows, columns)
@@ -109,7 +110,8 @@ module Game
 				lower_diag.each_cons(4) { |chips| return chips if matchesGoal?(chips) }
 			end
 
-			saveToFile('test.txt')
+			s = SavedGames.new()
+			s.saveGame("GameTest", 1, self)
 
 			return []
 		end
