@@ -1,6 +1,8 @@
 require 'Qt'
 require 'test/unit'
 
+require_relative '../leaderboard/leaderboard'
+
 module LobbyColor
   GREY = "#D8DAE7"
   BLACK = "#050D10"
@@ -71,7 +73,7 @@ end
 class OnlineLobbyUI < Qt::Frame
   attr_reader :room, :buttons, :lobby
 
-  slots :createRoom, :addRoom
+  slots :createRoom, :addRoom, :showLeaderboard
 
   @@MAX_ROOM_COUNT = 5
 
@@ -94,6 +96,7 @@ class OnlineLobbyUI < Qt::Frame
     setLayout(layout)
 
     connect(buttons.add, SIGNAL("clicked()"), self, SLOT(:createRoom))
+    connect(buttons.leaderboard, SIGNAL("clicked()"), self, SLOT(:showLeaderboard))
     setStyleSheet("background-color:#{LobbyColor::DARK_BLUE}; border: 1px; border-radius: 10px")
   end
 
@@ -106,6 +109,12 @@ class OnlineLobbyUI < Qt::Frame
             SIGNAL("clicked()"),
             self,
             SLOT(:addRoom))
+  end
+
+  def showLeaderboard
+    # show the popup for the leaderboard
+    puts "opening leaderboard"
+    newapp = LeaderboardState.new
   end
 
   def addRoom(name = nil, game_id = nil, game_type = nil)
@@ -142,7 +151,7 @@ class OnlineLobbyUI < Qt::Frame
 end
 
 class LobbyButtons < Qt::Widget
-  attr_reader :join, :add, :exit, :gameID
+  attr_reader :join, :add, :exit, :gameID, :leaderboard
 
   def initialize(parent: nil)
     parent != nil ? super(parent) : super()
@@ -152,10 +161,12 @@ class LobbyButtons < Qt::Widget
     @exit = LobbyButton.new("Exit",self)
     @join = LobbyButton.new("Join Room", self)
     @gameID = LobbyTextBox.new(self)
+    @leaderboard = LobbyButton.new("Leaderboard", self)
     buttonLayout.addWidget(exit)
     buttonLayout.addWidget(add)
     buttonLayout.addWidget(join)
     buttonLayout.addWidget(gameID)
+    buttonLayout.addWidget(leaderboard)
     setLayout(buttonLayout)
 
   end

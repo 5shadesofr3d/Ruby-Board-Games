@@ -3,6 +3,7 @@ require 'Qt'
 
 require_relative 'gui/settings'
 require_relative 'gui/states/application_states'
+require_relative 'gui/leaderboard/leaderboard'
 
 class QTApplication
   include Singleton

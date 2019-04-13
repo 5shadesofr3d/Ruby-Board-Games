@@ -64,18 +64,18 @@ class SQLController
   end
 
   #gets all players w/ wins, losses, ties
-  def get_leaderboard
+  def get_leaderboard(extraQueryStr: "")
     #pre
     assert @db.is_a? SQLite3::Database
 
     players = []
-    @db.execute( "SELECT name,wins,losses,ties FROM leaderboard" ) do |row|
-      players << PlayerData.new(row[0],row[1],row[2],row[3])
+    @db.execute( "SELECT name,wins,losses,ties FROM leaderboard " + extraQueryStr) do |row|
+      players << {"name"=> row[0], "wins"=> row[1], "losses"=> row[2], "ties"=> row[3]}
     end
 
     #post
     assert players.is_a? Array
-    players.each{|p| assert p.is_a? PlayerData}
+    players.each{|p| assert p.is_a? Hash}
     return players
   end
 
@@ -98,6 +98,9 @@ class SQLController
   end
 end
 
+
+
+# Depricated
 class PlayerData
   include Test::Unit::Assertions
 
@@ -123,13 +126,13 @@ class PlayerData
 
 end
 
-## EXAMPLE USAGE #####
-#sql = SQLController.new
-#sql.insert_new_player("gregg") ##Creates new player with 0 for all stats
-#sql.insert_new_player("steve")
-#sql.update_player("gregg") ##UPDATE DEFAULTS TO WINS
-#sql.update_player("steve","losses")
-#sql.update_player("steve","ties")
-#sql.debug_print_data
-#puts sql.get_leaderboard
-#######################
+# # EXAMPLE USAGE #####
+# sql = SQLController.new
+# sql.insert_new_player("gregg") ##Creates new player with 0 for all stats
+# sql.insert_new_player("steve")
+# sql.update_player("gregg") ##UPDATE DEFAULTS TO WINS
+# sql.update_player("steve","losses")
+# sql.update_player("steve","ties")
+# sql.debug_print_data
+# puts sql.get_leaderboard
+# ######################
