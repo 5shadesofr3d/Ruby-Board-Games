@@ -17,7 +17,7 @@ module Game
 		attr_reader :user, :machine, :timer
 		attr_reader :model_stack, :window_state
 
-		@@timeout = 100
+		@@timeout = 300 # ms
 
 		slots "onTimeout()", "exit()"
 
