@@ -1,13 +1,15 @@
 require 'singleton'
+require_relative '../gui/settings'
 
 class Client
   include Singleton
-  attr_accessor :conn, :username, :player_number
+  attr_accessor :server
 
   def initialize
-    @username = ""
-    @player_number = 0
-    @conn = XMLRPC::Client.new( "localhost", "/", 1234 )
+    settings = Settings.instance
+    @server = XMLRPC::Client.new(settings.hostname,
+                                 "/RPC2",
+                                 settings.port_number)
   end
 
 end

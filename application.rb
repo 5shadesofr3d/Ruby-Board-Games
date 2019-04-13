@@ -27,7 +27,7 @@ class GameApplication
   end
 
   # Create GUI here.
-  def initialize
+  def initialize(hostname: ENV['HOSTNAME'], port: 50525)
     # Use a singleton to create the QT GUI.
     @window = QTApplication.instance
     @settings = Settings.instance

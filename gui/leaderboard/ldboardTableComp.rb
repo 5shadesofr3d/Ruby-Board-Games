@@ -70,7 +70,7 @@ class Leaderboard < Qt::Widget
   def sortData()
   	# Right now puts that stuff from text
   	# TODO: Add server functionality here to get the list of dictionaries
-  	sql = SQLController.new
+  	sql = Client.instance.server.proxy("leaderboard")
 
   	orderStr = "ORDER BY "
   	sortText = @buttons.SortComboBox.currentText.to_s
@@ -110,7 +110,7 @@ class Leaderboard < Qt::Widget
   	theme = Settings.instance.theme
 
     # Set the background of the window.
-    setStyleSheet("background-color: #{theme.color[:background]};")
+    # setStyleSheet("background-color: #{theme.color[:background]};")
 
   end
 
@@ -127,18 +127,20 @@ class Leaderboard < Qt::Widget
     assert valid?
     # assert LeaderboardTable.exists? <= Need this to put data in
 
-    # TODO: Need to get the leaderboard data from the server
-    # TODO: Implement the server code here VISHAL
+		puts "Got here...."
+
     # EXAMPLE USAGE #####
-	sql = SQLController.new
-	# sql.insert_new_player("gregg") ##Creates new player with 0 for all stats
-	# sql.insert_new_player("steve")
-	# sql.update_player("gregg") ##UPDATE DEFAULTS TO WINS
-	# sql.update_player("steve","losses")
-	# sql.update_player("steve","ties")
-	rankings = sql.get_leaderboard
-	@table.add_rankings(rankings)
-	######################
+		sql = Client.instance.server.proxy("leaderboard")
+		# sql.insert_new_player("gregg") ##Creates new player with 0 for all stats
+		# sql.insert_new_player("steve")
+		# sql.update_player("gregg") ##UPDATE DEFAULTS TO WINS
+		# sql.update_player("steve","losses")
+		# sql.update_player("steve","ties")
+		rankings = sql.get_leaderboard
+		puts rankings.to_s
+		puts "Got here....2"
+		@table.add_rankings(rankings)
+		######################
   end
 
 end
@@ -171,9 +173,9 @@ class LeaderboardButton < Qt::PushButton
   	theme = Settings.instance.theme
     super(str, parent)
 
-    setStyleSheet("background-color: #{theme.color[:button]};
-                    color: #{theme.color[:text]};
-                    border-radius: 5px;")
+    # setStyleSheet("background-color: #{theme.color[:button]};
+    #                 color: #{theme.color[:text]};
+    #                 border-radius: 5px;")
 
     setMaximumSize(75, 50)
     setMinimumSize(75, 50)
@@ -192,12 +194,12 @@ class LeaderboardComboBox < Qt::ComboBox
 		font.setPixelSize(15)
 		self.setFont(font)
 		addItems(["Wins", "Losses", "Ties", "AlphaNum"])
-		setStyleSheet("QComboBox { border: 1px solid gray;
-                               border-radius: 5px;
-                               padding: 1px 18px 1px 3px;
-                               min-width: 6em; }
-                   QComboBox:editable { background-color: #{theme.color[:button]};" +
-                                       "color: #{LeaderboardColor::WHITE}; }")
+		# setStyleSheet("QComboBox { border: 1px solid gray;
+    #                            border-radius: 5px;
+    #                            padding: 1px 18px 1px 3px;
+    #                            min-width: 6em; }
+    #                QComboBox:editable { background-color: #{theme.color[:button]};" +
+    #                                    "color: #{LeaderboardColor::WHITE}; }")
 	end
 end
 
@@ -209,7 +211,7 @@ class LeaderboardLineEdit < Qt::LineEdit
 		font.setPixelSize(15)
 		self.setFont(font)
 		setAlignment(Qt::AlignCenter)
-		setStyleSheet("color: #{LeaderboardColor::WHITE}; }")
+		# setStyleSheet("color: #{LeaderboardColor::WHITE}; }")
 	end
 end
 
@@ -284,7 +286,7 @@ class LeaderboardLabel < Qt::Label
     	setMinimumWidth(60)
 
     	theme = Settings.instance.theme
-    	setStyleSheet("color: #{theme.color[:text]}; }")
+    	# setStyleSheet("color: #{theme.color[:text]}; }")
     end
 end
 
@@ -327,7 +329,7 @@ class LeaderboardInfoHeader < Qt::Widget
 	    setLayout(@layout)
 
 	    theme = Settings.instance.theme
-	    setStyleSheet("background-color: #{theme.color[:background]};")
+	    # setStyleSheet("background-color: #{theme.color[:background]};")
 	end
 end
 
@@ -350,7 +352,7 @@ class RankRowInfo < Qt::Widget
 		@ties = LeaderboardLabel.new(playerData["ties"].to_s, self)
 
 		theme = Settings.instance.theme
-		setStyleSheet("background-color: #{theme.color[:background]};")
+		# setStyleSheet("background-color: #{theme.color[:background]};")
 		@name.setMaximumWidth(100)
     	@name.setMinimumWidth(100)
 
