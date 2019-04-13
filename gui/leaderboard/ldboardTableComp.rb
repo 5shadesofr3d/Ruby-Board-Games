@@ -69,6 +69,7 @@ class Leaderboard < Qt::Widget
 
   def sortData()
   	# Right now puts that stuff from text
+  	# TODO: Add server functionality here to get the list of dictionaries
   	sql = SQLController.new
 
   	orderStr = "ORDER BY "
@@ -83,6 +84,8 @@ class Leaderboard < Qt::Widget
   	elsif sortText == "AlphaNum"
   		orderStr += "name"
   	end
+
+  	# TODO: query from the server HERE
   	@table.add_rankings(sql.get_leaderboard(extraQueryStr: orderStr))
   end
 
@@ -125,6 +128,7 @@ class Leaderboard < Qt::Widget
     # assert LeaderboardTable.exists? <= Need this to put data in
 
     # TODO: Need to get the leaderboard data from the server
+    # TODO: Implement the server code here VISHAL
     # EXAMPLE USAGE #####
 	sql = SQLController.new
 	# sql.insert_new_player("gregg") ##Creates new player with 0 for all stats
