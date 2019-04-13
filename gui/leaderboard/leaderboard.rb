@@ -27,7 +27,7 @@ class LeaderboardState < Qt::Widget
 
     settings = Settings.instance
     @main_window.setFixedSize(settings.window_width, settings.window_height)
-    @main_window.setWindowTitle("Ruby-Board-Games")
+    @main_window.setWindowTitle("Leaderboard")
 
     @main_window.show#show title
     @leaderboard = Leaderboard.new(settings.window_width, settings.window_height, @main_window)
