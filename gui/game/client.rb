@@ -59,7 +59,7 @@ module Game
 
 		def setupUI()
 			# puts XMLRPC::Config::ENABLE_MARSHALLING
-			@view = Game::View.new(model.rows, model.columns, parent: parent)
+			@view = View.new(model.rows, model.columns, parent: parent)
 			@view.client = self
 			@view.show()
 			lobby.add(json_user)
@@ -80,7 +80,7 @@ module Game
 
 		def query_model()
 			if @model_stack.size < model.model_stack_size
-				new_model = Game::Model::Abstract::from_json(model.model_stack(@model_stack.size))				
+				new_model = Model::Abstract::from_json(model.model_stack(@model_stack.size))				
 				@model_stack << new_model
 				return new_model
 			else

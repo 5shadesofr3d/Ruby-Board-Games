@@ -27,8 +27,8 @@ module Board
 			board_model: nil, board_view: nil,
 			column: 0, time: 750)
 			
-			assert (chip_model.is_a?(Board::Model::Chip) or chip_model.nil?)
-			assert (chip_view.is_a?(Board::View::Chip) or chip_view.nil?)
+			assert (chip_model.is_a?(Model::Chip) or chip_model.nil?)
+			assert (chip_view.is_a?(View::Chip) or chip_view.nil?)
 			assert column.is_a? Integer
 			assert column >= 0
 			
@@ -50,18 +50,18 @@ module Board
 		end
 
 		def translate_model(item: nil, from: nil, to: nil)
-			assert item.is_a?(Board::Model::Chip)
-			assert from.is_a?(Board::Model::Tile)
-			assert to.is_a?(Board::Model::Tile)
+			assert item.is_a?(Model::Chip)
+			assert from.is_a?(Model::Tile)
+			assert to.is_a?(Model::Tile)
 
 			from.detach(destroy_view: false)
 			to.attach(item)
 		end
 
 		def translate_view(item: nil, from: nil, to: nil, time: 0)
-			assert item.is_a?(Board::View::Chip)
-			assert from.is_a?(Board::View::Tile)
-			assert to.is_a?(Board::View::Tile)
+			assert item.is_a?(View::Chip)
+			assert from.is_a?(View::Tile)
+			assert to.is_a?(View::Tile)
 			assert time.is_a?(Integer) and time >= 0
 
 			from.detach(destroy_view: false)

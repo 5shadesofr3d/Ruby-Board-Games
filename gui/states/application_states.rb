@@ -273,7 +273,7 @@ class OnlineGameScreenState < StatePattern::State
   include Test::Unit::Assertions
 
   def valid?
-    return false unless @game.is_a? Game
+    return false unless @game.is_a? Game::Client
     return true
   end
 
@@ -317,7 +317,7 @@ class OnlineGameScreenState < StatePattern::State
     # @game.show
       @game.set_window_state(self)
 
-      assert @game.is_a? Game
+      assert @game.is_a? Game::Client
       assert @game.visible
       assert valid?
     rescue Exception => e
@@ -331,7 +331,7 @@ class GameScreenState < StatePattern::State
   include Test::Unit::Assertions
 
   def valid?
-    return false unless @game.is_a? Game
+    return false unless @game.is_a? Game::Game
     return true
   end
 
@@ -342,16 +342,15 @@ class GameScreenState < StatePattern::State
 
     @game = nil
     settings = Settings.instance
-
     case settings.game_mode
     when :Connect4
-      @game = Connect4.new(rows: settings.num_rows,
+      @game = Game::Connect4.new(rows: settings.num_rows,
                            columns: settings.num_cols,
                            height: settings.window_height,
                            width: settings.window_width,
                            parent: stateful.main_window)
     when :TOOT
-      @game = OTTO.new(rows: settings.num_rows,
+      @game = Game::OTTO.new(rows: settings.num_rows,
                        columns: settings.num_cols,
                        height: settings.window_height,
                        width: settings.window_width,
@@ -362,7 +361,7 @@ class GameScreenState < StatePattern::State
     @game.show
     @game.set_state(self)
 
-    assert @game.is_a? Game
+    assert @game.is_a? Game::Game
     assert @game.visible
     assert valid?
   end

@@ -2,14 +2,7 @@ require 'Qt'
 require 'test/unit'
 
 require_relative '../leaderboard/leaderboard'
-
-module LobbyColor
-  GREY = "#D8DAE7"
-  BLACK = "#050D10"
-  LIGHT_BLUE = "#18CAE6"
-  BLUE = "#34608D"
-  DARK_BLUE = "#0D0C1C"
-end
+require_relative '../player/player_lobby'
 
 class OnlineLobbyData
   attr_accessor :name, :num_players, :game_id
