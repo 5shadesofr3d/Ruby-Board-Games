@@ -182,6 +182,8 @@ module Board
 	end
 
 	class View::Tile < View::Item
+		attr_reader :attached
+
 		def empty?()
 			return @attached.is_a?(NilClass)
 		end

@@ -108,7 +108,7 @@ class GameLobbyState < GameState
     model = client.current_model
 
     disconnect(startButton, SIGNAL("clicked()"), self, SIGNAL("done()"))
-    disconnect(exitButton, SIGNAL("clicked()"), self, SLOT("exit_lobby()"))
+    disconnect(exitButton, SIGNAL("clicked()"), self, SLOT("exit()"))
 
     assert model.players.is_a? Array
     assert model.players.size > 0

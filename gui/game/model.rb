@@ -225,7 +225,7 @@ module Game
 
 		def winnersGoal()
 			chips = findGoal()
-			players.each { |player| return player.goal if player.goal.size == chips.size && player.goal == chips.map(&:id) }
+			players.each { |player| return player.goal if player.goal.size == chips.size && player.goal == chips.map(&:text) }
 			return nil
 		end
 

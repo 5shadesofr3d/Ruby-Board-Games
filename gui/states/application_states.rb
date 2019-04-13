@@ -288,8 +288,9 @@ class OnlineGameScreenState < StatePattern::State
     lobby_name = "Lobby_"+String(settings.selected_game_id)
 
     begin
-      Client.instance.connect(settings.hostname, settings.port_number)
-      @game = Game::Client.new(address: lobby_name, parent: stateful.main_window)
+
+    Client.instance.connect(settings.hostname, settings.port_number)
+    @game = Game::Client.new(address: lobby_name, parent: stateful.main_window)
 
     # @game = Connect4.new(rows: 10,
     #                      columns: 10,
