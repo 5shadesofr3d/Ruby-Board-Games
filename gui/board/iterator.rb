@@ -2,6 +2,24 @@ require 'matrix'
 
 module Board
 	module Iterator
+		def head(col)
+			assert col.is_a?(Integer) and columns.include?(col)
+			assert valid?
+
+			return @head[col]
+		end
+
+		def tile(row, col)
+			assert row.is_a?(Integer) and rows.include?(row)
+			assert col.is_a?(Integer) and columns.include?(col)
+
+			return @tile[row][col]
+		end
+
+		def chip(row, col)
+			return tile(row, col).attached
+		end
+
 		def [](type, row, col)
 			assert valid?
 			assert row.is_a? Integer
