@@ -277,35 +277,25 @@ class OnlineGameScreenState < StatePattern::State
     return true
   end
 
+  def open_multiplayer_lobby
+    @game.close
+    transition_to(MultiplayerLobbyState)
+  end
+
   def enter
     # game_mode = :Connect4
     settings = Settings.instance
-    lobby_name = "Lobby "+String(settings.selected_game_id)
-    puts lobby_name
+    lobby_name = "Lobby_"+String(settings.selected_game_id)
 
+    @game = Game::Client.new(address: lobby_name, hostname: settings.hostname, port: settings.port, parent: stateful.main_window)
 
-    client = Client.instance
-    players = client.conn.call2("lobby.lobby")[1]
-
-    players_and_types = {}
-
-    # Add users to the hash
-    players.each do |user|
-      if user["username"] == client.username
-        players_and_types[user["username"]] = :MultiplayerLocalPlayer
-        client.player_number = user["player_num"]
-      else
-        players_and_types[user["username"]] = :MultiplayerOnlinePlayer
-      end
-    end
-
-    @game = Connect4.new(rows: 10,
-                         columns: 10,
-                         height: 600,
-                         width: 800,
-                         players: players_and_types,
-                         lobby_type: OnlineGameLobbyState,
-                         parent: stateful.main_window)
+    # @game = Connect4.new(rows: 10,
+    #                      columns: 10,
+    #                      height: 600,
+    #                      width: 800,
+    #                      players: players_and_types,
+    #                      lobby_type: OnlineGameLobbyState,
+    #                      parent: stateful.main_window)
 
     # case game_mode
     # when :Connect4
@@ -322,9 +312,9 @@ class OnlineGameScreenState < StatePattern::State
     #                    parent: stateful.main_window)
     # end
 
-    @game.start
-    @game.show
-    @game.set_state(self)
+    # @game.start
+    # @game.show
+    @game.set_window_state(self)
 
     assert @game.is_a? Game
     assert @game.visible
@@ -432,6 +422,10 @@ class SettingsController < Qt::Widget
       @settings.window_width = 1920
       @settings.window_height = 1080
     end
+
+    @settings.username = @gui.usernameEdit.text
+    @settings.hostname = @gui.hostnameEdit.text
+    @settings.port_number = @gui.portnumberEdit.text
 
     puts @settings.to_s
     @settings.save_settings

@@ -13,6 +13,9 @@ class SettingsGUI < Qt::Widget
   attr_reader :colSpinBox
   attr_reader :applyButton
   attr_reader :cancelButton
+  attr_reader :usernameEdit
+  attr_reader :hostnameEdit
+  attr_reader :portnumberEdit
 
   def initialize(width = 800, height = 600, parent = nil)
     assert width.is_a? Integer
@@ -145,12 +148,66 @@ class SettingsGUI < Qt::Widget
     @colSpinBox.setStyleSheet(spin_style)
 
     @horizontalLayout_2.addWidget(@colSpinBox)
-
-
     @gameGridLayout.addLayout(@horizontalLayout_2, 2, 1, 1, 1)
-
-
     @verticalLayout.addLayout(@gameGridLayout)
+
+    # Insert here...
+    @usernameText = Qt::Label.new
+    @usernameText.objectName = "usernameText"
+    @usernameText.minimumSize = Qt::Size.new(0, 50)
+    @usernameText.maximumSize = Qt::Size.new(16777215, 35)
+    @usernameText.font = @font1
+    @usernameText.setStyleSheet(text_style)
+    @usernameText.text = "Username:"
+
+    @gameGridLayout.addWidget(@usernameText, 3, 0, 1, 1)
+
+    @usernameEdit = Qt::LineEdit.new
+    @usernameEdit.objectName = "usernameEdit"
+    @usernameEdit.minimumSize = Qt::Size.new(0, 50)
+    @usernameEdit.maximumSize = Qt::Size.new(16777215, 35)
+    @usernameEdit.font = @font1
+    @usernameEdit.setStyleSheet(text_style)
+
+    @gameGridLayout.addWidget(@usernameEdit, 3, 1, 1, 1)
+
+    @portnumberText = Qt::Label.new
+    @portnumberText.objectName = "portnumberText"
+    @portnumberText.minimumSize = Qt::Size.new(0, 50)
+    @portnumberText.maximumSize = Qt::Size.new(16777215, 35)
+    @portnumberText.font = @font1
+    @portnumberText.setStyleSheet(text_style)
+    @portnumberText.text = "Port Number:"
+
+    @gameGridLayout.addWidget(@portnumberText, 4, 0, 1, 1)
+
+    @portnumberEdit = Qt::LineEdit.new
+    @portnumberEdit.objectName = "usernameEdit"
+    @portnumberEdit.minimumSize = Qt::Size.new(0, 50)
+    @portnumberEdit.maximumSize = Qt::Size.new(16777215, 35)
+    @portnumberEdit.font = @font1
+    @portnumberEdit.setStyleSheet(text_style)
+
+    @gameGridLayout.addWidget(@portnumberEdit, 4, 1, 1, 1)
+
+    @hostnameText = Qt::Label.new
+    @hostnameText.objectName = "hostnameText"
+    @hostnameText.minimumSize = Qt::Size.new(0, 50)
+    @hostnameText.maximumSize = Qt::Size.new(16777215, 35)
+    @hostnameText.font = @font1
+    @hostnameText.setStyleSheet(text_style)
+    @hostnameText.text = "Hostname:"
+
+    @gameGridLayout.addWidget(@hostnameText, 5, 0, 1, 1)
+
+    @hostnameEdit = Qt::LineEdit.new
+    @hostnameEdit.objectName = "usernameEdit"
+    @hostnameEdit.minimumSize = Qt::Size.new(0, 50)
+    @hostnameEdit.maximumSize = Qt::Size.new(16777215, 35)
+    @hostnameEdit.font = @font1
+    @hostnameEdit.setStyleSheet(text_style)
+
+    @gameGridLayout.addWidget(@hostnameEdit, 5, 1, 1, 1)
 
     @windowSettingsText = Qt::Label.new
     @windowSettingsText.objectName = "windowSettingsText"
@@ -242,9 +299,7 @@ class SettingsGUI < Qt::Widget
 
     @horizontalLayout.addWidget(@cancelButton)
 
-
     @verticalLayout.addLayout(@horizontalLayout)
-
 
     retranslateUi
     initialize_ui
@@ -290,7 +345,9 @@ class SettingsGUI < Qt::Widget
     @resolutionComboBox.currentIndex = settings.valid_resolutions
                                                .index(resolution)
 
-
+    @usernameEdit.text = settings.username
+    @portnumberEdit.text = settings.port_number
+    @hostnameEdit.text = settings.hostname
 
   end
 

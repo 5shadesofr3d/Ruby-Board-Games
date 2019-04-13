@@ -96,7 +96,7 @@ class GameLobbyState < GameState
     client.view.showLobby
 
     connect(startButton, SIGNAL("clicked()"), self, SIGNAL("done()"))
-    connect(exitButton, SIGNAL("clicked()"), self, SLOT("exit_lobby()"))
+    connect(exitButton, SIGNAL("clicked()"), client, SLOT("exit()"))
 
     client.timer.start
   end
