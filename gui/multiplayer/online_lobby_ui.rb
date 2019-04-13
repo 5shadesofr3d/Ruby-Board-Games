@@ -108,7 +108,7 @@ class OnlineLobbyUI < Qt::Frame
             SLOT(:addRoom))
   end
 
-  def addRoom(name = nil, game_id = nil)
+  def addRoom(name = nil, game_id = nil, game_type = nil)
 
     if @popup.is_a? NewRoomPopup
       name = @popup.roomNameText.text.to_s
@@ -116,7 +116,7 @@ class OnlineLobbyUI < Qt::Frame
     end
 
     if @room_count < @@MAX_ROOM_COUNT
-      @lobby.addRoom(name, game_id)
+      @lobby.addRoom(name, game_id, game_type)
       @room_count += 1
     end
   end
@@ -174,6 +174,8 @@ class LobbyTextBox < Qt::LineEdit
     font = self.font()
     font.setPixelSize(17)
     self.setFont(font)
+    setAlignment(Qt::AlignCenter)
+
   end
 end
 
@@ -230,7 +232,7 @@ class LobbyRoom < Qt::Frame
     assert valid?
   end
 
-  def addRoom(name, game_id)
+  def addRoom(name, game_id, game_type)
     assert valid?
 
     puts name.is_a? String
@@ -246,7 +248,7 @@ class LobbyRoom < Qt::Frame
     else
       lobbyInfo.game_id = game_id
     end
-
+    lobbyInfo.game_type = game_type
     @lobby_infos << lobbyInfo
     @scrollLayout.addWidget(lobbyInfo)
     verticalSpacer = Qt::SpacerItem.new(20, 20, Qt::SizePolicy::Minimum, Qt::SizePolicy::Expanding)
@@ -276,8 +278,8 @@ class LobbyInfoLabel < Qt::Label
     font.setPixelSize(17)
     self.setFont(font)
 
-    setMaximumWidth(30)
-    setMinimumWidth(30)
+    setMaximumWidth(75)
+    setMinimumWidth(50)
 
     setStyleSheet("color:#{LobbyColor::GREY};")
   end
@@ -292,7 +294,7 @@ class LobbyInfoHeader < Qt::Widget
 
     name = LobbyInfoLabel.new("Name",self)
     game_id = LobbyInfoLabel.new("Game ID",self)
-    num_players = LobbyInfoLabel.new("Number of Players",self)
+    #num_players = LobbyInfoLabel.new("Game Type",self)
 
 
     font = name.font
@@ -300,22 +302,22 @@ class LobbyInfoHeader < Qt::Widget
 
     name.font = font
     game_id.font = font
-    num_players.font = font
+    #num_players.font = font
 
-    name.setMaximumWidth(100)
-    name.setMinimumWidth(100)
+    name.setMaximumWidth(150)
+    name.setMinimumWidth(150)
 
     game_id.setMaximumWidth(100)
     game_id.setMinimumWidth(100)
 
-    num_players.setMaximumWidth(175)
-    num_players.setMinimumWidth(175)
+    #num_players.setMaximumWidth(175)
+    #num_players.setMinimumWidth(175)
 
     @layout = Qt::HBoxLayout.new(self)
     @layout.setSpacing(20)
     @layout.addWidget(name)
     @layout.addWidget(game_id)
-    @layout.addWidget(num_players)
+    #@layout.addWidget(num_players)
     setLayout(@layout)
 
     setStyleSheet("background-color:#{LobbyColor::DARK_BLUE};")
@@ -325,7 +327,7 @@ end
 class LobbyInfo < Qt::Widget
   include Test::Unit::Assertions
 
-  def initialize(name: "Player", game_id: 0, num_players: 0, parent: nil)
+  def initialize(name: "Player", game_id: 0, game_type: "Connect4", parent: nil)
     parent != nil ? super(parent) : super()
     # assert wins.is_a? Integer
     # assert ties >= 0
@@ -335,11 +337,11 @@ class LobbyInfo < Qt::Widget
 
     @name = LobbyInfoLabel.new(name, self)
     @game_id = LobbyInfoLabel.new(game_id.to_s, self)
-    @num_players = LobbyInfoLabel.new(num_players.to_s, self)
+    #@game_type = LobbyInfoLabel.new(game_type.to_s, self)
     setStyleSheet("background-color:#{LobbyColor::BLUE};")
 
-    @name.setMaximumWidth(100)
-    @name.setMinimumWidth(100)
+    @name.setMaximumWidth(150)
+    @name.setMinimumWidth(150)
 
     @game_id.setMaximumWidth(100)
     @game_id.setMinimumWidth(100)
@@ -348,7 +350,7 @@ class LobbyInfo < Qt::Widget
     @layout.setSpacing(20)
     @layout.addWidget(@name)
     @layout.addWidget(@game_id)
-    @layout.addWidget(@num_players)
+    #@layout.addWidget(@num_players)
     setLayout(@layout)
 
     assert valid?
@@ -370,12 +372,12 @@ class LobbyInfo < Qt::Widget
     @game_id.text = id
   end
 
-  def num_players
-    @num_players.text.to_s
+  def game_type
+    @game_type.text.to_s
   end
 
-  def num_players=(num)
-    @num_players = num
+  def game_type=(num)
+    @game_type = num
   end
 
   def close_all

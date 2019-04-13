@@ -191,7 +191,7 @@ class MultiplayerLobbyState < StatePattern::State
   def open_game
     assert valid?
 
-    #TODO: Transition to multiplayer game lobby
+
     #stateful.main_window.centralWidget.close if stateful.main_window.centralWidget != nil
     transition_to(OnlineGameScreenState)
 
@@ -241,7 +241,6 @@ class MultiplayerLobbyController < Qt::Widget
   end
 
   def join_game
-    #TODO: Join the game room
     puts 'Joined a new lobby'
     rooms = @mpLobby.lobby.lobby_infos #to verify game exists
     begin
@@ -250,7 +249,7 @@ class MultiplayerLobbyController < Qt::Widget
       return
     end
     settings = Settings.instance
-    if selectedGameId <= 4 and selectedGameId >= 0
+    if selectedGameId <= 5 and selectedGameId >= 1
       settings.selected_game_id = selectedGameId
 
       #POST
@@ -261,11 +260,11 @@ class MultiplayerLobbyController < Qt::Widget
   end
 
   def add_rooms
-    #TODO: Query server for rooms, and then list them.
-    #for all lobbies found...
-    for i in 0..5
-      @mpLobby.addRoom("Lobby "+String(i),i)
-    end
+    @mpLobby.addRoom("Connect4 (1)",1)
+    @mpLobby.addRoom("Connect4 (2)",2)
+    @mpLobby.addRoom("Connect4 (3)",3)
+    @mpLobby.addRoom("TOOT/OTTO (1)",4)
+    @mpLobby.addRoom("TOOT/OTTO (2)",5)
   end
 
 end
