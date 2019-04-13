@@ -59,7 +59,7 @@ module Game
 
 		def setupUI()
 			# puts XMLRPC::Config::ENABLE_MARSHALLING
-			@view = Game::View.new(model.rows, model.columns)
+			@view = Game::View.new(model.rows, model.columns, parent: parent)
 			@view.client = self
 			@view.show()
 			lobby.add(json_user)

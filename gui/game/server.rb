@@ -30,7 +30,8 @@ module Game
 				puts s.address
 			end
 			(4..5).each do |i|
-				PlayServer.new(address: "Lobby_#{i}", model: Game::Model::OTTO.new(), connection: @connection)
+				s = PlayServer.new(address: "Lobby_#{i}", model: Game::Model::OTTO.new(), connection: @connection)
+				puts s.address
 			end
 		end
 
