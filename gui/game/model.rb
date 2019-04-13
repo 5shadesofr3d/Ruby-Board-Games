@@ -21,12 +21,6 @@ module Game
 			@lobby = Lobby::Model.new()
 		end
 
-		def saveToFile(fileName)
-			file = File.open(fileName, 'w')
-			file.puts self.to_json
-			file.close
-		end
-
 		def to_json(options={})
 			return {
 				'class' => self.class,
@@ -109,9 +103,6 @@ module Game
 				lower_diag = board.to_enum(:each_in_diagonal, :chip, diagonal, :down)
 				lower_diag.each_cons(4) { |chips| return chips if matchesGoal?(chips) }
 			end
-
-			s = SavedGames.new()
-			s.saveGame("GameTest", 1, self)
 
 			return []
 		end
