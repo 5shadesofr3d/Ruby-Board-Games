@@ -39,7 +39,7 @@ app = GameApplication.new
 
 # username = ARGV.first
 # client = Game::Client.new(username: username)
-# model = Game::Model::Connect4.new()
+# model = Game::Model::OTTO.new()
 # model.addView Game::View.new(model.rows, model.columns)
 # model.start()
 
@@ -53,8 +53,11 @@ app = GameApplication.new
 
 # view.update(model)
 
-# chip_model = Board::Model::Chip.new()
+# chip_model = Board::Model::OTTOChip.new()
 # chip_view = Board::View::Chip.new(parent: view)
+
+# model.head(2).attach(chip_model)
+# chip_view.update(chip_model)
 
 # controller.drop(
 # 	chip_model: chip_model, chip_view: chip_view,

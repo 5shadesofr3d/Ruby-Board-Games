@@ -224,6 +224,7 @@ module Board
 
 		def to_json(options={})
 			return {
+				'class' => self.class,
 				'id' => @id,
 				'color' => @color.name,
 			}.to_json
@@ -232,7 +233,7 @@ module Board
 		def self.from_json(string)
 			data = JSON.load string
 			return data if data.nil?
-			return new id: data['id'], color: data['color']
+			return Object.const_get(data['class']).new id: data['id'].to_sym, color: data['color']
 		end
 
 		def addView(view)
@@ -267,6 +268,7 @@ module Board
 		def initialize(id: :T, color: Qt::red, view: nil)
 			assert (id == :T or id == :O)
 			super(id: id, color: color, view: view)
+			@text = id.to_s
 		end
 
 		def id=(value)

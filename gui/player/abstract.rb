@@ -137,8 +137,8 @@ module Player
 		end
 
 		def up()
-			@chip_model = model.constructChip(self.color)
-			self.chip_view.update( self.chip_model )
+			@chip_model = model.constructChip(self.color, column: @column)
+			self.view.update(self.model)
 		end
 
 		def down()
