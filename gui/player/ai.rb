@@ -34,10 +34,10 @@ module Player
 
 			ai_type = Settings.instance.game_mode
 			if ai_type == :Connect4
-				@ai_object = AI_Connect4.new(@game, 2, @current_chip)
+				@ai_object = AI_Connect4.new(@model, 2, @current_chip)
 			elsif ai_type == :TOOT
 				# make it that otto object
-				@ai_object = AI_OTTO.new(@game, 1, @current_chip)
+				@ai_object = AI_OTTO.new(@model, 1, @current_chip)
 				@ai_object.player_goal = @goal
 			end
 

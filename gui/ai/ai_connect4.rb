@@ -10,7 +10,7 @@ class AI_Connect4 < AI
 		# takes in the instance of the game board and returns a scoring matrix
 		# of size N x 1 (where N is the number of columns present in the game)
 		score = 0
-		model = temp_board.model
+		model = temp_board
 		#assert board.is_a? Board
 
 		## Score center column
