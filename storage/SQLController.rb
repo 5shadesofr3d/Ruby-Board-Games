@@ -123,13 +123,13 @@ class PlayerData
 
 end
 
-## EXAMPLE USAGE #####
-#sql = SQLController.new
-#sql.insert_new_player("gregg") ##Creates new player with 0 for all stats
-#sql.insert_new_player("steve")
-#sql.update_player("gregg") ##UPDATE DEFAULTS TO WINS
-#sql.update_player("steve","losses")
-#sql.update_player("steve","ties")
-#sql.debug_print_data
-#puts sql.get_leaderboard
-#######################
+# # EXAMPLE USAGE #####
+# sql = SQLController.new
+# sql.insert_new_player("gregg") ##Creates new player with 0 for all stats
+# sql.insert_new_player("steve")
+# sql.update_player("gregg") ##UPDATE DEFAULTS TO WINS
+# sql.update_player("steve","losses")
+# sql.update_player("steve","ties")
+# sql.debug_print_data
+# puts sql.get_leaderboard
+# ######################

@@ -17,6 +17,7 @@ require 'Qt'
 require 'test/unit'
 # require_relative '../GameData'
 require_relative '../settings'
+require_relative '../../storage/SQLController'
 
 module LeaderboardColor
   GREY = "#D8DAE7"
@@ -28,8 +29,9 @@ end
 
 class Leaderboard < Qt::Widget
   include Test::Unit::Assertions
-
   attr_reader :table, :buttons
+
+  slots :sortData, :searchData
 
   def initialize(width = 800, height = 600, parent = nil)
     assert width.is_a? Integer
@@ -50,11 +52,28 @@ class Leaderboard < Qt::Widget
     setLayout(@layout)
     setScreenSize(width,height)
     setWindowTitle("Leaderboard")
-    # drawMenu
-    # setup_ui
+
+    initialize_ui
+
+    # initialize the buttons to handle a response
+    connect(buttons.bSort, SIGNAL("clicked()"), self, SLOT(:sortData))
+    connect(buttons.bSearch, SIGNAL("clicked()"), self, SLOT(:searchData))
+
+    draw_color
 
     show
     assert @layout.is_a? Qt::VBoxLayout
+    assert valid?
+  end
+
+  def sortData()
+  	# Right now puts that stuff from text
+  	puts @buttons.SortComboBox.currentText
+  end
+
+  def searchData()
+  	# Right now prints to command line
+  	puts @buttons.SearchTextBox.text
   end
 
   # Sets the size of the main window and the title screen
@@ -69,51 +88,6 @@ class Leaderboard < Qt::Widget
   	assert height() == height
   end
 
-  # def setupUI()
-  # 	# TODO: need to verify that these asserts are valid
-  #   # Set the font
-  #   @font = Qt::Font.new 
-  #   @font.family = "Serif"
-  #   @font.pointSize = 20
-  #   @font.bold = true
-  #   @font.weight = 75
-
-  #   @font1 = Qt::Font.new
-  #   @font1.family = "Sans Serif"
-  #   @font1.pointSize = 16
-
-  # 	# NOTE: might need to look into the QtTableWidget for more inspiration
-  # 	# assert leaderboardWindow.is_a? Qt::MainWindow
-  #   # assert GameData.leaderboard.instance.valid?
-
-  # 	# setup the UI interface for the leaderboard
-   
-  # 	# setup the leaderboard Table
-
-  # 	# Setup the textbox for searching
-
-  # 	# setup the list of possible ways to sort
-  # 	# e.g. Wins, alphabetical, losses, ties (might be within table settings in Qt??)
-
-  # 	# setup the buttons to do tasks
-
-  # 	draw_color
-
-  # 	# assert leaderboardTable.visible = true
-  # 	# assert GameData.checkData = already checked
-  # 	# assert leaderboardTable.width = tableWidth (for all of the column names)
-  # 	# assert leaderboardTable.rows <= maxVisible rows
-  # 	assert @bBack.is_a? Qt::PushButton
-  #   assert @bSearch.is_a? Qt::PushButton
-  #   assert @bSort.is_a? Qt::PushButton
-  #   assert @SortComboBox.is_a? Qt::ComboBox
-  #   assert @SearchTextBox.is_a? Qt::TextEdit
-  # end
-
-  # def setup_ui
-  # 	setupUI
-  # end
-
   def draw_color
   	theme = Settings.instance.theme
 
@@ -122,10 +96,11 @@ class Leaderboard < Qt::Widget
 
   end
 
-  def valid?
+  def valid?()
     return false unless width().is_a?(Integer) and width().between?(100, 1920)
     return false unless height().is_a?(Integer) and height().between?(100, 1080)
     return false unless @layout.is_a? Qt::VBoxLayout
+    return false unless @table.is_a? LeaderboardTable and @buttons.is_a? LeaderboardButtons
     return true
   end
 
@@ -134,15 +109,16 @@ class Leaderboard < Qt::Widget
     assert valid?
     # assert LeaderboardTable.exists? <= Need this to put data in
 
-    # Get the instance of the game data that has been saved
-    # TODO: this is the SQL query controller getting all the data from the server
- 
- 	# leaderBoardData = GameData.Leaderboard.instance?
-
- 	# set the values to the leaderboard table
- 	# tableCells.content = leaderBoardData.tabular
-
- 	# ensure that all of the necessary boxes are empty (search and sort)
+    # EXAMPLE USAGE #####
+	sql = SQLController.new
+	# sql.insert_new_player("gregg") ##Creates new player with 0 for all stats
+	# sql.insert_new_player("steve")
+	# sql.update_player("gregg") ##UPDATE DEFAULTS TO WINS
+	# sql.update_player("steve","losses")
+	# sql.update_player("steve","ties")
+	rankings = sql.get_leaderboard
+	@table.add_rankings(rankings)
+	######################
   end
 
 end
@@ -225,7 +201,7 @@ class LeaderboardTable < Qt::Frame
 	def initialize(parent:nil)
 		parent != nil ? super(parent) : super()
 
-		@rankings = [] # This is to hold all of the ranking table
+		@rankings = [] #RankRowInfo.new(1, PlayerData.new("test1", 1, 1, 2), self), RankRowInfo.new(2, PlayerData.new("test2", 1, 2, 4), self)] # This is to hold all of the ranking table
 		@layout = Qt::VBoxLayout.new(self)
 		setLayout(@layout)
 
@@ -239,20 +215,27 @@ class LeaderboardTable < Qt::Frame
 
 	def add_rankings(rankingArray)
 		assert valid?
-		@rankings = rankingArray
+		assert rankingArray.is_a?(Array)
+		rankingArray.each {|ra| return false unless ra.is_a?(PlayerData)}
+			
+		# make rankings empty
+		@rankings = []
+
+		# add all of the player data rows from the database
+		rankingArray.each_with_index do |pData, index|
+			@rankings << RankRowInfo.new(index+1, pData, self)
+		end
 		# Add all of the rankings individually to the frame
 		@rankings.each do |rankInfo|
 			@layout.addWidget(rankInfo)
 		end
-
+		@rankings.each {|r| return false unless r.is_a?(RankRowInfo)}
 		assert valid?
 	end
 
 	def valid?()
 		return false unless @rankings.is_a?(Array)
 		return false unless @layout.is_a?(Qt::VBoxLayout)
-
-		@rankings.each {|r| return false unless r.is_a?(RankRowInfo)}
 
 		return true
 	end
@@ -315,4 +298,48 @@ class LeaderboardInfoHeader < Qt::Widget
 	    theme = Settings.instance.theme
 	    setStyleSheet("background-color: #{theme.color[:background]};")
 	end
+end
+
+class RankRowInfo < Qt::Widget
+	include Test::Unit::Assertions
+
+	def initialize(rank, playerData, parent)
+		parent != nil ? super(parent) : super()
+		assert rank.is_a? Integer
+		assert playerData.is_a? PlayerData
+		assert rank > 0
+
+		setMaximumHeight(50)
+		setMinimumHeight(50)
+
+		@rank = LeaderboardLabel.new(rank.to_s, self)
+		@name = LeaderboardLabel.new(playerData.name, self)
+		@wins = LeaderboardLabel.new(playerData.wins.to_s, self)
+		@losses = LeaderboardLabel.new(playerData.losses.to_s, self)
+		@ties = LeaderboardLabel.new(playerData.ties.to_s, self)
+
+		theme = Settings.instance.theme
+		setStyleSheet("background-color: #{theme.color[:background]};")
+		@name.setMaximumWidth(100)
+    	@name.setMinimumWidth(100)
+
+    	@layout = Qt::HBoxLayout.new(self)
+    	@layout.setSpacing(20)
+    	@layout.addWidget(@rank)
+    	@layout.addWidget(@name)
+    	@layout.addWidget(@wins)
+    	@layout.addWidget(@losses)
+    	@layout.addWidget(@ties)
+    	setLayout(@layout)
+
+    	# assert valid?
+    end
+
+    def valid?()
+    	# return false unless @rank.is_a?(Integer) and @rank > 0
+    	# return false unless @name.is_a?(String)
+    	# return false unless @wins.is_a?(Integer) and @wins >= 0
+    	# return false unless @losses.is_a?(Integer) and @losses >= 0
+    	# return false unless @ties.is_a?(Integer) and @ties >= 0
+    end
 end
