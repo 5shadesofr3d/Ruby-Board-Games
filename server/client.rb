@@ -1,6 +1,6 @@
 require 'singleton'
 
-class Client
+class XMLClient
   include Singleton
   attr_accessor :server
 

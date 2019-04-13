@@ -122,13 +122,13 @@ class TitleController < Qt::Widget
     assert @lobby_ui.is_a? LobbyGUI
     assert @lobby_window.visible
 
-    client = Client.instance
+    client = XMLClient.instance
 
     # Connect to the lobby as user1.
     # puts @lobby_ui.usernameText.text
     puts client.conn.call2('lobby.connect', @lobby_ui.usernameText.text)
     client.username = @lobby_ui.usernameText.text
-
+ent.i
     # Join a lobby,
     # busy wait for additional players for our game.
     while client.conn.call("lobby.players") < 2
@@ -289,7 +289,7 @@ class OnlineGameScreenState < StatePattern::State
 
     begin
 
-    Client.instance.connect(settings.hostname, settings.port_number)
+    XMLClient.instance.connect(settings.hostname, settings.port_number)
     @game = Game::Client.new(address: lobby_name, parent: stateful.main_window)
 
     # @game = Connect4.new(rows: 10,

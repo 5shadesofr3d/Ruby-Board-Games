@@ -37,7 +37,7 @@ module Game
 		end
 
 		def setupConnections()
-			@server = Client.instance.server
+			@server = XMLClient.instance.server
 		end
 
 		def setupProxy()

@@ -128,8 +128,8 @@ class Leaderboard < Qt::Widget
     # assert LeaderboardTable.exists? <= Need this to put data in
 
 		settings = Settings.instance
-		Client.instance.connect(settings.hostname, settings.port_number)
-		sql = Client.instance.server.proxy("leaderboard")
+		XMLClient.instance.connect(settings.hostname, settings.port_number)
+		sql = XMLClient.instance.server.proxy("leaderboard")
 
 		rankings = sql.get_leaderboard
 

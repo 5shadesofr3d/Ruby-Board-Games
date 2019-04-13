@@ -137,12 +137,12 @@ module Game
 
 					if player.goal == goal
 						player.wins += 1
-						sql = Client.instance.server.proxy("leaderboard")
+						sql = XMLClient.instance.server.proxy("leaderboard")
 						sql.insert_new_player(player.name)
 						sql.update_player(player.name, "wins")
 					else
 						player.losses += 1
-						sql = Client.instance.server.proxy("leaderboard")
+						sql = XMLClient.instance.server.proxy("leaderboard")
 						sql.insert_new_player(player.name)
 						sql.update_player(player.name, "losses")
 					end
@@ -151,7 +151,7 @@ module Game
 			else # we had a tie
 				players.each do |player|
 					player.ties += 1
-					sql = Client.instance.server.proxy("leaderboard")
+					sql = XMLClient.instance.server.proxy("leaderboard")
 					sql.insert_new_player(player.name)
 					sql.update_player(player.name, "ties")
 				end
