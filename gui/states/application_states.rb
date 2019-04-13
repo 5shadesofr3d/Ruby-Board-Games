@@ -423,6 +423,10 @@ class SettingsController < Qt::Widget
       @settings.window_height = 1080
     end
 
+    @settings.username = @gui.usernameEdit.text
+    @settings.hostname = @gui.hostnameEdit.text
+    @settings.port_number = @gui.portnumberEdit.text
+
     puts @settings.to_s
     @settings.save_settings
 
