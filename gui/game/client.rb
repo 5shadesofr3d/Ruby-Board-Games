@@ -15,19 +15,20 @@ module Game
 		attr_reader :address, :port, :server, :connection
 		attr_reader :model, :lobby, :board, :view
 		attr_reader :user, :machine, :timer
-		attr_reader :model_stack
+		attr_reader :model_stack, :window_state
 
 		@@timeout = 100
 
-		slots "onTimeout()"
+		slots "onTimeout()", "exit()"
 
-		def initialize(username: "Godzilla", address: "hello", port: 50525, parent: nil)
+		def initialize(username: "Godzilla", hostname: ENV['HOSTNAME'], address: "hello", port: 50525, parent: nil)
 			parent != nil ? super(parent) : super()
 	
 			@user = Player::Local.new(username, "green")
 			@user.client = self
 			@machine = GameStateMachine.new(self)
 			@address = address
+			@hostname = hostname
 			@port = port
 			@model_stack = []
 
@@ -38,13 +39,22 @@ module Game
 		end
 
 		def setupConnections()
-			@server = XMLRPC::Client.new(ENV['HOSTNAME'], "/RPC2", port)
+			@server = XMLRPC::Client.new(@hostname, "/RPC2", port)
 		end
 
 		def setupProxy()
 			@model = @server.proxy("#{address}_model")
 			@lobby = @server.proxy("#{address}_lobby")
 			@board = @server.proxy("#{address}_board")
+		end
+
+		def set_window_state(state)
+			@window_state = state
+		end
+
+		def exit()
+			machine.stop()
+			@window_state.open_multiplayer_lobby
 		end
 
 		def setupUI()

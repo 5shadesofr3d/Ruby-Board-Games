@@ -27,18 +27,18 @@ require_relative 'application'
 # gem install chroma
 
 
-# Debug::on # may cause animation lag due to excessive printing to terminal
-# app = GameApplication.new
+Debug::on # may cause animation lag due to excessive printing to terminal
+app = GameApplication.new
 
-app = Qt::Application.new []
+# app = Qt::Application.new []
 
 # player = Game::Model::Connect4.new()
 # data = JSON.dump(player)
 # puts data
 # p2 = JSON.load(data)
 
-username = ARGV.first
-client = Game::Client.new(username: username)
+# username = ARGV.first
+# client = Game::Client.new(username: username)
 # model = Game::Model::Connect4.new()
 # model.addView Game::View.new(model.rows, model.columns)
 # model.start()
@@ -61,4 +61,4 @@ client = Game::Client.new(username: username)
 # 	board_model: model, board_view: view,
 # 	column: 0)
 
-app.exec
+# app.exec
