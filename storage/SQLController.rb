@@ -133,6 +133,8 @@ end
 # sql.update_player("gregg") ##UPDATE DEFAULTS TO WINS
 # sql.update_player("steve","losses")
 # sql.update_player("steve","ties")
+# puts "print"
 # sql.debug_print_data
+# puts "done"
 # puts sql.get_leaderboard
 # ######################

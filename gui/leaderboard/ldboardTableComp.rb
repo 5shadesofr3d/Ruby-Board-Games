@@ -127,18 +127,14 @@ class Leaderboard < Qt::Widget
     assert valid?
     # assert LeaderboardTable.exists? <= Need this to put data in
 
-    # TODO: Need to get the leaderboard data from the server
-    # TODO: Implement the server code here VISHAL
-    # EXAMPLE USAGE #####
-	sql = SQLController.new
-	# sql.insert_new_player("gregg") ##Creates new player with 0 for all stats
-	# sql.insert_new_player("steve")
-	# sql.update_player("gregg") ##UPDATE DEFAULTS TO WINS
-	# sql.update_player("steve","losses")
-	# sql.update_player("steve","ties")
-	rankings = sql.get_leaderboard
-	@table.add_rankings(rankings)
-	######################
+		settings = Settings.instance
+		Client.instance.connect(settings.hostname, settings.port_number)
+		sql = Client.instance.server.proxy("leaderboard")
+
+		rankings = sql.get_leaderboard
+
+		@table.add_rankings(rankings)
+
   end
 
 end
@@ -299,7 +295,7 @@ class LeaderboardInfoHeader < Qt::Widget
 	    rank = LeaderboardLabel.new("Rank", self)
 	    name = LeaderboardLabel.new("Name", self)
 	    wins = LeaderboardLabel.new("Wins", self)
-	    loses = LeaderboardLabel.new("Loses", self)
+	    loses = LeaderboardLabel.new("Losses", self)
 	    ties = LeaderboardLabel.new("Ties", self)
 
 	    font = name.font

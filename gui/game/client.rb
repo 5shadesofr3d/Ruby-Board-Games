@@ -21,15 +21,13 @@ module Game
 
 		slots "onTimeout()", "exit()"
 
-		def initialize(username: "Godzilla", hostname: ENV['HOSTNAME'], address: "hello", port: 50525, parent: nil)
+		def initialize(username: "Godzilla", address: "hello", parent: nil)
 			parent != nil ? super(parent) : super()
 	
 			@user = Player::Local.new(username, "green")
 			@user.client = self
 			@machine = GameStateMachine.new(self)
 			@address = address
-			@hostname = hostname
-			@port = port
 			@model_stack = []
 
 			setupConnections()
@@ -39,7 +37,7 @@ module Game
 		end
 
 		def setupConnections()
-			@server = XMLRPC::Client.new(@hostname, "/RPC2", port)
+			@server = Client.instance.server
 		end
 
 		def setupProxy()

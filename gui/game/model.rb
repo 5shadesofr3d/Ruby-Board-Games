@@ -132,9 +132,29 @@ module Game
 		def updatePlayerScores()
 			goal = winnersGoal
 			if (goal != nil) # a winner was found
-				players.each { |player| player.goal == goal ? player.wins += 1 : player.losses += 1 }
+				players.each do |player|
+					# player.goal == goal ? player.wins += 1 : player.losses += 1
+
+					if player.goal == goal
+						player.wins += 1
+						sql = Client.instance.server.proxy("leaderboard")
+						sql.insert_new_player(player.name)
+						sql.update_player(player.name, "wins")
+					else
+						player.losses += 1
+						sql = Client.instance.server.proxy("leaderboard")
+						sql.insert_new_player(player.name)
+						sql.update_player(player.name, "losses")
+					end
+
+				end
 			else # we had a tie
-				players.each { |player| player.ties += 1 }
+				players.each do |player|
+					player.ties += 1
+					sql = Client.instance.server.proxy("leaderboard")
+					sql.insert_new_player(player.name)
+					sql.update_player(player.name, "ties")
+				end
 			end
 		end
 	end

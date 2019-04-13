@@ -37,10 +37,9 @@ module Game
 		end
 
 		def setupHandlers()
-			# TODO: Still need to implement
-			# @leaderboardHandler = SQLController.new
+			@leaderboardHandler = SQLController.new
 
-			# @connection.add_handler("Leaderboard", @leaderboardHandler)
+		  @connection.add_handler("leaderboard", @leaderboardHandler)
 		end
 
 		def serve()
