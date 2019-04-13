@@ -27,10 +27,12 @@ module Game
 
 		def setupSubservers()
 			(1..3).each do |i|
-				PlayServer.new(address: "Lobby_#{i}", model: Game::Model::Connect4.new(), connection: @connection)
+				s = PlayServer.new(address: "Lobby_#{i}", model: Game::Model::Connect4.new(), connection: @connection)
+				puts s.address
 			end
-			(1..2).each do |i|
-				PlayServer.new(address: "Lobby_#{i}", model: Game::Model::OTTO.new(), connection: @connection)
+			(4..5).each do |i|
+				s = PlayServer.new(address: "Lobby_#{i}", model: Game::Model::OTTO.new(), connection: @connection)
+				puts s.address
 			end
 		end
 
