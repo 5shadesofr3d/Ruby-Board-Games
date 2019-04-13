@@ -13,6 +13,7 @@
 # This will be the basis of the AI. I will need to set the scoring individually for each of the AI instances for any new game mode (both connect 4 and otto).
 # Once that is good they will all run the same getBestScore (based on difficulty) and return the corresponding column number as if it was its own move
 require 'test/unit'
+require_relative '../board/iterator'
 
 class AI
 	include Test::Unit::Assertions
@@ -20,17 +21,18 @@ class AI
 	NORMAL = 2
 	HARD = 3
 
-	attr_accessor :playing_game, :scoring_matrix, :ai_difficulty, :current_chip
+	attr_accessor :playing_game, :playing_game_controller, :scoring_matrix, :ai_difficulty, :current_chip_model
 
-	def initialize(game, difficulty, player_chip)
+	def initialize(game, game_controller, difficulty, player_chip)
 		# whenever the AI is initialized, it must have an instance of the game
 		assert difficulty.is_a? Integer and difficulty > 0 and difficulty <= 3
 		assert game.is_a? Game
 
 		@scoring_matrix = []
 		@playing_game = game
+		@playing_game_controller = game_controller
 		@ai_difficulty = difficulty # 1, 2, 3
-		@current_chip = player_chip
+		@current_chip_model = player_chip
 
 		assert @scoring_matrix.is_a? Array
 	end
@@ -41,7 +43,7 @@ class AI
 		# assert difficulty is valid
 		# assert scoring matrix is not empty?? THIS IS PRONE TO CHANGE
 
-		bestColumn = rand(self.playing_game.board.model.columns.max)
+		bestColumn = rand(self.playing_game.board.columnSize)
 
 		# TODO: implement the different values from the scoring matrix that are selected
 		# If easy, use RNG
@@ -71,10 +73,12 @@ class AI
 
 	def get_score
 		# This will be the general loop that will give the scoring matrix
-		@current_chip.hide
-		current_model = @playing_game.board.model
+		# TODO: Fix the changes made to the models in board to be used by the AI
+		# @current_chip.view.hide
+		current_model = @playing_game.board
 		current_model.columns.each do |col|
 			# get the next empty row num
+			score = 0
 			empty_row = 0
 			# TODO: verify that this works
 			e = current_model.to_enum(:each_in_column, :tile, col)
@@ -83,18 +87,32 @@ class AI
 					empty_row += 1
 				end
 			end
-			tile = current_model.next_empty(col)
-			@playing_game.board.translate(
-				item: @current_chip,
-				from: current_model.head(col),
-				to: tile,
-				time: 0)
-			score = scoring(@playing_game.board, @current_chip)
-			tile.detach()
+			
+			begin
+				tile = current_model.next_empty(col)
+				if tile != nil
+					# Do the mock translation
+					# @current_chip.view.geometry = tile.view.geometry
+					puts "Making the fake move"
+					@playing_game_controller.translate_model(
+						item: @current_chip,
+						from: current_model.head(col),
+						to: tile,
+						time: 0)
+					score = scoring(@playing_game.board, @current_chip)
+					tile.detach()
+				end
+
+			rescue Board::Iterator::ColumnFullError
+				# The column is full. Set the score to -100
+				score = -100
+			end
+			# append the column score to the matrix
 			@scoring_matrix << score
 		end
-
-		@current_chip.show
+		puts "showing the chip again"
+		# @current_chip.view.show
+		# @current_chip.update
 	end
 
 	def minimax_alg
