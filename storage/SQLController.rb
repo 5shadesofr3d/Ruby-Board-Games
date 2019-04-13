@@ -64,12 +64,12 @@ class SQLController
   end
 
   #gets all players w/ wins, losses, ties
-  def get_leaderboard
+  def get_leaderboard(extraQueryStr: "")
     #pre
     assert @db.is_a? SQLite3::Database
 
     players = []
-    @db.execute( "SELECT name,wins,losses,ties FROM leaderboard" ) do |row|
+    @db.execute( "SELECT name,wins,losses,ties FROM leaderboard " + extraQueryStr) do |row|
       players << PlayerData.new(row[0],row[1],row[2],row[3])
     end
 

@@ -69,7 +69,21 @@ class Leaderboard < Qt::Widget
 
   def sortData()
   	# Right now puts that stuff from text
-  	puts @buttons.SortComboBox.currentText
+  	sql = SQLController.new
+
+  	orderStr = "ORDER BY "
+  	sortText = @buttons.SortComboBox.currentText.to_s
+
+  	if sortText == "Wins"
+  		orderStr += "wins DESC"
+  	elsif sortText == "Losses"
+  		orderStr += "losses DESC"
+  	elsif sortText == "Ties"
+  		orderStr += "ties DESC"
+  	elsif sortText == "AlphaNum"
+  		orderStr += "name"
+  	end
+  	@table.add_rankings(sql.get_leaderboard(extraQueryStr: orderStr))
   end
 
   def searchData()
@@ -173,7 +187,7 @@ class LeaderboardComboBox < Qt::ComboBox
 		font = self.font()
 		font.setPixelSize(15)
 		self.setFont(font)
-		addItems(["Wins", "Loses", "Ties", "AlphaNum"])
+		addItems(["Wins", "Losses", "Ties", "AlphaNum"])
 		setStyleSheet("QComboBox { border: 1px solid gray;
                                border-radius: 5px;
                                padding: 1px 18px 1px 3px;
@@ -198,7 +212,7 @@ end
 class LeaderboardTable < Qt::Frame
 	include Test::Unit::Assertions
 
-	attr_reader :rankings
+	attr_accessor :rankings, :rows
 
 	def initialize(parent:nil)
 		parent != nil ? super(parent) : super()
@@ -221,7 +235,7 @@ class LeaderboardTable < Qt::Frame
 		rankingArray.each {|ra| return false unless ra.is_a?(PlayerData)}
 			
 		# make rankings empty
-		@rankings = []
+		clear
 
 		# add all of the player data rows from the database
 		rankingArray.each_with_index do |pData, index|
@@ -234,6 +248,17 @@ class LeaderboardTable < Qt::Frame
 		@rankings.each {|r| return false unless r.is_a?(RankRowInfo)}
 		assert valid?
 	end
+
+	def clear()
+		assert valid?
+		@rankings.each do |rankRow|
+			rankRow.close
+			@layout.removeWidget(rankRow)
+		end
+		@rankings.clear
+		assert valid?
+	end
+
 
 	def valid?()
 		return false unless @rankings.is_a?(Array)
