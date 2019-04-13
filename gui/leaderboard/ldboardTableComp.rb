@@ -109,6 +109,7 @@ class Leaderboard < Qt::Widget
     assert valid?
     # assert LeaderboardTable.exists? <= Need this to put data in
 
+    # TODO: Need to get the leaderboard data from the server
     # EXAMPLE USAGE #####
 	sql = SQLController.new
 	# sql.insert_new_player("gregg") ##Creates new player with 0 for all stats
@@ -336,10 +337,10 @@ class RankRowInfo < Qt::Widget
     end
 
     def valid?()
-    	# return false unless @rank.is_a?(Integer) and @rank > 0
-    	# return false unless @name.is_a?(String)
-    	# return false unless @wins.is_a?(Integer) and @wins >= 0
-    	# return false unless @losses.is_a?(Integer) and @losses >= 0
-    	# return false unless @ties.is_a?(Integer) and @ties >= 0
+    	return false unless @rank.is_a? LeaderboardLabel
+    	return false unless @name.is_a? LeaderboardLabel
+    	return false unless @wins.is_a? LeaderboardLabel
+    	return false unless @losses.is_a? LeaderboardLabel
+    	return false unless @ties.is_a? LeaderboardLabel
     end
 end
