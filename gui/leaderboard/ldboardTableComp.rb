@@ -25,6 +25,7 @@ module LeaderboardColor
   LIGHT_BLUE = "#18CAE6"
   BLUE = "#34608D"
   DARK_BLUE = "#0D0C1C"
+  WHITE = "#FFFFFF"
 end
 
 class Leaderboard < Qt::Widget
@@ -178,7 +179,7 @@ class LeaderboardComboBox < Qt::ComboBox
                                padding: 1px 18px 1px 3px;
                                min-width: 6em; }
                    QComboBox:editable { background-color: #{theme.color[:button]};" +
-                                       "color: #{LeaderboardColor::BLACK}; }")
+                                       "color: #{LeaderboardColor::WHITE}; }")
 	end
 end
 
@@ -190,7 +191,7 @@ class LeaderboardLineEdit < Qt::LineEdit
 		font.setPixelSize(15)
 		self.setFont(font)
 		setAlignment(Qt::AlignCenter)
-		setStyleSheet("color: #{LeaderboardColor::BLACK}; }")
+		setStyleSheet("color: #{LeaderboardColor::WHITE}; }")
 	end
 end
 
