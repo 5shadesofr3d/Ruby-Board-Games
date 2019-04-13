@@ -8,7 +8,7 @@ require_relative '../debug'
 module Board
 	class Model
 		include Test::Unit::Assertions
-		include Board::Iterator
+		include Iterator
 
 		def initialize(rows, cols, tile: [], head: [])
 			assert rows.is_a? Integer
@@ -37,8 +37,8 @@ module Board
 
 		def self.from_json(string)
 			data = JSON.load string
-			t = data['tile'].map { |r| r.map { |c| Board::Model::Tile::from_h(c) } }
-			h = data['head'].map { |t| i = Board::Model::Tile::from_h(t); i.color = Qt::transparent; i }
+			t = data['tile'].map { |r| r.map { |c| Model::Tile::from_h(c) } }
+			h = data['head'].map { |t| i = Model::Tile::from_h(t); i.color = Qt::transparent; i }
 			return new data['row'], data['col'], tile: t, head: h
 		end
 
@@ -73,7 +73,7 @@ module Board
 		end
 
 		def addView(view)
-			assert (view.is_a?(Board::View) or view.is_a?(Board::View::Proxy))
+			assert (view.is_a?(View) or view.is_a?(View::Proxy))
 			self.each_with_index(:head) { |head, row, col| head.addView view.head(col) }
 			self.each_with_index(:tile) { |tile, row, col| tile.addView view.tile(row, col) }
 		end
@@ -118,7 +118,7 @@ module Board
 			rows.each do |r|
 				row = []
 				columns.each do |c|
-					item = Board::Model::Tile.new(color: tile_color, row: r, column: c)
+					item = Model::Tile.new(color: tile_color, row: r, column: c)
 					row << item
 				end
 				@tile << row
@@ -133,7 +133,7 @@ module Board
 			assert @head.size == 0
 
 			columns.each do |col|
-				item = Board::Model::Tile.new(color: Qt::transparent, column: col)
+				item = Model::Tile.new(color: Qt::transparent, column: col)
 				@head << item
 			end
 
@@ -169,7 +169,7 @@ module Board
 
 		def self.from_h(data)
 			tile = new color: data['color'], row: data['row'], column: data['column']
-			tile.attach(Board::Model::Chip::from_json(data['attached'])) unless data['attached'].nil?
+			tile.attach(Model::Chip::from_json(data['attached'])) unless data['attached'].nil?
 			return tile
 		end
 
@@ -178,7 +178,7 @@ module Board
 		end
 
 		def attach(chip)
-			assert (chip.is_a?(Board::Model::Chip) or chip.nil?)
+			assert (chip.is_a?(Model::Chip) or chip.nil?)
 			@attached = chip
 			notify()
 		end
@@ -196,7 +196,7 @@ module Board
 		end
 
 		def addView(view)
-			assert (view.is_a?(Board::View::Item) or view.is_a?(Board::View::Tile::Proxy))
+			assert (view.is_a?(View::Item) or view.is_a?(View::Tile::Proxy))
 			@views << view
 			notify()
 		end
@@ -237,7 +237,7 @@ module Board
 		end
 
 		def addView(view)
-			assert (view.is_a?(Board::View::Item))
+			assert (view.is_a?(View::Item))
 			@views << view
 			view.lower()
 			notify()
@@ -252,10 +252,10 @@ module Board
 		end
 	end
 
-	class Model::Connect4Chip < Board::Model::Chip
-		def initialize(color: Qt::red, view: nil)
+	class Model::Connect4Chip < Model::Chip
+		def initialize(id: nil, color: Qt::red, view: nil)
 			super(id: color, color: color, view: view)
-			@id = color.name
+			@id = @color.name
 		end
 
 		def color=(value)
@@ -264,7 +264,7 @@ module Board
 		end
 	end
 
-	class Model::OTTOChip < Board::Model::Chip
+	class Model::OTTOChip < Model::Chip
 		def initialize(id: :T, color: Qt::red, view: nil)
 			assert (id == :T or id == :O)
 			super(id: id, color: color, view: view)

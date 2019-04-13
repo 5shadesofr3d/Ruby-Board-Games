@@ -40,7 +40,7 @@ module Game
 		end
 
 		def addView(view)
-			assert (view.is_a?(Game::View) or view.is_a?(Game::View::Proxy))
+			assert (view.is_a?(View) or view.is_a?(View::Proxy))
 			@views << view
 			board.addView view.board
 			lobby.addView view.lobby

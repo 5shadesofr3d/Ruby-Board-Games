@@ -5,7 +5,7 @@ require_relative '../debug'
 module Board
 	class View < Qt::Widget
 		include Test::Unit::Assertions
-		include Board::Iterator
+		include Iterator
 
 		def initialize(rows, cols, width: 800, height: 600, parent: nil)
 			assert rows.is_a? Integer
@@ -89,7 +89,7 @@ module Board
 			rows.each do |r|
 				row = []
 				columns.each do |c|
-					item = Board::View::Tile.new(parent: self)
+					item = View::Tile.new(parent: self)
 					row << item
 				end
 				@tile << row
@@ -104,7 +104,7 @@ module Board
 			assert @head.size == 0
 
 			columns.each do |col|
-				item = Board::View::Tile.new(parent: self)
+				item = View::Tile.new(parent: self)
 				@head << item
 			end
 
@@ -189,7 +189,7 @@ module Board
 		end
 
 		def attach(chip)
-			assert (chip.is_a?(Board::View::Chip) or chip.nil?)
+			assert (chip.is_a?(View::Chip) or chip.nil?)
 			@attached = chip
 		end
 
@@ -203,7 +203,7 @@ module Board
 			self.secondary = Qt::transparent
 
 			unless model.empty?
-				self.attach(Board::View::Chip.new(parent: self.parent)) if self.empty?
+				self.attach(View::Chip.new(parent: self.parent)) if self.empty?
 				@attached.update( model.attached )
 				@attached.geometry = self.geometry
 			else
@@ -219,39 +219,5 @@ module Board
 			self.text = model.text
 		end
 	end
-
-	class View::Proxy
-    	include XMLRPC::Marshallable
-
-		def initialize(username, port)
-			@username = username
-			@port = port
-			@server = XMLRPC::Client.new("localhost", "/RPC2", port)
-			@view = @server.proxy("#{@username}_board")
-		end
-
-		def head(column)
-			return View::Tile::Proxy.new(@username, @port, column)
-		end
-
-		def tile(row, column)
-			return View::Tile::Proxy.new(@username, @port, "#{row}_#{column}")
-		end
-	end
-
-	class View::Tile::Proxy
-		include XMLRPC::Marshallable
-		
-		def initialize(username, port, suffix)
-			@username = username
-			@column = column
-			@port = port
-			@server = XMLRPC::Client.new("localhost", "/RPC2", port)
-			@view = @server.proxy("#{@username}_board_#{suffix}")
-		end
-
-		def update(model)
-			@view.update(model)
-		end
-	end
+	
 end
