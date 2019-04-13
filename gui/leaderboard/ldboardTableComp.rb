@@ -72,6 +72,8 @@ class Leaderboard < Qt::Widget
   	# TODO: Add server functionality here to get the list of dictionaries
   	sql = SQLController.new
 
+  	puts "sorting"
+
   	orderStr = "ORDER BY "
   	sortText = @buttons.SortComboBox.currentText.to_s
 
@@ -86,6 +88,8 @@ class Leaderboard < Qt::Widget
   	end
 
   	# TODO: query from the server HERE
+  	puts orderStr
+  	puts sql.get_leaderboard(extraQueryStr: orderStr)
   	@table.add_rankings(sql.get_leaderboard(extraQueryStr: orderStr))
   end
 
@@ -221,7 +225,7 @@ class LeaderboardTable < Qt::Frame
 	def initialize(parent:nil)
 		parent != nil ? super(parent) : super()
 
-		@rankings = [] #RankRowInfo.new(1, PlayerData.new("test1", 1, 1, 2), self), RankRowInfo.new(2, PlayerData.new("test2", 1, 2, 4), self)] # This is to hold all of the ranking table
+		@rankings = []
 		@layout = Qt::VBoxLayout.new(self)
 		setLayout(@layout)
 
