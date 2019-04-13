@@ -109,3 +109,4 @@ class SavedGames
       p row
     end
   end
+end
