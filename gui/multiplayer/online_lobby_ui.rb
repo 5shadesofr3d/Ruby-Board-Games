@@ -1,7 +1,7 @@
 require 'Qt'
 require 'test/unit'
 
-require_relative '../../application'
+require_relative '../leaderboard/leaderboard'
 
 module LobbyColor
   GREY = "#D8DAE7"
@@ -113,7 +113,8 @@ class OnlineLobbyUI < Qt::Frame
 
   def showLeaderboard
     # show the popup for the leaderboard
-    newapp = LeaderboardApplication.new
+    puts "opening leaderboard"
+    newapp = LeaderboardState.new
   end
 
   def addRoom(name = nil, game_id = nil, game_type = nil)
