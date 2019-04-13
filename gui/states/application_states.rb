@@ -287,7 +287,8 @@ class OnlineGameScreenState < StatePattern::State
     settings = Settings.instance
     lobby_name = "Lobby_"+String(settings.selected_game_id)
 
-    @game = Game::Client.new(address: lobby_name, hostname: settings.hostname, port: settings.port, parent: stateful.main_window)
+    begin
+      @game = Game::Client.new(address: lobby_name, hostname: settings.hostname, port: settings.port_number, parent: stateful.main_window)
 
     # @game = Connect4.new(rows: 10,
     #                      columns: 10,
@@ -314,11 +315,14 @@ class OnlineGameScreenState < StatePattern::State
 
     # @game.start
     # @game.show
-    @game.set_window_state(self)
+      @game.set_window_state(self)
 
-    assert @game.is_a? Game
-    assert @game.visible
-    assert valid?
+      assert @game.is_a? Game
+      assert @game.visible
+      assert valid?
+    rescue Exception => e
+      puts e
+    end
   end
 
 end
