@@ -9,7 +9,8 @@ class Settings
 
   attr_accessor :game_mode, :num_cols, :num_rows
   attr_accessor :theme, :theme_setting
-  attr_accessor :window_height, :window_width, :window_mode
+  attr_accessor :window_height, :window_width, :window_mode, :selected_game_id
+  attr_accessor :port_number, :username, :hostname
   attr_reader   :valid_game_mode, :valid_themes, :valid_window_mode, :valid_resolutions
 
   def initialize
@@ -20,6 +21,7 @@ class Settings
     @valid_themes = [:Default, :Colorblind]
     @valid_window_mode = [:Windowed, :Fullscreen]
     @valid_resolutions = ["800x700", "1200x1050", "1920x1080"]
+    @selected_game_id = -1 #init value, -1 does not correspond to a game
 
     if File.file?("settings.json")
       tempHash = JSON.parse(IO.read("settings.json"))
@@ -30,6 +32,9 @@ class Settings
       @theme_setting = tempHash["theme_setting"].to_sym
       @window_width = tempHash["window_width"]
       @window_height = tempHash["window_height"]
+      @port_number = tempHash["port_number"]
+      @username = tempHash["username"]
+      @hostname = tempHash["hostname"]
       puts tempHash
     else
       @game_mode = :Connect4
@@ -39,6 +44,9 @@ class Settings
       @theme_setting = :Default
       @window_width = 800
       @window_height = 700
+      @port_number = 50525
+      @username = "godzilla"
+      @hostname = "192.168.1.1"
     end
 
     @theme = Theme.new(theme_setting)
@@ -54,7 +62,10 @@ class Settings
         :window_mode => @window_mode,
         :theme_setting => @theme_setting,
         :window_width => @window_width,
-        :window_height => @window_height
+        :window_height => @window_height,
+        :port_number => @port_number,
+        :username => @username,
+        :hostname => @hostname
     }
 
     File.open("settings.json","w") do |f|
@@ -88,7 +99,10 @@ class Settings
     "Board Size: Rows: #{@num_rows} Cols: #{@num_cols}\n" +
     "Window Mode: #{@window_mode}\n" +
     "Resolution: #{@window_width}x#{@window_height}\n" +
-    "Theme: #{@theme_setting}\n"
+    "Theme: #{@theme_setting}\n" +
+    "Username: #{@username}\n" +
+    "Port Number: #{@port_number}\n" +
+    "Hostname: #{@hostname}\n"
   end
 
 end

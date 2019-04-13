@@ -11,18 +11,59 @@ module Game
 		attr_reader :model
 
 		@@MAX_CONNECTIONS = 10
+		@@NUM_OF_SUBSERVERS = 5
 
 		def initialize(address: "hello", port: 50525, model: nil)
-			assert model.is_a?(Game::Model::Abstract)
+			assert (model.is_a?(Game::Model::Abstract) or model.nil?)
 			@model = model
 			@address = address
 			@port = port
-			#$stdout.reopen('/dev/null', 'w') unless Debug::enabled
 			@connection = XMLRPC::Server.new(port, ENV['HOSTNAME'], @@MAX_CONNECTIONS)
+			@subservers = []
+			setupHandlers()
+			setupSubservers()
+		end
+
+		def setupSubservers()
+			(1..3).each do |i|
+				s = PlayServer.new(address: "Lobby_#{i}", model: Game::Model::Connect4.new(), connection: @connection)
+				puts s.address
+			end
+			(4..5).each do |i|
+				s = PlayServer.new(address: "Lobby_#{i}", model: Game::Model::OTTO.new(), connection: @connection)
+				puts s.address
+			end
+		end
+
+		def setupHandlers()
+
+		end
+
+		def serve()
+			@thread = Thread.new { @connection.serve }
+		end
+	end
+
+	class PlayServer
+		include Test::Unit::Assertions
+		include Debug
+
+		attr_reader :model, :address, :port, :connection
+
+		def initialize(address: "hello", port: 50525, model: nil, connection: nil)
+			assert (model.is_a?(Game::Model::Abstract))
+			@address = address
+			@port = port
+			@model = model
+			if connection.nil?
+				@connection = XMLRPC::Server.new(port, ENV['HOSTNAME'], @@MAX_CONNECTIONS)
+			else
+				@connection = connection
+			end
 			setupHandlers()
 		end
 
-		def setupHandlers
+		def setupHandlers()
 			@gameHandler = GameHandler.new(model)
 			@lobbyHandler = LobbyHandler.new(@gameHandler)
 			

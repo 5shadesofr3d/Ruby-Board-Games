@@ -7,6 +7,7 @@ require_relative '../settings'
 require_relative '../settings/interface'
 require_relative '../title'
 require_relative '../multiplayer/lobby_ui'
+require_relative '../multiplayer/online_lobby_ui'
 require_relative '../../server/client'
 
 require_relative '../game'
@@ -51,7 +52,8 @@ class TitleScreenState < StatePattern::State
     assert valid?
 
     stateful.main_window.centralWidget.close if stateful.main_window.centralWidget != nil
-    transition_to(OnlineGameScreenState)
+    transition_to(MultiplayerLobbyState)
+    #transition_to(OnlineGameScreenState)
 
     assert valid?
   end
@@ -97,17 +99,22 @@ class TitleController < Qt::Widget
   end
 
   def show_lobby
-    @lobby_window = Qt::Dialog.new
-    @lobby_ui = LobbyGUI.new(@lobby_window)
 
-    connect(@lobby_ui.quickMatchButton, SIGNAL('clicked()'), self, SLOT('ready_pressed()'))
 
-    @lobby_window.setFixedSize(500, 500)
-    @lobby_window.setWindowTitle("Lobby")
-    @lobby_window.setModal(true)
-    @lobby_window.show
+    @title.close
+    @state.open_online_game
 
-    assert @lobby_window.visible
+    #@lobby_window = Qt::Dialog.new
+    #@lobby_ui = LobbyGUI.new(@lobby_window)
+
+    #connect(@lobby_ui.quickMatchButton, SIGNAL('clicked()'), self, SLOT('ready_pressed()'))
+
+    #@lobby_window.setFixedSize(500, 500)
+    #@lobby_window.setWindowTitle("Lobby")
+    #@lobby_window.setModal(true)
+    #@lobby_window.show
+
+    #assert @lobby_window.visible
   end
 
   def ready_pressed
@@ -155,6 +162,113 @@ class TitleController < Qt::Widget
 
 end
 
+class MultiplayerLobbyState < StatePattern::State
+  include Test::Unit::Assertions
+
+  def valid?
+    return true
+  end
+
+  def enter
+    #no preconditions as setup is performed here
+    assert stateful.main_window.is_a? Qt::MainWindow
+
+    @mpLobby = MultiplayerLobbyController.new(self,stateful.main_window)
+
+    assert @mpLobby.is_a? MultiplayerLobbyController
+
+    assert valid?
+  end
+
+  def open_title
+    assert valid?
+
+    transition_to(TitleScreenState)
+
+    assert valid?
+  end
+
+  def open_game
+    assert valid?
+
+
+    #stateful.main_window.centralWidget.close if stateful.main_window.centralWidget != nil
+    transition_to(OnlineGameScreenState)
+
+    assert valid?
+  end
+
+end
+
+class MultiplayerLobbyController < Qt::Widget
+  include Test::Unit::Assertions
+
+  slots 'exit_lobby()','create_lobby()','join_game()'
+
+  def initialize(state, window)
+    assert state.is_a? MultiplayerLobbyState
+    assert window.is_a? Qt::MainWindow
+    super()
+
+    @state = state
+    @window = window
+
+    settings = Settings.instance
+    @mpLobby = OnlineLobbyUI.new(width: settings.window_width, height: settings.window_height, parent: window)
+    @mpLobby.show
+    add_rooms
+
+    connect(@mpLobby.buttons.exit,  SIGNAL('clicked()'), self, SLOT('exit_lobby()'))
+    connect(@mpLobby.buttons.join,  SIGNAL('clicked()'), self, SLOT('join_game()'))
+
+    assert @state.is_a? MultiplayerLobbyState
+    assert @window.is_a? Qt::MainWindow
+    assert @mpLobby.is_a? OnlineLobbyUI
+  end
+
+  def exit_lobby
+    @mpLobby.close
+    @state.open_title
+  end
+
+  def create_lobby
+    #TODO: Host a room on the server
+    puts 'Created a new lobby'
+    #POST:
+    #@mpLobby.close
+    #@state.open_game
+    #Transition to multiplayer game lobby
+  end
+
+  def join_game
+    puts 'Joined a new lobby'
+    rooms = @mpLobby.lobby.lobby_infos #to verify game exists
+    begin
+      selectedGameId = Integer(@mpLobby.buttons.gameID.text)
+    rescue
+      return
+    end
+    settings = Settings.instance
+    if selectedGameId <= 5 and selectedGameId >= 1
+      settings.selected_game_id = selectedGameId
+
+      #POST
+      @mpLobby.close
+      @state.open_game
+      #Transition to multiplayer game lobby
+    end
+  end
+
+  def add_rooms
+    @mpLobby.addRoom("Connect4 (1)",1)
+    @mpLobby.addRoom("Connect4 (2)",2)
+    @mpLobby.addRoom("Connect4 (3)",3)
+    @mpLobby.addRoom("TOOT/OTTO (1)",4)
+    @mpLobby.addRoom("TOOT/OTTO (2)",5)
+  end
+
+end
+
 class OnlineGameScreenState < StatePattern::State
   include Test::Unit::Assertions
 
@@ -163,31 +277,26 @@ class OnlineGameScreenState < StatePattern::State
     return true
   end
 
+  def open_multiplayer_lobby
+    @game.close
+    transition_to(MultiplayerLobbyState)
+  end
+
   def enter
     # game_mode = :Connect4
+    settings = Settings.instance
+    lobby_name = "Lobby_"+String(settings.selected_game_id)
 
-    client = Client.instance
-    players = client.conn.call2("lobby.lobby")[1]
+    begin
+      @game = Game::Client.new(address: lobby_name, hostname: settings.hostname, port: settings.port_number, parent: stateful.main_window)
 
-    players_and_types = {}
-
-    # Add users to the hash
-    players.each do |user|
-      if user["username"] == client.username
-        players_and_types[user["username"]] = :MultiplayerLocalPlayer
-        client.player_number = user["player_num"]
-      else
-        players_and_types[user["username"]] = :MultiplayerOnlinePlayer
-      end
-    end
-
-    @game = Connect4.new(rows: 10,
-                         columns: 10,
-                         height: 600,
-                         width: 800,
-                         players: players_and_types,
-                         lobby_type: OnlineGameLobbyState,
-                         parent: stateful.main_window)
+    # @game = Connect4.new(rows: 10,
+    #                      columns: 10,
+    #                      height: 600,
+    #                      width: 800,
+    #                      players: players_and_types,
+    #                      lobby_type: OnlineGameLobbyState,
+    #                      parent: stateful.main_window)
 
     # case game_mode
     # when :Connect4
@@ -204,13 +313,16 @@ class OnlineGameScreenState < StatePattern::State
     #                    parent: stateful.main_window)
     # end
 
-    @game.start
-    @game.show
-    @game.set_state(self)
+    # @game.start
+    # @game.show
+      @game.set_window_state(self)
 
-    assert @game.is_a? Game
-    assert @game.visible
-    assert valid?
+      assert @game.is_a? Game
+      assert @game.visible
+      assert valid?
+    rescue Exception => e
+      puts e
+    end
   end
 
 end
@@ -314,6 +426,10 @@ class SettingsController < Qt::Widget
       @settings.window_width = 1920
       @settings.window_height = 1080
     end
+
+    @settings.username = @gui.usernameEdit.text
+    @settings.hostname = @gui.hostnameEdit.text
+    @settings.port_number = @gui.portnumberEdit.text
 
     puts @settings.to_s
     @settings.save_settings
