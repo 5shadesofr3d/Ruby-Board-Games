@@ -232,7 +232,7 @@ class LeaderboardTable < Qt::Frame
 	def add_rankings(rankingArray)
 		assert valid?
 		assert rankingArray.is_a?(Array)
-		rankingArray.each {|ra| return false unless ra.is_a?(PlayerData)}
+		rankingArray.each {|ra| return false unless ra.is_a?(Hash)}
 			
 		# make rankings empty
 		clear
@@ -333,17 +333,17 @@ class RankRowInfo < Qt::Widget
 	def initialize(rank, playerData, parent)
 		parent != nil ? super(parent) : super()
 		assert rank.is_a? Integer
-		assert playerData.is_a? PlayerData
+		assert playerData.is_a? Hash
 		assert rank > 0
 
 		setMaximumHeight(50)
 		setMinimumHeight(50)
 
 		@rank = LeaderboardLabel.new(rank.to_s, self)
-		@name = LeaderboardLabel.new(playerData.name, self)
-		@wins = LeaderboardLabel.new(playerData.wins.to_s, self)
-		@losses = LeaderboardLabel.new(playerData.losses.to_s, self)
-		@ties = LeaderboardLabel.new(playerData.ties.to_s, self)
+		@name = LeaderboardLabel.new(playerData["name"], self)
+		@wins = LeaderboardLabel.new(playerData["wins"].to_s, self)
+		@losses = LeaderboardLabel.new(playerData["losses"].to_s, self)
+		@ties = LeaderboardLabel.new(playerData["ties"].to_s, self)
 
 		theme = Settings.instance.theme
 		setStyleSheet("background-color: #{theme.color[:background]};")

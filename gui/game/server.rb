@@ -2,6 +2,7 @@ require 'test/unit'
 require 'xmlrpc/server'
 require_relative 'model'
 require_relative '../debug'
+require_relative '../../storage/SQLController'
 
 module Game
 	class Server
@@ -34,7 +35,10 @@ module Game
 		end
 
 		def setupHandlers()
+			# TODO: Still need to implement
+			# @leaderboardHandler = SQLController.new
 
+			# @connection.add_handler("Leaderboard", @leaderboardHandler)
 		end
 
 		def serve()

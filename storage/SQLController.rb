@@ -70,12 +70,12 @@ class SQLController
 
     players = []
     @db.execute( "SELECT name,wins,losses,ties FROM leaderboard " + extraQueryStr) do |row|
-      players << PlayerData.new(row[0],row[1],row[2],row[3])
+      players << {"name"=> row[0], "wins"=> row[1], "losses"=> row[2], "ties"=> row[3]}
     end
 
     #post
     assert players.is_a? Array
-    players.each{|p| assert p.is_a? PlayerData}
+    players.each{|p| assert p.is_a? Hash}
     return players
   end
 
@@ -98,6 +98,9 @@ class SQLController
   end
 end
 
+
+
+# Depricated
 class PlayerData
   include Test::Unit::Assertions
 
