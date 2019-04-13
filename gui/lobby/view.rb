@@ -102,16 +102,35 @@ module Lobby
       @start = Button.new("Start", self)
       @exit = Button.new("Exit",self)
       @remove = Button.new("Remove",self)
+      #@loadedGame = TextBox.new(self)
       buttonLayout.addWidget(exit)
       buttonLayout.addWidget(add)
       buttonLayout.addWidget(remove)
       buttonLayout.addWidget(start)
+      #buttonLayout.addWidget(loadedGame)
       setLayout(buttonLayout)
       add.hide
       remove.hide
       start.hide
     end
 
+  end
+
+  class TextBox < Qt::LineEdit
+    def initialize(parent)
+      super(parent)
+
+      setStyleSheet("color:white; background-color:#{Color::BLUE}; border: 1px; border-radius: 10px")
+
+      setMaximumSize(125, 50)
+      setMinimumSize(125, 50)
+
+      font = self.font()
+      font.setPixelSize(17)
+      self.setFont(font)
+      setAlignment(Qt::AlignCenter)
+
+    end
   end
 
   class Button < Qt::PushButton

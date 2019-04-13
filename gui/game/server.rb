@@ -2,7 +2,7 @@ require 'test/unit'
 require 'xmlrpc/server'
 require_relative 'model'
 require_relative '../debug'
-require_relative '../../storage/SQLController'
+require_relative 'saved_game'
 
 module Game
 	class Server
@@ -13,6 +13,7 @@ module Game
 
 		@@MAX_CONNECTIONS = 10
 		@@NUM_OF_SUBSERVERS = 5
+
 
 		def initialize(address: "hello", port: 50525, model: nil)
 			assert (model.is_a?(Game::Model::Abstract) or model.nil?)
@@ -26,14 +27,16 @@ module Game
 		end
 
 		def setupSubservers()
-			(1..3).each do |i|
-				s = PlayServer.new(address: "Lobby_#{i}", model: Game::Model::Connect4.new(), connection: @connection)
-				puts s.address
-			end
-			(4..5).each do |i|
-				s = PlayServer.new(address: "Lobby_#{i}", model: Game::Model::OTTO.new(), connection: @connection)
-				puts s.address
-			end
+
+				 (1..3).each do |i|
+				 	s = PlayServer.new(address: "Lobby_#{i}", model: Game::Model::Connect4.new(), connection: @connection)
+				 	puts s.address
+				 end
+				 (4..5).each do |i|
+				 	s = PlayServer.new(address: "Lobby_#{i}", model: Game::Model::OTTO.new(), connection: @connection)
+				 	puts s.address
+				 end
+
 		end
 
 		def setupHandlers()
@@ -97,6 +100,8 @@ module Game
 				lobby.update(obj)
 				@gameHandler.push_latest
 			end
+			gameLoader = SavedGames.new()
+			gameLoader.saveGame()
 			return true
 		end
 

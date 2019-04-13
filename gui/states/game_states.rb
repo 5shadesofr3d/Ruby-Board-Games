@@ -80,7 +80,12 @@ class GameState < Qt::State
 end
 
 class GameLobbyState < GameState
+
   def startButton()
+    #loadedGameText = client.view.lobby.buttons.loadedGame
+    #savedGame = SavedGames.new()
+    #loadedGameObject = savedGame.loadGame(loadedGameText)
+
     return client.view.lobby.buttons.start
   end
 

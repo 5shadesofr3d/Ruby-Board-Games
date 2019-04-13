@@ -90,6 +90,10 @@ module Game
       @lobby.client = value
     end
 
+    def lobby
+      return @lobby
+    end
+
   end
 
   class View::Proxy
