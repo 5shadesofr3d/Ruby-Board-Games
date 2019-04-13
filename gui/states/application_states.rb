@@ -278,7 +278,7 @@ class OnlineGameScreenState < StatePattern::State
   end
 
   def open_multiplayer_lobby
-    #@game.close
+    @game.close
     transition_to(MultiplayerLobbyState)
   end
 
